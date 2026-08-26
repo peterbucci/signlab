@@ -1,0 +1,61 @@
+{
+  "ambiguity_margin": 1e-09,
+  "body_anchors": [
+    "left_shoulder",
+    "right_shoulder",
+    "left_elbow",
+    "right_elbow",
+    "left_wrist",
+    "right_wrist"
+  ],
+  "browser_package": "@mediapipe/tasks-vision",
+  "browser_package_version": "1.0.1",
+  "config_id": "mediapipe_tasks_video",
+  "decoder_package": "av",
+  "decoder_package_version": "18.1.0",
+  "delegate": "CPU",
+  "hand_task_asset": {
+    "compatible_runtimes": [
+      "browser",
+      "python"
+    ],
+    "filename": "hand_landmarker.task",
+    "model_id": "mediapipe-hand-landmarker-full",
+    "model_revision": "1.0.0",
+    "schema_version": "mediapipe-task-asset/1",
+    "sha256": "sha256:fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1",
+    "size_bytes": 7819105,
+    "task_kind": "hand_landmarker"
+  },
+  "handedness_disagreement_penalty": 0.05,
+  "max_spatial_cost": 0.25,
+  "min_hand_detection_confidence": 0.5,
+  "min_hand_presence_confidence": 0.5,
+  "min_hand_tracking_confidence": 0.5,
+  "min_pose_detection_confidence": 0.5,
+  "min_pose_presence_confidence": 0.5,
+  "min_pose_tracking_confidence": 0.5,
+  "num_hands": 2,
+  "num_poses": 1,
+  "pose_task_asset": {
+    "compatible_runtimes": [
+      "browser",
+      "python"
+    ],
+    "filename": "pose_landmarker_lite.task",
+    "model_id": "mediapipe-pose-landmarker-lite",
+    "model_revision": "1.0.0",
+    "schema_version": "mediapipe-task-asset/1",
+    "sha256": "sha256:59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a",
+    "size_bytes": 5777746,
+    "task_kind": "pose_landmarker"
+  },
+  "python_package": "mediapipe",
+  "python_package_version": "1.0.1",
+  "running_mode": "VIDEO",
+  "schema_version": "mediapipe-extraction-config/1",
+  "timestamp_rule": "source_pts_relative_us_then_strict_monotonic_floor_ms/1",
+  "tracking_algorithm": "deterministic_wrist_mcp_centroid_minimum_cost",
+  "tracking_algorithm_version": "1.0.0",
+  "version": "1.0.0"
+}

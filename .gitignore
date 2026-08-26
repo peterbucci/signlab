@@ -68,6 +68,7 @@ mlruns/
 *.pth
 *.safetensors
 *.so
+*.task
 *.tflite
 *.webm
 
@@ -86,3 +87,8 @@ mlruns/
 !tests/fixtures/public/**
 !docs/legacy/export/v1/runs/
 !docs/legacy/export/v1/runs/*.json
+
+# Keep the reviewed MediaPipe provenance lock, never local model bytes or other files.
+!src/signlab/resources/extraction/models/
+src/signlab/resources/extraction/models/*
+!src/signlab/resources/extraction/models/mediapipe-tasks-1.0.1.lock.json

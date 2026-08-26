@@ -1,0 +1,912 @@
+{
+  "$comment": "This JSON Schema enforces portable extraction structure. SignLab's strict extraction validators remain authoritative for canonical hashes, timeline recurrence, masks, counts, model registration, lineage, and artifact binding.",
+  "$defs": {
+    "ArtifactRefV1": {
+      "additionalProperties": false,
+      "description": "Exact bytes plus a portable location; the location is never the identity.",
+      "properties": {
+        "artifact_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "media_type": {
+          "maxLength": 127,
+          "minLength": 3,
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$",
+          "title": "Media Type",
+          "type": "string"
+        },
+        "role": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "artifact-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "role",
+        "media_type",
+        "sha256",
+        "size_bytes",
+        "locator"
+      ],
+      "title": "ArtifactRefV1",
+      "type": "object"
+    },
+    "ArtifactUriLocatorV1": {
+      "additionalProperties": false,
+      "description": "A storage-independent logical URI resolved by a future artifact adapter.",
+      "properties": {
+        "kind": {
+          "const": "artifact_uri",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 1024,
+          "minLength": 12,
+          "pattern": "^signlab://[a-z][a-z0-9-]{0,63}(/[a-z][a-z0-9._-]{0,127})+$",
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "uri"
+      ],
+      "title": "ArtifactUriLocatorV1",
+      "type": "object"
+    },
+    "DerivedArtifactRowV1": {
+      "additionalProperties": false,
+      "description": "One derived artifact with immutable root grouping and optional sample identity.",
+      "properties": {
+        "annotation_id": {
+          "anyOf": [
+            {
+              "pattern": "^annotation_[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Annotation Id"
+        },
+        "artifact": {
+          "$ref": "#/$defs/ArtifactRefV1"
+        },
+        "clip_id": {
+          "anyOf": [
+            {
+              "pattern": "^clip_[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clip Id"
+        },
+        "derivation_kind": {
+          "enum": [
+            "crop",
+            "augmentation",
+            "window",
+            "landmark_extraction",
+            "feature_extraction"
+          ],
+          "title": "Derivation Kind",
+          "type": "string"
+        },
+        "derived_artifact_id": {
+          "pattern": "^derived_artifact_[0-9a-f]{32}$",
+          "title": "Derived Artifact Id",
+          "type": "string"
+        },
+        "handedness": {
+          "enum": [
+            "left",
+            "right",
+            "both",
+            "ambidextrous",
+            "unknown"
+          ],
+          "title": "Handedness",
+          "type": "string"
+        },
+        "label_id": {
+          "anyOf": [
+            {
+              "enum": [
+                "hello",
+                "no",
+                "please",
+                "thank_you",
+                "yes",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Id"
+        },
+        "mirror_state": {
+          "enum": [
+            "not_mirrored",
+            "mirrored"
+          ],
+          "title": "Mirror State",
+          "type": "string"
+        },
+        "operation_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "operation_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Operation Version",
+          "type": "string"
+        },
+        "parent_artifact_ids": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 3,
+            "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Parent Artifact Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        },
+        "partition": {
+          "anyOf": [
+            {
+              "enum": [
+                "train",
+                "validation",
+                "test"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Partition"
+        },
+        "sample_id": {
+          "anyOf": [
+            {
+              "pattern": "^sample_[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Sample Id"
+        },
+        "session_id": {
+          "pattern": "^session_[0-9a-f]{32}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "source_recording_id": {
+          "pattern": "^recording_[0-9a-f]{32}$",
+          "title": "Source Recording Id",
+          "type": "string"
+        },
+        "split_id": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 3,
+              "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Split Id"
+        }
+      },
+      "required": [
+        "derived_artifact_id",
+        "derivation_kind",
+        "parent_artifact_ids",
+        "participant_id",
+        "session_id",
+        "source_recording_id",
+        "clip_id",
+        "annotation_id",
+        "sample_id",
+        "label_id",
+        "split_id",
+        "partition",
+        "handedness",
+        "mirror_state",
+        "operation_id",
+        "operation_version",
+        "artifact"
+      ],
+      "title": "DerivedArtifactRowV1",
+      "type": "object"
+    },
+    "LandmarkObservationCountsV1": {
+      "additionalProperties": false,
+      "description": "Auditable observation totals without introducing a quality policy.",
+      "properties": {
+        "body_anchor_observation_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Body Anchor Observation Count",
+          "type": "integer"
+        },
+        "body_anchor_presence_counts": {
+          "maxItems": 6,
+          "minItems": 6,
+          "prefixItems": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            }
+          ],
+          "title": "Body Anchor Presence Counts",
+          "type": "array"
+        },
+        "frame_count": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Frame Count",
+          "type": "integer"
+        },
+        "hand_observation_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Hand Observation Count",
+          "type": "integer"
+        },
+        "invalid_frame_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Invalid Frame Count",
+          "type": "integer"
+        },
+        "one_hand_frame_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "One Hand Frame Count",
+          "type": "integer"
+        },
+        "two_hand_frame_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Two Hand Frame Count",
+          "type": "integer"
+        },
+        "valid_frame_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Valid Frame Count",
+          "type": "integer"
+        },
+        "zero_hand_frame_count": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Zero Hand Frame Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "frame_count",
+        "valid_frame_count",
+        "invalid_frame_count",
+        "zero_hand_frame_count",
+        "one_hand_frame_count",
+        "two_hand_frame_count",
+        "hand_observation_count",
+        "body_anchor_observation_count",
+        "body_anchor_presence_counts"
+      ],
+      "title": "LandmarkObservationCountsV1",
+      "type": "object"
+    },
+    "LandmarkSequenceRefV1": {
+      "additionalProperties": false,
+      "description": "Lineage, exact input/output bytes, and semantic identity of one sequence.",
+      "properties": {
+        "content_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Content Sha256",
+          "type": "string"
+        },
+        "counts": {
+          "$ref": "#/$defs/LandmarkObservationCountsV1"
+        },
+        "frames_schema_version": {
+          "const": "landmark-frames-table/1",
+          "title": "Frames Schema Version",
+          "type": "string"
+        },
+        "lineage": {
+          "$ref": "#/$defs/DerivedArtifactRowV1"
+        },
+        "schema_version": {
+          "const": "landmark-sequence-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_media_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Source Media Sha256",
+          "type": "string"
+        },
+        "source_media_size_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Source Media Size Bytes",
+          "type": "integer"
+        },
+        "source_mirror_state": {
+          "enum": [
+            "not_mirrored",
+            "mirrored"
+          ],
+          "title": "Source Mirror State",
+          "type": "string"
+        },
+        "source_rotation_degrees": {
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ],
+          "title": "Source Rotation Degrees",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "lineage",
+        "source_media_sha256",
+        "source_media_size_bytes",
+        "source_rotation_degrees",
+        "source_mirror_state",
+        "frames_schema_version",
+        "content_sha256",
+        "counts"
+      ],
+      "title": "LandmarkSequenceRefV1",
+      "type": "object"
+    },
+    "MediaPipeExtractionConfigV1": {
+      "additionalProperties": false,
+      "description": "Fully pinned detector, timestamp, and deterministic tracking configuration.",
+      "properties": {
+        "ambiguity_margin": {
+          "maximum": 1e-09,
+          "minimum": 1e-09,
+          "title": "Ambiguity Margin",
+          "type": "number"
+        },
+        "body_anchors": {
+          "maxItems": 6,
+          "minItems": 6,
+          "prefixItems": [
+            {
+              "enum": [
+                "left_shoulder",
+                "right_shoulder",
+                "left_elbow",
+                "right_elbow",
+                "left_wrist",
+                "right_wrist"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "left_shoulder",
+                "right_shoulder",
+                "left_elbow",
+                "right_elbow",
+                "left_wrist",
+                "right_wrist"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "left_shoulder",
+                "right_shoulder",
+                "left_elbow",
+                "right_elbow",
+                "left_wrist",
+                "right_wrist"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "left_shoulder",
+                "right_shoulder",
+                "left_elbow",
+                "right_elbow",
+                "left_wrist",
+                "right_wrist"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "left_shoulder",
+                "right_shoulder",
+                "left_elbow",
+                "right_elbow",
+                "left_wrist",
+                "right_wrist"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "left_shoulder",
+                "right_shoulder",
+                "left_elbow",
+                "right_elbow",
+                "left_wrist",
+                "right_wrist"
+              ],
+              "type": "string"
+            }
+          ],
+          "title": "Body Anchors",
+          "type": "array"
+        },
+        "browser_package": {
+          "const": "@mediapipe/tasks-vision",
+          "title": "Browser Package",
+          "type": "string"
+        },
+        "browser_package_version": {
+          "const": "1.0.1",
+          "title": "Browser Package Version",
+          "type": "string"
+        },
+        "config_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Config Id",
+          "type": "string"
+        },
+        "decoder_package": {
+          "const": "av",
+          "title": "Decoder Package",
+          "type": "string"
+        },
+        "decoder_package_version": {
+          "const": "18.1.0",
+          "title": "Decoder Package Version",
+          "type": "string"
+        },
+        "delegate": {
+          "const": "CPU",
+          "title": "Delegate",
+          "type": "string"
+        },
+        "hand_task_asset": {
+          "$ref": "#/$defs/MediaPipeTaskAssetV1"
+        },
+        "handedness_disagreement_penalty": {
+          "maximum": 0.05,
+          "minimum": 0.05,
+          "title": "Handedness Disagreement Penalty",
+          "type": "number"
+        },
+        "max_spatial_cost": {
+          "maximum": 0.25,
+          "minimum": 0.25,
+          "title": "Max Spatial Cost",
+          "type": "number"
+        },
+        "min_hand_detection_confidence": {
+          "maximum": 0.5,
+          "minimum": 0.5,
+          "title": "Min Hand Detection Confidence",
+          "type": "number"
+        },
+        "min_hand_presence_confidence": {
+          "maximum": 0.5,
+          "minimum": 0.5,
+          "title": "Min Hand Presence Confidence",
+          "type": "number"
+        },
+        "min_hand_tracking_confidence": {
+          "maximum": 0.5,
+          "minimum": 0.5,
+          "title": "Min Hand Tracking Confidence",
+          "type": "number"
+        },
+        "min_pose_detection_confidence": {
+          "maximum": 0.5,
+          "minimum": 0.5,
+          "title": "Min Pose Detection Confidence",
+          "type": "number"
+        },
+        "min_pose_presence_confidence": {
+          "maximum": 0.5,
+          "minimum": 0.5,
+          "title": "Min Pose Presence Confidence",
+          "type": "number"
+        },
+        "min_pose_tracking_confidence": {
+          "maximum": 0.5,
+          "minimum": 0.5,
+          "title": "Min Pose Tracking Confidence",
+          "type": "number"
+        },
+        "num_hands": {
+          "const": 2,
+          "title": "Num Hands",
+          "type": "integer"
+        },
+        "num_poses": {
+          "const": 1,
+          "title": "Num Poses",
+          "type": "integer"
+        },
+        "pose_task_asset": {
+          "$ref": "#/$defs/MediaPipeTaskAssetV1"
+        },
+        "python_package": {
+          "const": "mediapipe",
+          "title": "Python Package",
+          "type": "string"
+        },
+        "python_package_version": {
+          "const": "1.0.1",
+          "title": "Python Package Version",
+          "type": "string"
+        },
+        "running_mode": {
+          "const": "VIDEO",
+          "title": "Running Mode",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "mediapipe-extraction-config/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "timestamp_rule": {
+          "const": "source_pts_relative_us_then_strict_monotonic_floor_ms/1",
+          "title": "Timestamp Rule",
+          "type": "string"
+        },
+        "tracking_algorithm": {
+          "const": "deterministic_wrist_mcp_centroid_minimum_cost",
+          "title": "Tracking Algorithm",
+          "type": "string"
+        },
+        "tracking_algorithm_version": {
+          "const": "1.0.0",
+          "title": "Tracking Algorithm Version",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "config_id",
+        "version",
+        "python_package",
+        "python_package_version",
+        "browser_package",
+        "browser_package_version",
+        "decoder_package",
+        "decoder_package_version",
+        "delegate",
+        "running_mode",
+        "num_hands",
+        "num_poses",
+        "min_hand_detection_confidence",
+        "min_hand_presence_confidence",
+        "min_hand_tracking_confidence",
+        "min_pose_detection_confidence",
+        "min_pose_presence_confidence",
+        "min_pose_tracking_confidence",
+        "body_anchors",
+        "timestamp_rule",
+        "tracking_algorithm",
+        "tracking_algorithm_version",
+        "max_spatial_cost",
+        "handedness_disagreement_penalty",
+        "ambiguity_margin",
+        "hand_task_asset",
+        "pose_task_asset"
+      ],
+      "title": "MediaPipeExtractionConfigV1",
+      "type": "object"
+    },
+    "MediaPipeTaskAssetV1": {
+      "additionalProperties": false,
+      "description": "Exact identity of one cross-runtime MediaPipe Tasks model bundle.",
+      "properties": {
+        "compatible_runtimes": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "enum": [
+                "browser",
+                "python"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "browser",
+                "python"
+              ],
+              "type": "string"
+            }
+          ],
+          "title": "Compatible Runtimes",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "filename": {
+          "enum": [
+            "hand_landmarker.task",
+            "pose_landmarker_lite.task"
+          ],
+          "title": "Filename",
+          "type": "string"
+        },
+        "model_id": {
+          "enum": [
+            "mediapipe-hand-landmarker-full",
+            "mediapipe-pose-landmarker-lite"
+          ],
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_revision": {
+          "const": "1.0.0",
+          "title": "Model Revision",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "mediapipe-task-asset/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "task_kind": {
+          "enum": [
+            "hand_landmarker",
+            "pose_landmarker"
+          ],
+          "title": "Task Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_kind",
+        "model_id",
+        "model_revision",
+        "filename",
+        "sha256",
+        "size_bytes",
+        "compatible_runtimes"
+      ],
+      "title": "MediaPipeTaskAssetV1",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/landmark-extraction-manifest-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Self-digested extraction handoff bound to exact raw data and task assets.",
+  "properties": {
+    "config": {
+      "$ref": "#/$defs/MediaPipeExtractionConfigV1"
+    },
+    "config_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Config Sha256",
+      "type": "string"
+    },
+    "extraction_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Extraction Id",
+      "type": "string"
+    },
+    "manifest_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Manifest Sha256",
+      "type": "string"
+    },
+    "raw_data_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Raw Data Sha256",
+      "type": "string"
+    },
+    "raw_dataset_id": {
+      "pattern": "^dataset_[0-9a-f]{32}$",
+      "title": "Raw Dataset Id",
+      "type": "string"
+    },
+    "raw_dataset_manifest_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Raw Dataset Manifest Sha256",
+      "type": "string"
+    },
+    "raw_dataset_version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Raw Dataset Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "landmark-extraction-manifest/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sequences": {
+      "items": {
+        "$ref": "#/$defs/LandmarkSequenceRefV1"
+      },
+      "minItems": 1,
+      "title": "Sequences",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "extraction_id",
+    "version",
+    "raw_dataset_id",
+    "raw_dataset_version",
+    "raw_data_sha256",
+    "raw_dataset_manifest_sha256",
+    "config",
+    "config_sha256",
+    "sequences",
+    "manifest_sha256"
+  ],
+  "title": "LandmarkExtractionManifestV1",
+  "type": "object"
+}

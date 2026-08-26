@@ -21,11 +21,12 @@ Public surface: React/Vite, Web Worker, MediaPipe Tasks, ONNX Runtime Web
 The root DVC graph is generated from the typed SignLab stage registry. Its current
 stages produce synthetic receipts only: they prove the intended boundaries and DVC
 wiring, not production ingestion, extraction, quality, splitting, or features. Later
-stage stories replace those adapters with importable services while preserving one
-registered graph. Public Git contains only the synthetic fixture lock. When Story #19
-creates the first approved production version, participant-data pointers and
-production lock history will live in a separate protected metadata repository. See
-[data versioning](data-versioning.md).
+stage stories provide importable services while preserving one registered graph;
+the raw importer and MediaPipe extractor now exist independently of their still-
+synthetic DVC receipts. Public Git contains only the synthetic fixture lock. When
+Story #19 creates the first approved production version, participant-data pointers
+and production lock history will live in a separate protected metadata repository.
+See [data versioning](data-versioning.md).
 
 ## State model
 
@@ -65,6 +66,30 @@ recording, clip, annotation, and derived-artifact tables, with the two derived-m
 types—clips and derived artifacts—empty before extraction. It binds the finalized
 sidecar, governance policy, lineage inventory, and taxonomy without pretending that
 raw recordings are trainable samples.
+
+The [landmark-extraction boundary](landmark-extraction.md) consumes that raw
+manifest without creating sample, label, feature, quality, or split identity. Its
+canonical Python batch pins `mediapipe==1.0.1`, PyAV `18.1.0`, CPU/VIDEO execution,
+all task thresholds, the tracker, and exact Hand Landmarker Full and Pose Landmarker
+Lite bytes. The future browser path pins `@mediapipe/tasks-vision@1.0.1` and the same
+two `.task` hashes. Model assets remain external and are loaded only from verified
+local buffers; extraction never auto-downloads them.
+
+Each source frame preserves PTS, rational time base, relative microseconds, and the
+strictly increasing MediaPipe millisecond timestamp derived from them. Output keeps
+two stable hand slots with 21 image/world points, detector order, handedness and
+score; six ordered shoulder/elbow/wrist anchors; and explicit absent/invalid masks.
+Source mirror and rotation facts are recorded but never silently normalized. A
+semantic frames-table digest and an exact Parquet-byte digest answer different
+reproducibility questions, and the extraction manifest binds both to raw data,
+configuration, model assets, and derived-artifact lineage.
+
+This is a raw diagnostic boundary only. Story #20 decides whether timing, absence,
+or landmark patterns are usable; Story #22 defines normalization and portable
+features. Private participant extraction additionally requires authenticated
+authorization for the consent scope's `derived_features` field and runs in a
+network-isolated environment after task assets have been acquired. Public extraction
+fixtures are synthetic and do not relax that gate.
 
 The sample-bearing [dataset manifest](dataset-manifests.md) includes stable
 identifiers for clips, participants, sessions, source recordings, devices, camera

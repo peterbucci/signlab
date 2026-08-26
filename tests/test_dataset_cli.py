@@ -219,4 +219,6 @@ def test_dataset_resource_command_validates_packaged_review_artifacts(
     result = runner.invoke(cli.app, ["data", "validate-resources"])
 
     assert result.exit_code == 0
-    assert result.output.strip() == "Packaged dataset and ingest schemas and examples are valid."
+    assert result.output.strip() == (
+        "Packaged dataset, ingest, and extraction resources are valid."
+    )

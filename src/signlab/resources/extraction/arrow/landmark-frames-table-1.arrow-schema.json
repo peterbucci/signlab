@@ -1,0 +1,352 @@
+{
+  "allowed_schema_metadata": {
+    "signlab:content_sha256": "sha256:<64 lowercase hex characters>",
+    "signlab:schema_sha256": "sha256:cc379bd6a507a1dd902365fcc47c4beac759b5911e9fa9b129d8c98443d335a8",
+    "signlab:schema_version": "landmark-frames-table/1",
+    "signlab:table_kind": "landmark_frames"
+  },
+  "fields": [
+    {
+      "field_id": 1,
+      "name": "schema_version",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 2,
+      "name": "source_recording_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 3,
+      "name": "frame_index",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 4,
+      "name": "source_pts",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 5,
+      "name": "source_time_base_numerator",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 6,
+      "name": "source_time_base_denominator",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 7,
+      "name": "relative_timestamp_us",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 8,
+      "name": "task_timestamp_ms",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 9,
+      "name": "invalid",
+      "nullable": false,
+      "type": "bool"
+    },
+    {
+      "field_id": 10,
+      "name": "invalid_reason",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 31,
+      "name": "hands",
+      "nullable": false,
+      "type": {
+        "element": {
+          "field_id": 32,
+          "name": "element",
+          "nullable": false,
+          "type": {
+            "fields": [
+              {
+                "field_id": 11,
+                "name": "slot_id",
+                "nullable": false,
+                "type": "utf8"
+              },
+              {
+                "field_id": 12,
+                "name": "present",
+                "nullable": false,
+                "type": "bool"
+              },
+              {
+                "field_id": 13,
+                "name": "tracking_id",
+                "nullable": true,
+                "type": "utf8"
+              },
+              {
+                "field_id": 14,
+                "name": "detector_index",
+                "nullable": true,
+                "type": "int16"
+              },
+              {
+                "field_id": 15,
+                "name": "handedness",
+                "nullable": true,
+                "type": "utf8"
+              },
+              {
+                "field_id": 16,
+                "name": "handedness_confidence",
+                "nullable": true,
+                "type": "float64"
+              },
+              {
+                "field_id": 22,
+                "name": "image_landmarks",
+                "nullable": false,
+                "type": {
+                  "element": {
+                    "field_id": 23,
+                    "name": "element",
+                    "nullable": true,
+                    "type": {
+                      "fields": [
+                        {
+                          "field_id": 17,
+                          "name": "x",
+                          "nullable": false,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 18,
+                          "name": "y",
+                          "nullable": false,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 19,
+                          "name": "z",
+                          "nullable": false,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 20,
+                          "name": "visibility",
+                          "nullable": true,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 21,
+                          "name": "presence",
+                          "nullable": true,
+                          "type": "float64"
+                        }
+                      ],
+                      "kind": "struct"
+                    }
+                  },
+                  "kind": "fixed_size_list",
+                  "size": 21
+                }
+              },
+              {
+                "field_id": 29,
+                "name": "world_landmarks",
+                "nullable": false,
+                "type": {
+                  "element": {
+                    "field_id": 30,
+                    "name": "element",
+                    "nullable": true,
+                    "type": {
+                      "fields": [
+                        {
+                          "field_id": 24,
+                          "name": "x",
+                          "nullable": false,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 25,
+                          "name": "y",
+                          "nullable": false,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 26,
+                          "name": "z",
+                          "nullable": false,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 27,
+                          "name": "visibility",
+                          "nullable": true,
+                          "type": "float64"
+                        },
+                        {
+                          "field_id": 28,
+                          "name": "presence",
+                          "nullable": true,
+                          "type": "float64"
+                        }
+                      ],
+                      "kind": "struct"
+                    }
+                  },
+                  "kind": "fixed_size_list",
+                  "size": 21
+                }
+              }
+            ],
+            "kind": "struct"
+          }
+        },
+        "kind": "fixed_size_list",
+        "size": 2
+      }
+    },
+    {
+      "field_id": 47,
+      "name": "body_anchors",
+      "nullable": false,
+      "type": {
+        "element": {
+          "field_id": 48,
+          "name": "element",
+          "nullable": false,
+          "type": {
+            "fields": [
+              {
+                "field_id": 33,
+                "name": "name",
+                "nullable": false,
+                "type": "utf8"
+              },
+              {
+                "field_id": 34,
+                "name": "present",
+                "nullable": false,
+                "type": "bool"
+              },
+              {
+                "field_id": 40,
+                "name": "image_point",
+                "nullable": true,
+                "type": {
+                  "fields": [
+                    {
+                      "field_id": 35,
+                      "name": "x",
+                      "nullable": false,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 36,
+                      "name": "y",
+                      "nullable": false,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 37,
+                      "name": "z",
+                      "nullable": false,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 38,
+                      "name": "visibility",
+                      "nullable": true,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 39,
+                      "name": "presence",
+                      "nullable": true,
+                      "type": "float64"
+                    }
+                  ],
+                  "kind": "struct"
+                }
+              },
+              {
+                "field_id": 46,
+                "name": "world_point",
+                "nullable": true,
+                "type": {
+                  "fields": [
+                    {
+                      "field_id": 41,
+                      "name": "x",
+                      "nullable": false,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 42,
+                      "name": "y",
+                      "nullable": false,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 43,
+                      "name": "z",
+                      "nullable": false,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 44,
+                      "name": "visibility",
+                      "nullable": true,
+                      "type": "float64"
+                    },
+                    {
+                      "field_id": 45,
+                      "name": "presence",
+                      "nullable": true,
+                      "type": "float64"
+                    }
+                  ],
+                  "kind": "struct"
+                }
+              }
+            ],
+            "kind": "struct"
+          }
+        },
+        "kind": "fixed_size_list",
+        "size": 6
+      }
+    },
+    {
+      "field_id": 49,
+      "name": "observed_hand_count",
+      "nullable": false,
+      "type": "int8"
+    },
+    {
+      "field_id": 50,
+      "name": "observed_body_anchor_count",
+      "nullable": false,
+      "type": "int8"
+    }
+  ],
+  "format": "arrow-schema-snapshot/1",
+  "schema_version": "landmark-frames-table/1",
+  "table_name": "landmark_frames",
+  "writer_generated_file_metadata": {
+    "ARROW:schema": "authoritative Arrow schema encoding"
+  }
+}

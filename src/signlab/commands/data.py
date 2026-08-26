@@ -261,6 +261,123 @@ def validate_raw_dataset_command(
     typer.echo(f"Current consent authorization: {checked.consent_authorization.replace('_', ' ')}")
 
 
+def _echo_landmark_extraction_summary(
+    *,
+    status: str,
+    manifest_sha256: str,
+    config_sha256: str,
+    raw_data_sha256: str,
+    sequence_count: int,
+    frame_count: int,
+    invalid_frame_count: int,
+    integrity: str,
+) -> None:
+    """Emit only path-free, aggregate extraction evidence."""
+
+    typer.echo(f"Landmark extraction: {status.replace('_', ' ')}.")
+    typer.echo(f"Extraction manifest SHA-256: {manifest_sha256}")
+    typer.echo(f"Extraction configuration SHA-256: {config_sha256}")
+    typer.echo(f"Raw data SHA-256: {raw_data_sha256}")
+    typer.echo(f"Extracted sequences: {sequence_count}")
+    typer.echo(f"Landmark frames: {frame_count}")
+    typer.echo(f"Invalid frames: {invalid_frame_count}")
+    typer.echo(f"Extraction bundle integrity: {integrity.replace('_', ' ')}")
+
+
+@app.command("extract-landmarks")
+def extract_landmarks_command(
+    raw_manifest: Annotated[
+        Path,
+        typer.Argument(help="Raw-dataset-manifest/1 JSON document."),
+    ],
+    raw_bundle_root: Annotated[
+        Path,
+        typer.Option("--raw-bundle-root", help="Explicit validated raw bundle root."),
+    ],
+    model_root: Annotated[
+        Path,
+        typer.Option("--model-root", help="Directory containing the two pinned task assets."),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New or byte-identical landmark bundle directory."),
+    ],
+) -> None:
+    """Extract an eligible synthetic raw bundle with the packaged pinned config."""
+
+    from signlab.extraction.batch import extract_raw_dataset
+    from signlab.extraction.resources import load_packaged_default_extraction_config
+
+    try:
+        result = extract_raw_dataset(
+            raw_manifest.read_bytes(),
+            raw_bundle_root=raw_bundle_root,
+            model_root=model_root,
+            config=load_packaged_default_extraction_config(),
+            destination=output,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Landmark extraction failed.", err=True)
+        raise typer.Exit(code=1) from error
+    validation = result.validation
+    _echo_landmark_extraction_summary(
+        status=result.status,
+        manifest_sha256=result.manifest.manifest_sha256,
+        config_sha256=result.manifest.config_sha256,
+        raw_data_sha256=result.manifest.raw_data_sha256,
+        sequence_count=validation.sequence_count,
+        frame_count=validation.frame_count,
+        invalid_frame_count=validation.invalid_frame_count,
+        integrity=validation.semantic_integrity,
+    )
+
+
+@app.command("validate-extraction")
+def validate_extraction_command(
+    extraction_manifest: Annotated[
+        Path,
+        typer.Argument(help="Landmark-extraction-manifest/1 JSON document."),
+    ],
+    workspace_root: Annotated[
+        Path,
+        typer.Option("--workspace-root", help="Explicit landmark bundle root."),
+    ],
+    raw_manifest: Annotated[
+        Path,
+        typer.Option("--raw-manifest", help="Exact raw-dataset-manifest/1 JSON document."),
+    ],
+    raw_bundle_root: Annotated[
+        Path,
+        typer.Option("--raw-bundle-root", help="Explicit validated raw bundle root."),
+    ],
+) -> None:
+    """Verify extraction lineage, inventory, Parquet bytes, and semantic rows."""
+
+    from signlab.extraction.batch import validate_landmark_extraction_bundle
+
+    try:
+        result = validate_landmark_extraction_bundle(
+            extraction_manifest.read_bytes(),
+            workspace_root,
+            raw_manifest=raw_manifest.read_bytes(),
+            raw_bundle_root=raw_bundle_root,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Landmark extraction validation failed.", err=True)
+        raise typer.Exit(code=1) from error
+    validation = result.validation
+    _echo_landmark_extraction_summary(
+        status="verified",
+        manifest_sha256=result.manifest.manifest_sha256,
+        config_sha256=result.manifest.config_sha256,
+        raw_data_sha256=result.manifest.raw_data_sha256,
+        sequence_count=validation.sequence_count,
+        frame_count=validation.frame_count,
+        invalid_frame_count=validation.invalid_frame_count,
+        integrity=validation.semantic_integrity,
+    )
+
+
 @app.command("configure-private-remote")
 def configure_private_remote_command() -> None:
     """Configure a credential-free private S3 DVC remote in ignored local state."""
@@ -345,18 +462,20 @@ def run_reproduction_stage_command(
 
 @app.command("validate-resources")
 def validate_dataset_resources() -> None:
-    """Validate packaged dataset, capture, and raw-handoff schemas and examples."""
+    """Validate packaged dataset, ingest, and extraction resources."""
 
     from signlab.datasets.ingest_resources import validate_packaged_ingest_resources
     from signlab.datasets.resources import validate_packaged_dataset_resources
+    from signlab.extraction.resources import validate_packaged_extraction_resources
 
     try:
         validate_packaged_dataset_resources()
         validate_packaged_ingest_resources()
+        validate_packaged_extraction_resources()
     except (OSError, TypeError, ValueError) as error:
         typer.echo("Packaged dataset resource validation failed.", err=True)
         raise typer.Exit(code=1) from error
-    typer.echo("Packaged dataset and ingest schemas and examples are valid.")
+    typer.echo("Packaged dataset, ingest, and extraction resources are valid.")
 
 
 @app.command("write-example-dataset")

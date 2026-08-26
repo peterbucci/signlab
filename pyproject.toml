@@ -29,6 +29,12 @@ dependencies = [
   "tzdata==2026.3",
 ]
 
+[project.optional-dependencies]
+extraction = [
+  "av==18.1.0",
+  "mediapipe==1.0.1",
+]
+
 [project.urls]
 Homepage = "https://github.com/peterbucci/signlab"
 Issues = "https://github.com/peterbucci/signlab/issues"

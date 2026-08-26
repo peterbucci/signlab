@@ -42,7 +42,7 @@ jobs:
         run: uv lock --check
 
       - name: Install locked environment
-        run: uv sync --locked --all-groups
+        run: uv sync --locked --all-groups --all-extras
 
       - name: Enforce public-repository boundary
         run: uv run --locked python scripts/check_repository_hygiene.py
@@ -111,7 +111,7 @@ jobs:
         run: uv lock --check
 
       - name: Install locked environment
-        run: uv sync --locked --all-groups
+        run: uv sync --locked --all-groups --all-extras
 
       - name: Enforce public-repository boundary
         run: uv run --locked python scripts/check_repository_hygiene.py

@@ -42,6 +42,18 @@ These are stage-handoff contracts, not new members of the downstream
 or replace the sample-bearing `dataset-manifest/2` contract. See
 [capture and raw dataset import](capture-import.md).
 
+Three extraction-stage contracts preserve raw detector evidence before quality or
+feature construction:
+
+| Contract | Identity and responsibility |
+| --- | --- |
+| `mediapipe-extraction-config/1` | Exact Python/browser/decoder versions, model bytes, CPU/VIDEO task settings, timestamp rule, anchor order, and stable-hand tracker facts |
+| `landmark-frames-table/1` | One recording's ordered source PTS/time-base, two hand slots, six body anchors, detector observations, and explicit absence/invalid masks |
+| `landmark-extraction-manifest/1` | Self-digested binding from an exact raw manifest and configuration to content-addressed Parquet bytes, semantic row hashes, counts, orientation facts, and lineage |
+
+These are also stage handoffs rather than sample-bearing dataset or preprocessing
+contracts. See [version-pinned landmark extraction](landmark-extraction.md).
+
 `assert_model_compatible(...)` validates the complete chain. The narrower
 `assert_split_compatible(...)`, `assert_resolved_configuration_compatible(...)`,
 and `assert_run_compatible(...)` checks are available at earlier pipeline stages.
@@ -147,6 +159,9 @@ before Pydantic validation.
 | Capture identifier set | `capture-identifier-set/1` | `/1` | Never |
 | Collection sidecar | `collection-sidecar/1` | `/1` | Never |
 | Raw dataset manifest | `raw-dataset-manifest/1` | `/1` | Never |
+| MediaPipe extraction config | `mediapipe-extraction-config/1` | `/1` | Never |
+| Landmark frames table | `landmark-frames-table/1` | `/1` | Never |
+| Landmark extraction manifest | `landmark-extraction-manifest/1` | `/1` | Never |
 | Split manifest | `split-manifest/1` | `/1` | Never |
 | Preprocessing plan | `preprocessing-plan/1` | `/1` | Never |
 | Resolved configuration | `resolved-configuration/1` | `/1` | Never |
@@ -191,6 +206,8 @@ Run both layers through the CLI:
 uv run signlab contracts versions
 uv run signlab contracts validate-resources
 uv run signlab contracts validate path/to/contract.json
+uv run signlab data validate-resources
+uv run signlab data validate-extraction --help
 ```
 
 Regenerate review artifacts after an authoritative model or synthetic example

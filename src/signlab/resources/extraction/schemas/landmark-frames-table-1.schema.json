@@ -1,0 +1,394 @@
+{
+  "$comment": "This JSON Schema enforces portable extraction structure. SignLab's strict extraction validators remain authoritative for canonical hashes, timeline recurrence, masks, counts, model registration, lineage, and artifact binding.",
+  "$defs": {
+    "BodyAnchorV1": {
+      "additionalProperties": false,
+      "description": "One selected pose anchor, explicitly masked when it is not observable.",
+      "properties": {
+        "image_point": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Point3V1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "enum": [
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "present": {
+          "title": "Present",
+          "type": "boolean"
+        },
+        "world_point": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Point3V1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "present",
+        "image_point",
+        "world_point"
+      ],
+      "title": "BodyAnchorV1",
+      "type": "object"
+    },
+    "HandSlotV1": {
+      "additionalProperties": false,
+      "description": "One stable hand identity, explicitly masked when no hand occupies the slot.",
+      "properties": {
+        "detector_index": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Detector Index"
+        },
+        "handedness": {
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "right"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Handedness"
+        },
+        "handedness_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Handedness Confidence"
+        },
+        "image_landmarks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Point3V1"
+              },
+              "maxItems": 21,
+              "minItems": 21,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Image Landmarks"
+        },
+        "present": {
+          "title": "Present",
+          "type": "boolean"
+        },
+        "slot_id": {
+          "enum": [
+            "hand_0",
+            "hand_1"
+          ],
+          "title": "Slot Id",
+          "type": "string"
+        },
+        "tracking_id": {
+          "anyOf": [
+            {
+              "enum": [
+                "hand_0",
+                "hand_1"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tracking Id"
+        },
+        "world_landmarks": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Point3V1"
+              },
+              "maxItems": 21,
+              "minItems": 21,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "World Landmarks"
+        }
+      },
+      "required": [
+        "slot_id",
+        "present",
+        "detector_index",
+        "tracking_id",
+        "handedness",
+        "handedness_confidence",
+        "image_landmarks",
+        "world_landmarks"
+      ],
+      "title": "HandSlotV1",
+      "type": "object"
+    },
+    "LandmarkFrameV1": {
+      "additionalProperties": false,
+      "description": "One decoded source frame with raw task observations and explicit masks.",
+      "properties": {
+        "body_anchors": {
+          "maxItems": 6,
+          "minItems": 6,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/BodyAnchorV1"
+            },
+            {
+              "$ref": "#/$defs/BodyAnchorV1"
+            },
+            {
+              "$ref": "#/$defs/BodyAnchorV1"
+            },
+            {
+              "$ref": "#/$defs/BodyAnchorV1"
+            },
+            {
+              "$ref": "#/$defs/BodyAnchorV1"
+            },
+            {
+              "$ref": "#/$defs/BodyAnchorV1"
+            }
+          ],
+          "title": "Body Anchors",
+          "type": "array"
+        },
+        "frame_index": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Frame Index",
+          "type": "integer"
+        },
+        "hands": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/HandSlotV1"
+            },
+            {
+              "$ref": "#/$defs/HandSlotV1"
+            }
+          ],
+          "title": "Hands",
+          "type": "array"
+        },
+        "invalid": {
+          "title": "Invalid",
+          "type": "boolean"
+        },
+        "invalid_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "source_frame_invalid",
+                "task_inference_failed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Invalid Reason"
+        },
+        "observed_body_anchor_count": {
+          "le": 6,
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Observed Body Anchor Count",
+          "type": "integer"
+        },
+        "observed_hand_count": {
+          "le": 2,
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Observed Hand Count",
+          "type": "integer"
+        },
+        "relative_timestamp_us": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Relative Timestamp Us",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "landmark-frame/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_pts": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "title": "Source Pts",
+          "type": "integer"
+        },
+        "source_recording_id": {
+          "pattern": "^recording_[0-9a-f]{32}$",
+          "title": "Source Recording Id",
+          "type": "string"
+        },
+        "source_time_base_denominator": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Source Time Base Denominator",
+          "type": "integer"
+        },
+        "source_time_base_numerator": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Source Time Base Numerator",
+          "type": "integer"
+        },
+        "task_timestamp_ms": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Task Timestamp Ms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_recording_id",
+        "frame_index",
+        "source_pts",
+        "source_time_base_numerator",
+        "source_time_base_denominator",
+        "relative_timestamp_us",
+        "task_timestamp_ms",
+        "invalid",
+        "invalid_reason",
+        "hands",
+        "body_anchors",
+        "observed_hand_count",
+        "observed_body_anchor_count"
+      ],
+      "title": "LandmarkFrameV1",
+      "type": "object"
+    },
+    "Point3V1": {
+      "additionalProperties": false,
+      "description": "One finite 3-D point with optional task-provided confidence channels.",
+      "properties": {
+        "presence": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Presence"
+        },
+        "visibility": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Visibility"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "z": {
+          "title": "Z",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z",
+        "visibility",
+        "presence"
+      ],
+      "title": "Point3V1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/landmark-frames-table-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Semantic rows for one source recording's Parquet landmark sequence.",
+  "properties": {
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/LandmarkFrameV1"
+      },
+      "minItems": 1,
+      "title": "Rows",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "landmark-frames-table/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rows"
+  ],
+  "title": "LandmarkFramesTableV1",
+  "type": "object"
+}

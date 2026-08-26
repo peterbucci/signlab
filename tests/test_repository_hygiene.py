@@ -28,6 +28,7 @@ def test_current_tracked_repository_is_public_safe() -> None:
         (".ENV", b"TOKEN=fake", "secret-file"),
         ("checkpoint.joblib", b"model", "artifact-type"),
         ("checkpoint.safetensors", b"model", "artifact-type"),
+        ("hand_landmarker.task", b"model", "artifact-type"),
         ("checkpoint.tflite", b"model", "artifact-type"),
         ("native.dll", b"binary", "artifact-type"),
         ("native.so", b"binary", "artifact-type"),
@@ -56,6 +57,7 @@ def test_current_tracked_repository_is_public_safe() -> None:
         "mixed-case-env",
         "joblib-artifact",
         "safetensors-artifact",
+        "mediapipe-task-artifact",
         "tflite-artifact",
         "windows-native-library",
         "unix-native-library",
@@ -110,3 +112,20 @@ def test_checkout_cleanliness_detects_untracked_files(tmp_path: Path) -> None:
     (tmp_path / "new-file.txt").write_text("untracked\n", encoding="utf-8")
 
     assert not hygiene.is_checkout_clean(tmp_path)
+
+
+def test_only_reviewed_extraction_model_lock_is_unignored() -> None:
+    repository_root = Path(__file__).resolve().parents[1]
+
+    def is_ignored(relative_path: str) -> bool:
+        completed = subprocess.run(
+            ["git", "check-ignore", "--quiet", "--no-index", relative_path],
+            cwd=repository_root,
+            check=False,
+        )
+        assert completed.returncode in {0, 1}
+        return completed.returncode == 0
+
+    assert not is_ignored("src/signlab/resources/extraction/models/mediapipe-tasks-1.0.1.lock.json")
+    assert is_ignored("src/signlab/resources/extraction/models/unreviewed.lock.json")
+    assert is_ignored("src/signlab/resources/extraction/models/hand_landmarker.task")
