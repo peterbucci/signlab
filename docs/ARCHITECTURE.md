@@ -17,6 +17,15 @@ Research surface: Python CLI, DVC, MLflow, Parquet
 Public surface: React/Vite, Web Worker, MediaPipe Tasks, ONNX Runtime Web
 ```
 
+The root DVC graph is generated from the typed SignLab stage registry. Its current
+stages produce synthetic receipts only: they prove the intended boundaries and DVC
+wiring, not production ingestion, extraction, quality, splitting, or features. Later
+stage stories replace those adapters with importable services while preserving one
+registered graph. Public Git contains only the synthetic fixture lock. When Story #19
+creates the first approved production version, participant-data pointers and
+production lock history will live in a separate protected metadata repository. See
+[data versioning](data-versioning.md).
+
 ## State model
 
 - **Inactive:** no candidate event is currently present; owned by the candidate-event detector.

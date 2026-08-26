@@ -1,0 +1,12 @@
+# Public SignLab DVC metadata is fixture-only. Private metadata lives in a
+# separate access-controlled Git/DVC metadata repository.
+.git/
+.venv/
+**/__pycache__/
+**/*.py[cod]
+artifacts/
+data/private/
+dist/
+mlruns/
+models/
+runs/

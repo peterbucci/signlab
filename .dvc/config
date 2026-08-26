@@ -1,0 +1,10 @@
+[core]
+    analytics = false
+    check_update = false
+    autostage = false
+[cache]
+    type = "reflink,copy"
+[studio]
+    offline = true
+[exp]
+    auto_push = false

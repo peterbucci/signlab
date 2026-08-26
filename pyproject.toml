@@ -23,6 +23,7 @@ dependencies = [
   "jsonschema>=4.26,<5",
   "pyarrow==25.0.1",
   "pydantic>=2.13.4,<2.14",
+  "PyYAML==6.0.3",
   "rfc8785==0.1.4",
   "typer>=0.27.1,<0.28",
   "tzdata==2026.3",
@@ -46,6 +47,10 @@ dev = [
   "pytest-cov>=7,<8",
   "ruff==0.16.3",
   "types-jsonschema==4.26.0.20260518",
+  "types-PyYAML==6.0.12.20260815",
+]
+reproducibility = [
+  "dvc[s3]==3.67.1",
 ]
 
 [tool.hatch.version]

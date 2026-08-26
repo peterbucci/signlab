@@ -119,6 +119,23 @@ def test_distribution_policy_rejects_traversal_and_private_artifacts() -> None:
 @pytest.mark.parametrize(
     "member_name",
     [
+        ".dvcignore",
+        "dvc.lock",
+        "dvc.yaml",
+        "params.yaml",
+        "private-data.dvc",
+        "signlab-0.1.0/.dvc/config",
+    ],
+)
+def test_distribution_policy_rejects_every_dvc_data_metadata_form(member_name: str) -> None:
+    assert validate_member_names((member_name,)) == (
+        "archive contains a private or generated artifact",
+    )
+
+
+@pytest.mark.parametrize(
+    "member_name",
+    [
         f"{chr(67)}:/outside.txt",
         r"..\outside.txt",
         r"\\server\share\outside.txt",

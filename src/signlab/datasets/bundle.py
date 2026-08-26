@@ -28,6 +28,7 @@ from signlab.contracts.governance import (
 )
 from signlab.contracts.pipeline import SplitManifestV1, validate_dataset_manifest_v2
 from signlab.datasets.parquet import read_dataset_table, write_dataset_table
+from signlab.datasets.storage import DatasetStorageError, verify_dataset_row_artifacts
 from signlab.datasets.validation import (
     ConsentEvidenceLookup,
     DatasetValidationError,
@@ -39,12 +40,14 @@ type DatasetBundleErrorCategory = Literal[
     "manifest.invalid",
     "table_bytes.invalid",
     "semantics.invalid",
+    "row_artifact_bytes.invalid",
 ]
 
 _ERROR_MESSAGES: dict[DatasetBundleErrorCategory, str] = {
     "manifest.invalid": "dataset bundle manifest is invalid",
     "table_bytes.invalid": "dataset bundle table bytes could not be verified",
     "semantics.invalid": "dataset bundle semantic relationships are invalid",
+    "row_artifact_bytes.invalid": "dataset bundle row-artifact bytes could not be verified",
 }
 
 
@@ -174,6 +177,7 @@ def validate_dataset_bundle(
     consent_authorization_verifier: ConsentAuthorizationVerifier | None = None,
     authorization_permission: ScopePermission | None = None,
     authorization_at: str | None = None,
+    verify_row_artifacts: bool = False,
 ) -> DatasetBundleValidationResult:
     """Verify six exact Parquet files and their semantic dataset relationships.
 
@@ -200,11 +204,18 @@ def validate_dataset_bundle(
         )
     except DatasetValidationError as error:
         raise DatasetBundleError("semantics.invalid") from error
+    artifact_byte_integrity: Literal["verified", "not_checked"] = "not_checked"
+    if verify_row_artifacts:
+        try:
+            verify_dataset_row_artifacts(tables, workspace_root)
+        except DatasetStorageError as error:
+            raise DatasetBundleError("row_artifact_bytes.invalid") from error
+        artifact_byte_integrity = "verified"
     return DatasetBundleValidationResult(
         data_sha256=checked_manifest.data_sha256,
         parquet_table_bytes="verified",
         semantic_integrity=result.semantic_integrity,
-        artifact_byte_integrity=result.artifact_byte_integrity,
+        artifact_byte_integrity=artifact_byte_integrity,
         split_compatibility=result.split_compatibility,
         consent_authorization=result.consent_authorization,
     )

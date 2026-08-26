@@ -10,6 +10,16 @@ a private contact channel without including sensitive details.
 Reports should identify the affected version, expected and observed behavior, and a
 minimal reproduction that contains no real participant data or active credential.
 
+DVC remote URLs, `.dvc/config.local`, participant-data pointers, production lock
+entries, remote listings, and private content hashes must also stay out of public
+issues and pull requests. Use environment credential chains and the local-only setup
+described in [docs/data-versioning.md](docs/data-versioning.md); never paste cloud
+credentials into DVC commands or configuration.
+
+The local setup command validates and writes DVC metadata; it does not provision or
+audit the remote service. Encryption, access roles, logging, retention, deletion, and
+backup controls require separate review in the storage environment.
+
 ## Supported versions
 
 SignLab is pre-release software. Security fixes are applied to the current `main`

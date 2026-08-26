@@ -1,0 +1,42 @@
+{
+  "fixture_only": true,
+  "records": [
+    {
+      "observations": [[1, 4], [2, 5], [3, 6]],
+      "recording_id": "synthetic_recording_01",
+      "session_group": "synthetic_session_a",
+      "signer_group": "synthetic_signer_a"
+    },
+    {
+      "observations": [[2, 6], [3, 7], [4, 8]],
+      "recording_id": "synthetic_recording_02",
+      "session_group": "synthetic_session_a",
+      "signer_group": "synthetic_signer_a"
+    },
+    {
+      "observations": [[4, 1], [5, 2], [6, 3]],
+      "recording_id": "synthetic_recording_03",
+      "session_group": "synthetic_session_b",
+      "signer_group": "synthetic_signer_b"
+    },
+    {
+      "observations": [[6, 2], [7, 3], [8, 4]],
+      "recording_id": "synthetic_recording_04",
+      "session_group": "synthetic_session_b",
+      "signer_group": "synthetic_signer_b"
+    },
+    {
+      "observations": [[3, 3], [5, 5], [7, 7]],
+      "recording_id": "synthetic_recording_05",
+      "session_group": "synthetic_session_c",
+      "signer_group": "synthetic_signer_c"
+    },
+    {
+      "observations": [[4, 4], [6, 6], [8, 8]],
+      "recording_id": "synthetic_recording_06",
+      "session_group": "synthetic_session_c",
+      "signer_group": "synthetic_signer_c"
+    }
+  ],
+  "schema_version": "synthetic-recording-source/1"
+}

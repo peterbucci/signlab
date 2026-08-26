@@ -50,9 +50,10 @@ defines the explicit import alias and keeps `nothing` quarantined; the exporter 
 not silently relabel either value.
 
 Quarantined feedback and segments are `development-only`; they cannot be used as a
-locked final test. This local copy is not an off-machine backup. A later private-DVC
-story must place it in an authenticated private remote before the legacy source can be
-retired.
+locked final test. This local copy is not an off-machine backup. A separate authorized
+archival-migration decision, not Story #14 or the Story #19 production collection,
+must place any retained quarantine in approved private storage before the legacy
+source can be retired.
 
 ## Export and verification
 

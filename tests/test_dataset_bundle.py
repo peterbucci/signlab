@@ -8,6 +8,7 @@ from signlab.contracts.dataset import DatasetManifestV2, DatasetTable
 from signlab.datasets import bundle
 from signlab.datasets.parquet import ParquetTableResult, write_dataset_table
 from signlab.datasets.resources import DatasetResourceBundle, build_example_dataset_bundle
+from signlab.datasets.storage import DatasetStorageError
 
 
 @pytest.fixture
@@ -172,3 +173,63 @@ def test_post_write_validation_failure_leaves_existing_destination_empty(
     assert destination.is_dir()
     assert not tuple(destination.iterdir())
     _assert_no_staging_directories(tmp_path, destination.name)
+
+
+def test_row_artifact_verification_is_explicit_and_propagates_positive_evidence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    example_bundle: DatasetResourceBundle,
+) -> None:
+    destination = tmp_path / "dataset"
+    written = bundle.write_dataset_bundle(
+        example_bundle.manifest,
+        example_bundle.tables,
+        destination,
+    )
+    calls = 0
+
+    def verify(_tables: object, workspace_root: str | Path) -> object:
+        nonlocal calls
+        calls += 1
+        assert Path(workspace_root) == destination
+        return object()
+
+    monkeypatch.setattr(bundle, "verify_dataset_row_artifacts", verify)
+
+    unchecked = bundle.validate_dataset_bundle(written.manifest, destination)
+    checked = bundle.validate_dataset_bundle(
+        written.manifest,
+        destination,
+        verify_row_artifacts=True,
+    )
+
+    assert unchecked.artifact_byte_integrity == "not_checked"
+    assert checked.artifact_byte_integrity == "verified"
+    assert calls == 1
+
+
+def test_row_artifact_verification_failure_has_a_distinct_boundary(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    example_bundle: DatasetResourceBundle,
+) -> None:
+    destination = tmp_path / "dataset"
+    written = bundle.write_dataset_bundle(
+        example_bundle.manifest,
+        example_bundle.tables,
+        destination,
+    )
+    monkeypatch.setattr(
+        bundle,
+        "verify_dataset_row_artifacts",
+        lambda *_args: (_ for _ in ()).throw(DatasetStorageError()),
+    )
+
+    with pytest.raises(bundle.DatasetBundleError) as raised:
+        bundle.validate_dataset_bundle(
+            written.manifest,
+            destination,
+            verify_row_artifacts=True,
+        )
+
+    assert raised.value.category == "row_artifact_bytes.invalid"

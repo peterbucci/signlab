@@ -14,6 +14,7 @@ permissions:
   contents: read
 
 env:
+  DVC_NO_ANALYTICS: "true"
   PYTHONUTF8: "1"
   UV_NO_PROGRESS: "1"
 
@@ -45,6 +46,23 @@ jobs:
 
       - name: Enforce public-repository boundary
         run: uv run --locked python scripts/check_repository_hygiene.py
+
+      - name: Validate generated DVC graph
+        run: uv run --locked python scripts/generate_dvc_pipeline.py --check
+
+      - name: Prove public-fixture DVC clean-room reproduction
+        run: >-
+          uv run --locked python scripts/verify_dvc_clean_room.py
+          --report "${{ runner.temp }}/signlab-dvc-clean-room-linux.json"
+
+      - name: Upload public-fixture DVC clean-room proof
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dvc-clean-room-linux
+          path: ${{ runner.temp }}/signlab-dvc-clean-room-linux.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Lint
         run: uv run --locked ruff check .
@@ -97,6 +115,23 @@ jobs:
 
       - name: Enforce public-repository boundary
         run: uv run --locked python scripts/check_repository_hygiene.py
+
+      - name: Validate generated DVC graph
+        run: uv run --locked python scripts/generate_dvc_pipeline.py --check
+
+      - name: Prove public-fixture DVC clean-room reproduction
+        run: >-
+          uv run --locked python scripts/verify_dvc_clean_room.py
+          --report "${{ runner.temp }}/signlab-dvc-clean-room-windows.json"
+
+      - name: Upload public-fixture DVC clean-room proof
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dvc-clean-room-windows
+          path: ${{ runner.temp }}/signlab-dvc-clean-room-windows.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Test Windows paths and behavior
         run: uv run --locked pytest

@@ -36,6 +36,15 @@ def test_current_tracked_repository_is_public_safe() -> None:
         ("unix.txt", b"/" + b"home/fixture/data", "machine-path"),
         ("uri.txt", b"file" + b":///" + b"C" + b":/fixture/data", "machine-path"),
         ("secret.txt", b"AKIA" + b"A" * 16, "secret"),
+        (".dvc/config.local", b'[remote "private"]\nurl=s3://bucket\n', "dvc-local-config"),
+        ("private-data.dvc", b"outs:\n- md5: deadbeef\n", "dvc-pointer"),
+        (".dvc/config", b'[remote "private"]\nurl=s3://bucket\n', "dvc-remote"),
+        (
+            "dvc.yaml",
+            b"stages" + b":\n  x" + b":\n    cmd" + b": x\n    deps" + b": [s3://bucket/key]\n",
+            "dvc-remote",
+        ),
+        ("dvc.lock", b"access_key_id: fixture\n", "dvc-credential"),
         ("line-endings.txt", b"first\r\nsecond\r\n", "line-ending"),
     ],
     ids=[
@@ -55,6 +64,11 @@ def test_current_tracked_repository_is_public_safe() -> None:
         "unix-path",
         "file-uri",
         "secret-pattern",
+        "dvc-local-config",
+        "dvc-pointer",
+        "dvc-config-remote",
+        "dvc-stage-remote",
+        "dvc-credential",
         "crlf",
     ],
 )
@@ -68,6 +82,11 @@ def test_seeded_repository_policy_failures_are_detected(
 
 def test_small_reviewed_public_fixture_may_use_an_artifact_extension() -> None:
     assert _rules("tests/fixtures/public/replay.mp4", b"synthetic") == set()
+
+
+def test_dvc_managed_windows_newlines_are_normalized_by_git() -> None:
+    for path in (".dvc/.gitignore", ".dvc/config", "dvc.lock"):
+        assert "line-ending" not in _rules(path, b"generated\r\n")
 
 
 def test_web_url_with_users_path_is_not_a_machine_path() -> None:

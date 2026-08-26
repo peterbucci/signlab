@@ -1,0 +1,7 @@
+{
+  "fixture_only": true,
+  "minimum_valid_vectors": 3,
+  "profile": "public-synthetic-reproducibility",
+  "random_seed": 20260825,
+  "schema_version": "synthetic-dvc-profile/1"
+}

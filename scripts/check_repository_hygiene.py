@@ -12,6 +12,8 @@ from pathlib import Path, PurePosixPath
 MAX_TRACKED_BYTES = 1_048_576
 PUBLIC_FIXTURE_PREFIX = PurePosixPath("tests/fixtures/public")
 PRIVATE_ROOTS = (
+    PurePosixPath(".dvc/cache"),
+    PurePosixPath(".dvc/tmp"),
     PurePosixPath("artifacts"),
     PurePosixPath("data/interim"),
     PurePosixPath("data/private"),
@@ -21,6 +23,9 @@ PRIVATE_ROOTS = (
     PurePosixPath("models"),
     PurePosixPath("runs"),
 )
+PRIVATE_DVC_PATHS = {
+    PurePosixPath(".dvc/config.local"),
+}
 PRIVATE_SUFFIXES = {
     ".a",
     ".avi",
@@ -88,6 +93,16 @@ SECRET_PATTERNS = (
     re.compile(rb"AKIA[0-9A-Z]{16}"),
     re.compile(rb"gh[pousr]_[A-Za-z0-9]{36,255}"),
 )
+DVC_METADATA_NAMES = {"dvc.lock", "dvc.yaml"}
+DVC_NATIVE_NEWLINE_PATHS = {
+    PurePosixPath(".dvc/.gitignore"),
+    PurePosixPath(".dvc/config"),
+    PurePosixPath("dvc.lock"),
+}
+DVC_PRIVATE_KEY_PATTERN = re.compile(
+    rb"(?i)(?:access[_-]?key(?:[_-]?id)?|secret[_-]?key|session[_-]?token|credential|password)\s*[:=]"
+)
+DVC_REMOTE_PATTERN = re.compile(rb"(?i)(?:s3|gs|azure|ssh|hdfs|webhdfs|webdav|webdavs|https?)://")
 
 
 @dataclass(frozen=True, order=True)
@@ -118,6 +133,14 @@ def inspect_tracked_file(relative_path: str, content: bytes) -> tuple[Violation,
         violations.append(
             Violation(relative_path, "private-root", "private/generated directory is tracked")
         )
+    if policy_path in PRIVATE_DVC_PATHS:
+        violations.append(
+            Violation(relative_path, "dvc-local-config", "local DVC configuration is tracked")
+        )
+    if policy_path.suffix == ".dvc":
+        violations.append(
+            Violation(relative_path, "dvc-pointer", "DVC data pointer is tracked publicly")
+        )
     if policy_path.name.startswith(".env") and path.name != ".env.example":
         violations.append(Violation(relative_path, "secret-file", "environment file is tracked"))
     suffix = policy_path.suffix
@@ -127,7 +150,9 @@ def inspect_tracked_file(relative_path: str, content: bytes) -> tuple[Violation,
             Violation(relative_path, "artifact-type", "private/generated artifact type is tracked")
         )
     if suffix not in BINARY_SUFFIXES and b"\0" not in content:
-        if b"\r\n" in content:
+        # DVC's Windows writers use the platform text newline. Git still stores
+        # these exact generated files as LF through the repository attributes.
+        if b"\r\n" in content and policy_path not in DVC_NATIVE_NEWLINE_PATHS:
             violations.append(Violation(relative_path, "line-ending", "text file contains CRLF"))
         if any(pattern.search(content) for pattern in MACHINE_PATH_PATTERNS):
             violations.append(
@@ -137,6 +162,23 @@ def inspect_tracked_file(relative_path: str, content: bytes) -> tuple[Violation,
             violations.append(
                 Violation(relative_path, "secret", "text contains a high-confidence secret pattern")
             )
+        if policy_path.name in DVC_METADATA_NAMES or policy_path == PurePosixPath(".dvc/config"):
+            if DVC_PRIVATE_KEY_PATTERN.search(content):
+                violations.append(
+                    Violation(
+                        relative_path,
+                        "dvc-credential",
+                        "DVC metadata contains a credential-like setting",
+                    )
+                )
+            if DVC_REMOTE_PATTERN.search(content):
+                violations.append(
+                    Violation(
+                        relative_path,
+                        "dvc-remote",
+                        "DVC metadata contains a physical remote location",
+                    )
+                )
     return tuple(violations)
 
 

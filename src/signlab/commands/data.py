@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
 
@@ -14,6 +14,88 @@ from signlab.legacy.validator import validate_legacy_export
 app = create_group(
     help_text="Capture, import, validate, version, and split consent-approved datasets."
 )
+
+
+@app.command("configure-private-remote")
+def configure_private_remote_command() -> None:
+    """Configure a credential-free private S3 DVC remote in ignored local state."""
+
+    from signlab.reproducibility.remote import (
+        DvcRemoteConfigurationError,
+        configure_private_dvc_remote,
+    )
+
+    try:
+        result = configure_private_dvc_remote(Path.cwd())
+    except (OSError, DvcRemoteConfigurationError) as error:
+        typer.echo("Private DVC remote configuration failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        "Private DVC remote configured locally: "
+        f"endpoint override {str(result.endpoint_configured).lower()}, "
+        f"region override {str(result.region_configured).lower()}."
+    )
+
+
+@app.command("capture-reproduction-snapshot")
+def capture_reproduction_snapshot_command(
+    metadata_repository_role: Annotated[
+        Literal["public-fixture", "protected-metadata"],
+        typer.Option(
+            "--repository-role",
+            help=(
+                "Declare whether this checkout is the public fixture or "
+                "protected metadata repository."
+            ),
+        ),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option(
+            "--output",
+            help="New repository-relative JSON path beneath reports/reproduction/.",
+        ),
+    ] = Path("reports/reproduction/dvc-snapshot.json"),
+) -> None:
+    """Capture clean Git/DVC identities for later experiment tracking."""
+
+    from signlab.reproducibility.evidence import (
+        DvcEvidenceError,
+        capture_dvc_snapshot,
+        write_dvc_snapshot,
+    )
+    from signlab.reproducibility.provenance import dvc_snapshot_digest
+
+    try:
+        snapshot = capture_dvc_snapshot(
+            Path.cwd(),
+            metadata_repository_role=metadata_repository_role,
+        )
+        write_dvc_snapshot(snapshot, Path.cwd(), output.as_posix())
+        snapshot_sha256 = dvc_snapshot_digest(snapshot)
+    except (OSError, DvcEvidenceError, ValueError) as error:
+        typer.echo("DVC reproduction snapshot could not be captured.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"DVC reproduction snapshot SHA-256: {snapshot_sha256}")
+
+
+@app.command("run-reproduction-stage")
+def run_reproduction_stage_command(
+    stage: Annotated[
+        Literal["ingest", "validate", "extract", "quality", "split", "feature"],
+        typer.Argument(help="Registered public-fixture stage to execute."),
+    ],
+) -> None:
+    """Run one deterministic stage in the synthetic DVC proof graph."""
+
+    from signlab.reproducibility.stages import ReproductionStageError, run_reproduction_stage
+
+    try:
+        run_reproduction_stage(stage, Path.cwd())
+    except (OSError, ReproductionStageError) as error:
+        typer.echo("Synthetic reproduction stage failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"Synthetic reproduction stage completed: {stage}.")
 
 
 @app.command("validate-resources")
@@ -77,6 +159,13 @@ def validate_dataset(
             help="Optional exact split-manifest/1 to reconcile.",
         ),
     ] = None,
+    verify_row_artifacts: Annotated[
+        bool,
+        typer.Option(
+            "--verify-row-artifacts",
+            help="Stream-check every recording, materialized clip, and derived artifact.",
+        ),
+    ] = False,
 ) -> None:
     """Verify Parquet bytes, schemas, semantic relationships, and optional split."""
 
@@ -91,6 +180,7 @@ def validate_dataset(
             manifest_document,
             workspace_root,
             split=checked_split,
+            verify_row_artifacts=verify_row_artifacts,
         )
     except (OSError, TypeError, ValueError) as error:
         typer.echo(

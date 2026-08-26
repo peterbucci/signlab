@@ -97,10 +97,12 @@ FORBIDDEN_REPOSITORY_ROOTS = {
     "runs",
 }
 FORBIDDEN_ANY_PARTS = {".dvc", ".env"}
+FORBIDDEN_DVC_NAMES = {".dvcignore", "dvc.lock", "dvc.yaml", "params.yaml"}
 FORBIDDEN_SUFFIXES = {
     ".a",
     ".avi",
     ".db",
+    ".dvc",
     ".dll",
     ".dylib",
     ".exe",
@@ -185,6 +187,7 @@ def validate_member_names(member_names: Iterable[str]) -> tuple[str, ...]:
         if (
             set(lowered_parts) & FORBIDDEN_ANY_PARTS
             or has_forbidden_root
+            or bool(set(lowered_parts) & FORBIDDEN_DVC_NAMES)
             or path.suffix.lower() in FORBIDDEN_SUFFIXES
         ):
             errors.append("archive contains a private or generated artifact")

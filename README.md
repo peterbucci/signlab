@@ -65,6 +65,11 @@ uv run python scripts/verify_distribution.py dist
 See [docs/development.md](docs/development.md) for directory ownership, dependency
 updates, generated-file policy, and the Python-version decision.
 
+The [DVC data-versioning guide](docs/data-versioning.md) defines the fixture-only
+stage scaffold, local clean-room transport proof, the future Story #19 protected
+private-data gate, and tracker-neutral reproduction metadata that a later
+experiment-tracking story records.
+
 The [gesture taxonomy and claim boundary](docs/gesture-taxonomy.md) define the
 versioned six-output classifier vocabulary and the evidence required before making
 any named-language claim.
@@ -118,17 +123,20 @@ The immutable legacy audit, reproducible developer foundation, sanitized legacy
 evidence export, versioned gesture taxonomy, and fail-closed participant-data
 governance baseline are established. The current dataset contract adds six
 normalized, lineage-preserving Parquet tables while retaining the published v1
-reader. No headline model result is considered valid until the remaining grouped
-evaluation foundations are complete.
+reader. A six-stage DVC fixture graph exercises dependency and transport wiring
+without claiming that production ingestion, extraction, quality, splitting, or
+feature engineering is complete. No headline model result is considered valid until
+the remaining grouped evaluation foundations are complete.
 
 ## Data and privacy
 
 Raw participant video and contributed feedback are not committed to Git. Names,
 contacts, signatures, and the identity-to-pseudonym mapping belong only in a
 separate encrypted identity vault; research systems use random pseudonymous IDs.
-The legacy quarantine is currently local-only and explicitly not a durable backup;
-a later private-DVC story will place approved data behind a controlled remote.
-Public fixtures must be synthetic, explicitly consented, or separately licensed.
+Approved data belongs behind a controlled DVC remote whose pointers and lock history
+live in a separate access-controlled metadata repository. The public repository
+contains only explicitly synthetic DVC metadata. Public fixtures must be synthetic,
+explicitly consented, or separately licensed.
 
 ## License
 

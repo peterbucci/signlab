@@ -24,10 +24,16 @@ def test_validate_dataset_reports_each_verification_boundary(
 ) -> None:
     manifest = tmp_path / "private-dataset-manifest.json"
     manifest.write_bytes(b"synthetic-manifest")
-    calls: list[tuple[bytes, Path, object]] = []
+    calls: list[tuple[bytes, Path, object, bool]] = []
 
-    def validate(document: bytes, workspace_root: Path, *, split: object) -> object:
-        calls.append((document, workspace_root, split))
+    def validate(
+        document: bytes,
+        workspace_root: Path,
+        *,
+        split: object,
+        verify_row_artifacts: bool,
+    ) -> object:
+        calls.append((document, workspace_root, split, verify_row_artifacts))
         return SimpleNamespace(
             data_sha256="sha256:" + "a" * 64,
             parquet_table_bytes="verified",
@@ -51,7 +57,7 @@ def test_validate_dataset_reports_each_verification_boundary(
     )
 
     assert result.exit_code == 0
-    assert calls == [(b"synthetic-manifest", tmp_path, None)]
+    assert calls == [(b"synthetic-manifest", tmp_path, None, False)]
     assert result.output.splitlines() == [
         "Dataset data SHA-256: sha256:" + "a" * 64,
         "Parquet table bytes: verified",
@@ -131,9 +137,16 @@ def test_validate_dataset_redacts_a_missing_workspace_path(
     manifest.write_bytes(b"synthetic-manifest")
     missing_workspace = tmp_path / "private-participant-workspace"
 
-    def fail(_document: bytes, workspace_root: Path, *, split: object) -> object:
+    def fail(
+        _document: bytes,
+        workspace_root: Path,
+        *,
+        split: object,
+        verify_row_artifacts: bool,
+    ) -> object:
         assert workspace_root == missing_workspace
         assert split is None
+        assert verify_row_artifacts is False
         raise OSError("seeded private workspace failure")
 
     monkeypatch.setattr(bundle, "validate_dataset_bundle", fail)

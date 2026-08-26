@@ -103,9 +103,15 @@ row-artifact integrity, split compatibility, and current consent authorization a
 separate states. It never upgrades an omitted external check to “verified.”
 The writer builds and validates a sibling staging directory, writes its manifest
 as the final completion marker, then atomically publishes the directory.
-This story's byte-mismatch gate covers the six manifest-bound Parquet tables.
-Recording, clip, and derived/sample bytes remain explicitly `not checked` until
-the storage/import boundary supplies and authenticates those private artifacts.
+The default byte-mismatch gate covers the six manifest-bound Parquet tables.
+After an authorized DVC pull, add `--verify-row-artifacts` to stream every recording,
+materialized clip, and derived/sample file from its content-addressed workspace
+locator. The verifier requires a sorted, unique set of portable paths beneath the
+explicit workspace root and rejects missing files, final symlinks, path escapes,
+non-files, size drift, and SHA-256 drift. Logical `signlab://` locators still require
+an explicit storage adapter. This byte check remains separate from authenticated
+current consent. See [data versioning](data-versioning.md) for the future protected
+pull workflow owned by Story #19.
 
 ## Public fixtures and private data
 

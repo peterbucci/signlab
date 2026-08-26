@@ -43,6 +43,7 @@ data/private/
 artifacts/
 models/
 runs/
+reports/reproduction/
 mlruns/
 *.a
 *.avi
@@ -75,11 +76,11 @@ mlruns/
 *.sqlite
 *.sqlite3
 .dvc/cache/
+.dvc/config.local
 .dvc/tmp/
 
-# Keep lightweight contracts, manifests, fixtures, reports, and DVC pointers.
-!data/manifests/
-!data/splits/
+# Keep reviewed public fixtures. Private DVC pointers and dataset metadata live
+# in a separate access-controlled metadata repository.
 !tests/fixtures/
 !tests/fixtures/public/
 !tests/fixtures/public/**
