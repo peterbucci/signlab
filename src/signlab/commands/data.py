@@ -378,6 +378,160 @@ def validate_extraction_command(
     )
 
 
+def _echo_landmark_quality_summary(
+    *,
+    status: str,
+    manifest_sha256: str,
+    policy_sha256: str,
+    extraction_manifest_sha256: str,
+    raw_dataset_manifest_sha256: str,
+    sequence_count: int,
+    pass_count: int,
+    warning_count: int,
+    quarantine_count: int,
+    reject_count: int,
+    dataset_status: str,
+    integrity: str,
+) -> None:
+    """Emit only path-free, aggregate landmark-quality evidence."""
+
+    typer.echo(f"Landmark quality: {status.replace('_', ' ')}.")
+    typer.echo(f"Quality manifest SHA-256: {manifest_sha256}")
+    typer.echo(f"Quality policy SHA-256: {policy_sha256}")
+    typer.echo(f"Extraction manifest SHA-256: {extraction_manifest_sha256}")
+    typer.echo(f"Raw dataset manifest SHA-256: {raw_dataset_manifest_sha256}")
+    typer.echo(f"Assessed sequences: {sequence_count}")
+    typer.echo(
+        "Quality dispositions: "
+        f"{pass_count} pass, "
+        f"{warning_count} warning, "
+        f"{quarantine_count} quarantine, "
+        f"{reject_count} reject."
+    )
+    typer.echo(f"Dataset quality status: {dataset_status.replace('_', ' ')}")
+    typer.echo(f"Quality report recomputation: {integrity.replace('_', ' ')}")
+
+
+@app.command("assess-landmark-quality")
+def assess_landmark_quality_command(
+    extraction_manifest: Annotated[
+        Path,
+        typer.Argument(help="Landmark-extraction-manifest/1 JSON document."),
+    ],
+    extraction_root: Annotated[
+        Path,
+        typer.Option("--extraction-root", help="Explicit validated landmark bundle root."),
+    ],
+    raw_manifest: Annotated[
+        Path,
+        typer.Option("--raw-manifest", help="Exact raw-dataset-manifest/1 JSON document."),
+    ],
+    raw_bundle_root: Annotated[
+        Path,
+        typer.Option("--raw-bundle-root", help="Explicit validated raw bundle root."),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New or byte-identical quality report bundle directory."),
+    ],
+) -> None:
+    """Assess an eligible synthetic landmark bundle with the packaged policy."""
+
+    from signlab.quality.batch import assess_landmark_quality
+    from signlab.quality.resources import load_packaged_default_quality_policy
+
+    try:
+        result = assess_landmark_quality(
+            extraction_manifest.read_bytes(),
+            extraction_root=extraction_root,
+            raw_manifest=raw_manifest.read_bytes(),
+            raw_bundle_root=raw_bundle_root,
+            policy=load_packaged_default_quality_policy(),
+            destination=output,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Landmark quality assessment failed.", err=True)
+        raise typer.Exit(code=1) from error
+    validation = result.validation
+    _echo_landmark_quality_summary(
+        status=result.status,
+        manifest_sha256=result.manifest.manifest_sha256,
+        policy_sha256=result.manifest.policy_sha256,
+        extraction_manifest_sha256=result.manifest.extraction_manifest_sha256,
+        raw_dataset_manifest_sha256=result.manifest.raw_dataset_manifest_sha256,
+        sequence_count=validation.sequence_count,
+        pass_count=validation.pass_count,
+        warning_count=validation.warning_count,
+        quarantine_count=validation.quarantine_count,
+        reject_count=validation.reject_count,
+        dataset_status=result.manifest.dataset_report.status,
+        integrity=validation.report_recomputation,
+    )
+
+
+@app.command("validate-landmark-quality")
+def validate_landmark_quality_command(
+    quality_manifest: Annotated[
+        Path,
+        typer.Argument(help="Landmark-quality-manifest/1 JSON document."),
+    ],
+    workspace_root: Annotated[
+        Path,
+        typer.Option("--workspace-root", help="Explicit quality report bundle root."),
+    ],
+    extraction_manifest: Annotated[
+        Path,
+        typer.Option(
+            "--extraction-manifest",
+            help="Exact landmark-extraction-manifest/1 JSON document.",
+        ),
+    ],
+    extraction_root: Annotated[
+        Path,
+        typer.Option("--extraction-root", help="Explicit validated landmark bundle root."),
+    ],
+    raw_manifest: Annotated[
+        Path,
+        typer.Option("--raw-manifest", help="Exact raw-dataset-manifest/1 JSON document."),
+    ],
+    raw_bundle_root: Annotated[
+        Path,
+        typer.Option("--raw-bundle-root", help="Explicit validated raw bundle root."),
+    ],
+) -> None:
+    """Verify quality source bindings, inventory, and every recomputed report."""
+
+    from signlab.quality.batch import validate_landmark_quality_bundle
+
+    try:
+        result = validate_landmark_quality_bundle(
+            quality_manifest.read_bytes(),
+            workspace_root,
+            extraction_manifest=extraction_manifest.read_bytes(),
+            extraction_root=extraction_root,
+            raw_manifest=raw_manifest.read_bytes(),
+            raw_bundle_root=raw_bundle_root,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Landmark quality validation failed.", err=True)
+        raise typer.Exit(code=1) from error
+    validation = result.validation
+    _echo_landmark_quality_summary(
+        status="verified",
+        manifest_sha256=result.manifest.manifest_sha256,
+        policy_sha256=result.manifest.policy_sha256,
+        extraction_manifest_sha256=result.manifest.extraction_manifest_sha256,
+        raw_dataset_manifest_sha256=result.manifest.raw_dataset_manifest_sha256,
+        sequence_count=validation.sequence_count,
+        pass_count=validation.pass_count,
+        warning_count=validation.warning_count,
+        quarantine_count=validation.quarantine_count,
+        reject_count=validation.reject_count,
+        dataset_status=result.manifest.dataset_report.status,
+        integrity=validation.report_recomputation,
+    )
+
+
 @app.command("configure-private-remote")
 def configure_private_remote_command() -> None:
     """Configure a credential-free private S3 DVC remote in ignored local state."""
@@ -462,20 +616,22 @@ def run_reproduction_stage_command(
 
 @app.command("validate-resources")
 def validate_dataset_resources() -> None:
-    """Validate packaged dataset, ingest, and extraction resources."""
+    """Validate packaged dataset, ingest, extraction, and quality resources."""
 
     from signlab.datasets.ingest_resources import validate_packaged_ingest_resources
     from signlab.datasets.resources import validate_packaged_dataset_resources
     from signlab.extraction.resources import validate_packaged_extraction_resources
+    from signlab.quality.resources import validate_packaged_quality_resources
 
     try:
         validate_packaged_dataset_resources()
         validate_packaged_ingest_resources()
         validate_packaged_extraction_resources()
+        validate_packaged_quality_resources()
     except (OSError, TypeError, ValueError) as error:
         typer.echo("Packaged dataset resource validation failed.", err=True)
         raise typer.Exit(code=1) from error
-    typer.echo("Packaged dataset, ingest, and extraction resources are valid.")
+    typer.echo("Packaged dataset, ingest, extraction, and quality resources are valid.")
 
 
 @app.command("write-example-dataset")

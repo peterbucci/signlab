@@ -84,12 +84,17 @@ semantic frames-table digest and an exact Parquet-byte digest answer different
 reproducibility questions, and the extraction manifest binds both to raw data,
 configuration, model assets, and derived-artifact lineage.
 
-This is a raw diagnostic boundary only. Story #20 decides whether timing, absence,
-or landmark patterns are usable; Story #22 defines normalization and portable
-features. Private participant extraction additionally requires authenticated
-authorization for the consent scope's `derived_features` field and runs in a
-network-isolated environment after task assets have been acquired. Public extraction
-fixtures are synthetic and do not relax that gate.
+This is a raw diagnostic boundary only. The [landmark-quality boundary](landmark-quality.md)
+then recomputes elapsed-time timing and resampling evidence plus gap, pose,
+confidence, discontinuity, and suspected-swap findings from those exact immutable
+rows. It publishes only a canonical
+report manifest: raw Parquet is never rewritten, short-gap interpolation remains a
+declared plan rather than a feature tensor, and no sample or split identity is created.
+Story #22 defines normalization and portable features. Private participant extraction
+additionally requires authenticated authorization for the consent scope's
+`derived_features` field and runs in a network-isolated environment after task assets
+have been acquired. Public extraction and quality fixtures are synthetic and do not
+relax that gate.
 
 The sample-bearing [dataset manifest](dataset-manifests.md) includes stable
 identifiers for clips, participants, sessions, source recordings, devices, camera

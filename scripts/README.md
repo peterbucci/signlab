@@ -12,4 +12,6 @@ corresponding source changes, then review and commit the deterministic output.
 Dataset table JSON Schemas, examples, and Arrow-schema snapshots come from
 `generate_dataset_resources.py`; it deliberately does not commit Parquet bytes.
 Capture identifier, collection-sidecar, and raw dataset handoff schemas come from
-`generate_ingest_resources.py`.
+`generate_ingest_resources.py`. Version-pinned extraction resources come from
+`generate_extraction_resources.py`; landmark-quality policy and report schemas come
+from `generate_quality_resources.py`.

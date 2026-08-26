@@ -1,0 +1,94 @@
+{
+  "expected_hand_cardinality_rule": "recording_handedness_unknown_means_one",
+  "extrapolation_allowed": false,
+  "handedness_confidence_diagnostic_ppm": 800000,
+  "interpolation_method": "linear_coordinates_only",
+  "max_interpolated_missing_frames": 2,
+  "max_interpolation_bridge_us": 100000,
+  "max_palm_wrist_speed_units_per_second": 12,
+  "policy_id": "landmark_quality_pilot",
+  "pose_presence_diagnostic_ppm": 500000,
+  "pose_visibility_diagnostic_ppm": 500000,
+  "resampling_rule": "nominal_elapsed_time_append_final/1",
+  "schema_version": "landmark-quality-policy/1",
+  "suspected_swap_cost_margin_ppm": 10000,
+  "target_rate_denominator": 1,
+  "target_rate_numerator": 30,
+  "threshold_rules": [
+    {
+      "direction": "lower_is_worse",
+      "metric": "expected_hand_coverage_ppm",
+      "quarantine": 800000,
+      "reject": 500000,
+      "rule_id": "expected_hand_coverage_ppm",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 950000
+    },
+    {
+      "direction": "higher_is_worse",
+      "metric": "invalid_frame_fraction_ppm",
+      "quarantine": 50000,
+      "reject": 200000,
+      "rule_id": "invalid_frame_fraction_ppm",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 10000
+    },
+    {
+      "direction": "higher_is_worse",
+      "metric": "longest_unfilled_internal_hand_gap_us",
+      "quarantine": 500000,
+      "reject": null,
+      "rule_id": "longest_unfilled_internal_hand_gap_us",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 100000
+    },
+    {
+      "direction": "higher_is_worse",
+      "metric": "low_handedness_confidence_fraction_ppm",
+      "quarantine": 300000,
+      "reject": null,
+      "rule_id": "low_handedness_confidence_fraction_ppm",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 100000
+    },
+    {
+      "direction": "lower_is_worse",
+      "metric": "minimum_pose_anchor_coverage_ppm",
+      "quarantine": 700000,
+      "reject": null,
+      "rule_id": "minimum_pose_anchor_coverage_ppm",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 900000
+    },
+    {
+      "direction": "higher_is_worse",
+      "metric": "suspected_hand_swap_count",
+      "quarantine": 2,
+      "reject": null,
+      "rule_id": "suspected_hand_swap_count",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 0
+    },
+    {
+      "direction": "higher_is_worse",
+      "metric": "temporal_discontinuity_count",
+      "quarantine": 2,
+      "reject": null,
+      "rule_id": "temporal_discontinuity_count",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 0
+    },
+    {
+      "direction": "higher_is_worse",
+      "metric": "timestamp_discontinuity_count",
+      "quarantine": 2,
+      "reject": null,
+      "rule_id": "timestamp_discontinuity_count",
+      "schema_version": "quality-threshold-rule/1",
+      "warning": 0
+    }
+  ],
+  "timestamp_discontinuity_absolute_us": 100000,
+  "timestamp_discontinuity_median_multiplier_ppm": 3000000,
+  "version": "1.0.0"
+}
