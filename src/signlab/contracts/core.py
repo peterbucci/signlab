@@ -134,7 +134,11 @@ def _validate_utc_timestamp(value: str) -> str:
         raise ValueError(
             "timestamp must be a real UTC second in YYYY-MM-DDTHH:MM:SSZ form"
         ) from error
-    if parsed.strftime("%Y-%m-%dT%H:%M:%SZ") != value:
+    canonical = (
+        f"{parsed.year:04d}-{parsed.month:02d}-{parsed.day:02d}T"
+        f"{parsed.hour:02d}:{parsed.minute:02d}:{parsed.second:02d}Z"
+    )
+    if canonical != value:
         raise ValueError("timestamp must use canonical UTC form")
     return value
 
