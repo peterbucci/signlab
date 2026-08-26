@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "counts": {
+      "additionalProperties": false,
+      "properties": {
+        "annotated_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "annotations": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "detections": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "orphan_segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "promoted_models": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "quarantine_objects": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "referenced_segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sessions": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "unannotated_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "attempts",
+        "annotations",
+        "annotated_attempts",
+        "unannotated_attempts",
+        "sessions",
+        "detections",
+        "segments",
+        "referenced_segments",
+        "orphan_segments",
+        "promoted_models",
+        "quarantine_objects"
+      ],
+      "title": "Private quarantine counts",
+      "type": "object"
+    },
+    "kind": {
+      "const": "signlab.legacy-quarantine"
+    },
+    "objects": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "roles": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "storage_key": {
+            "pattern": "^objects/sha256/[0-9a-f]{64}\\.(json|keras|npz)$",
+            "type": "string"
+          },
+          "uri": {
+            "pattern": "^quarantine://sha256/[0-9a-f]{64}\\.(json|keras|npz)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri",
+          "storage_key",
+          "bytes",
+          "sha256",
+          "roles"
+        ],
+        "title": "Content-addressed quarantine object",
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "policy": {
+      "additionalProperties": false,
+      "properties": {
+        "contains_private_artifacts": {
+          "const": true
+        },
+        "data_role": {
+          "const": "development-only"
+        },
+        "eligible_for_locked_test": {
+          "const": false
+        },
+        "identifiers": {
+          "const": "pseudonymized-ordinal"
+        },
+        "publishable": {
+          "const": false
+        },
+        "timestamps": {
+          "const": "live-records-relative-offsets-only"
+        }
+      },
+      "required": [
+        "data_role",
+        "eligible_for_locked_test",
+        "contains_private_artifacts",
+        "publishable",
+        "identifiers",
+        "timestamps"
+      ],
+      "title": "Private quarantine policy",
+      "type": "object"
+    },
+    "record_components": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "path": {
+            "pattern": "^[a-z0-9][a-z0-9_.-]*(/[a-z0-9_.-]+)*$",
+            "type": "string"
+          },
+          "records": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "bytes",
+          "sha256"
+        ],
+        "title": "Portable component",
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "policy",
+    "counts",
+    "record_components",
+    "objects"
+  ],
+  "title": "Private legacy quarantine manifest",
+  "type": "object"
+}

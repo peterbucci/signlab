@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "components": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "path": {
+            "pattern": "^[a-z0-9][a-z0-9_.-]*(/[a-z0-9_.-]+)*$",
+            "type": "string"
+          },
+          "records": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "bytes",
+          "sha256"
+        ],
+        "title": "Portable component",
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "counts": {
+      "additionalProperties": false,
+      "properties": {
+        "annotated_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "annotations": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "detections": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "orphan_segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "promoted_models": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "quarantine_objects": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "referenced_segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sessions": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "unannotated_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "attempts",
+        "annotations",
+        "annotated_attempts",
+        "unannotated_attempts",
+        "sessions",
+        "detections",
+        "segments",
+        "referenced_segments",
+        "orphan_segments",
+        "promoted_models",
+        "quarantine_objects"
+      ],
+      "title": "Private quarantine counts",
+      "type": "object"
+    },
+    "kind": {
+      "const": "signlab.legacy-quarantine-receipt"
+    },
+    "policy": {
+      "additionalProperties": false,
+      "properties": {
+        "contains_individual_object_hashes": {
+          "const": false
+        },
+        "data_role": {
+          "const": "development-only"
+        },
+        "durability": {
+          "const": "local-only-pending-private-remote"
+        },
+        "eligible_for_locked_test": {
+          "const": false
+        },
+        "publishable": {
+          "const": false
+        }
+      },
+      "required": [
+        "data_role",
+        "eligible_for_locked_test",
+        "publishable",
+        "durability",
+        "contains_individual_object_hashes"
+      ],
+      "title": "Public quarantine-receipt policy",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "policy",
+    "counts",
+    "components"
+  ],
+  "title": "Private quarantine receipt",
+  "type": "object"
+}

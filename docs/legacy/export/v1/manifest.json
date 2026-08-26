@@ -1,0 +1,131 @@
+{
+  "components": [
+    {
+      "bytes": 3827,
+      "path": "preprocessing-plans.json",
+      "records": 3,
+      "sha256": "184aeb6477004204ddbd44e3870034a929fb1880a18c9e731114ea8bb7b4ea5d"
+    },
+    {
+      "bytes": 4790,
+      "path": "promoted-artifacts.json",
+      "records": 4,
+      "sha256": "b034352d8805f8703df5d0cebcae71882a1526dd4a8452879b60eb5bf7fd3ae0"
+    },
+    {
+      "bytes": 1492,
+      "path": "quarantine-receipt.json",
+      "sha256": "59867cda2be825bf237150a35221a688cb9ed358c696604f545de800bea2a7f4"
+    },
+    {
+      "bytes": 437984,
+      "path": "runs/runs-000.json",
+      "records": 100,
+      "sha256": "04c581c88b36345842447b1c24fb95ef03c2b4141c4e9ff13fc755b4d7b7f03a"
+    },
+    {
+      "bytes": 534099,
+      "path": "runs/runs-001.json",
+      "records": 100,
+      "sha256": "f35426618fd07ea252df4b024c9812d3e8747797ada67da4305cd8a161b2f39e"
+    },
+    {
+      "bytes": 542597,
+      "path": "runs/runs-002.json",
+      "records": 100,
+      "sha256": "74461df02ec6d0dc1694dbe76777ada31b6ba62558f1d54bf975918e3b7e191c"
+    },
+    {
+      "bytes": 508328,
+      "path": "runs/runs-003.json",
+      "records": 100,
+      "sha256": "34fe9d9a3dd7cad85a5f92964458f440b2464c11f5273fbe41cceb7e0e7c6ad0"
+    },
+    {
+      "bytes": 329438,
+      "path": "runs/runs-004.json",
+      "records": 64,
+      "sha256": "c2c6ff2c6da385108f3c8d93ad5fa821cefe5cf163fc4ab132b824bb4f259d7a"
+    },
+    {
+      "bytes": 1085,
+      "path": "schemas/annotation.schema.json",
+      "sha256": "578376d66bc4e3c02a223242a07e69750ecb6a669fe695f1844cc3a0b53f7df1"
+    },
+    {
+      "bytes": 1377,
+      "path": "schemas/detection.schema.json",
+      "sha256": "b49811f2542f97705483d970dd7b1ec08687e5c9765244ae15e40eaf842db123"
+    },
+    {
+      "bytes": 2047,
+      "path": "schemas/live-attempt.schema.json",
+      "sha256": "25272bae9a41c9720234ee55e79a746ae57432a47a71165386437606403b8487"
+    },
+    {
+      "bytes": 1977,
+      "path": "schemas/preprocessing-plans.schema.json",
+      "sha256": "e176057e2892387ce5b0a745b368f5fd75de081d89dc2649faebcb830e5c8617"
+    },
+    {
+      "bytes": 3843,
+      "path": "schemas/promoted-artifacts.schema.json",
+      "sha256": "541c9dd65902a172951aaaa0b2d7692ab80a9111081a8821caa32881af818320"
+    },
+    {
+      "bytes": 4202,
+      "path": "schemas/public-manifest.schema.json",
+      "sha256": "1706ab34123067973c229830ebdaa28b8d648a6a5afa5d85de1700612cbce52e"
+    },
+    {
+      "bytes": 4467,
+      "path": "schemas/quarantine-manifest.schema.json",
+      "sha256": "591974703d263728d9a2f42484651e3a8340c90098e06e7318e1a83e60bb94a4"
+    },
+    {
+      "bytes": 3298,
+      "path": "schemas/quarantine-receipt.schema.json",
+      "sha256": "e1febf61a2b6aebf9592d23fc863e87961299d26efee007f8ed8ab4000c3c7c8"
+    },
+    {
+      "bytes": 18139,
+      "path": "schemas/run-index.schema.json",
+      "sha256": "4d8054707d19bd867c725ed6bd2a61f745ff13f728a71a31f2c3713237bd2690"
+    },
+    {
+      "bytes": 707,
+      "path": "schemas/session.schema.json",
+      "sha256": "3862ba02c6343e68b6c662697fe1cce6bf06390256e0416423121cc84a8ec67a"
+    }
+  ],
+  "counts": {
+    "annotated_attempts": 401,
+    "annotations": 408,
+    "attempts": 532,
+    "detections": 45,
+    "orphan_segments": 4,
+    "preprocessing_plans": 3,
+    "promoted_models": 4,
+    "referenced_segments": 525,
+    "runs": 464,
+    "runs_failed": 6,
+    "runs_running": 1,
+    "runs_succeeded": 457,
+    "segments": 529,
+    "sessions": 5,
+    "unannotated_attempts": 131
+  },
+  "kind": "signlab.legacy-public-export",
+  "policy": {
+    "contains_private_artifacts": false,
+    "data_role": "development-only",
+    "durability": "local-only-pending-private-remote",
+    "eligible_for_locked_test": false
+  },
+  "schema_version": 1,
+  "source": {
+    "audit_sha256": "4e107edbbdc95f280e2e33b15083db57b613cbb7c369417a9960a22b11ab4155",
+    "head_commit": "0e630168727e0d526a1f040ce912db26c1cefc72",
+    "tree_object": "828edda9a38ef5bdd0f0e501265482b49de000be"
+  }
+}

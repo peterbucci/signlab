@@ -1,0 +1,604 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "signlab.legacy-run-index"
+    },
+    "records": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "artifacts": {
+            "additionalProperties": false,
+            "properties": {
+              "configuration": {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "ambiguous",
+                      "missing",
+                      "not-recorded"
+                    ]
+                  },
+                  "registered_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resolved_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "registered_locator",
+                  "resolved_locator",
+                  "availability"
+                ],
+                "title": "Historical artifact locator",
+                "type": "object"
+              },
+              "directory": {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "ambiguous",
+                      "missing",
+                      "not-recorded"
+                    ]
+                  },
+                  "registered_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resolved_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "registered_locator",
+                  "resolved_locator",
+                  "availability"
+                ],
+                "title": "Historical artifact locator",
+                "type": "object"
+              },
+              "history": {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "ambiguous",
+                      "missing",
+                      "not-recorded"
+                    ]
+                  },
+                  "registered_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resolved_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "registered_locator",
+                  "resolved_locator",
+                  "availability"
+                ],
+                "title": "Historical artifact locator",
+                "type": "object"
+              },
+              "label_map": {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "ambiguous",
+                      "missing",
+                      "not-recorded"
+                    ]
+                  },
+                  "registered_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resolved_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "registered_locator",
+                  "resolved_locator",
+                  "availability"
+                ],
+                "title": "Historical artifact locator",
+                "type": "object"
+              },
+              "metrics": {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "ambiguous",
+                      "missing",
+                      "not-recorded"
+                    ]
+                  },
+                  "registered_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resolved_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "registered_locator",
+                  "resolved_locator",
+                  "availability"
+                ],
+                "title": "Historical artifact locator",
+                "type": "object"
+              },
+              "model": {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "ambiguous",
+                      "missing",
+                      "not-recorded"
+                    ]
+                  },
+                  "registered_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resolved_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "registered_locator",
+                  "resolved_locator",
+                  "availability"
+                ],
+                "title": "Historical artifact locator",
+                "type": "object"
+              },
+              "predictions": {
+                "additionalProperties": false,
+                "properties": {
+                  "availability": {
+                    "enum": [
+                      "available",
+                      "ambiguous",
+                      "missing",
+                      "not-recorded"
+                    ]
+                  },
+                  "registered_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "resolved_locator": {
+                    "anyOf": [
+                      {
+                        "maxLength": 4096,
+                        "not": {
+                          "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                        },
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "registered_locator",
+                  "resolved_locator",
+                  "availability"
+                ],
+                "title": "Historical artifact locator",
+                "type": "object"
+              }
+            },
+            "required": [
+              "directory",
+              "model",
+              "label_map",
+              "configuration",
+              "history",
+              "predictions",
+              "metrics"
+            ],
+            "title": "Historical run artifacts",
+            "type": "object"
+          },
+          "configuration": {
+            "additionalProperties": false,
+            "properties": {
+              "batch_size": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "data_locator": {
+                "anyOf": [
+                  {
+                    "maxLength": 4096,
+                    "not": {
+                      "pattern": "(?:^[A-Za-z]:[\\\\/]|^/|^[Ff][Ii][Ll][Ee]:///|^\\\\\\\\)"
+                    },
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "epochs": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "global_settings": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "model_settings": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "sequence_length": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "test_fraction": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "validation_fraction": {
+                "maximum": 1,
+                "minimum": 0,
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "model_settings",
+              "global_settings",
+              "data_locator",
+              "sequence_length",
+              "test_fraction",
+              "validation_fraction",
+              "batch_size",
+              "epochs"
+            ],
+            "title": "Historical run configuration",
+            "type": "object"
+          },
+          "finished_at": {
+            "maxLength": 64,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metrics": {
+            "additionalProperties": false,
+            "properties": {
+              "quick": {
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "samples_test": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "samples_train": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "samples_validation": {
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "test_accuracy": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "test_loss": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "quick",
+              "test_loss",
+              "test_accuracy",
+              "samples_train",
+              "samples_validation",
+              "samples_test"
+            ],
+            "title": "Historical run metrics",
+            "type": "object"
+          },
+          "model_key": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "record_id": {
+            "pattern": "^run-[0-9]{6}$",
+            "type": "string"
+          },
+          "run_name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "source_run_id": {
+            "maxLength": 321,
+            "minLength": 1,
+            "type": "string"
+          },
+          "started_at": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "succeeded",
+              "failed",
+              "running"
+            ]
+          },
+          "validity": {
+            "additionalProperties": false,
+            "properties": {
+              "data_role": {
+                "const": "development-only"
+              },
+              "eligible_for_locked_test": {
+                "const": false
+              },
+              "legacy_error_present": {
+                "type": "boolean"
+              },
+              "legacy_notes_present": {
+                "type": "boolean"
+              },
+              "notes": {
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "data_role",
+              "eligible_for_locked_test",
+              "notes",
+              "legacy_notes_present",
+              "legacy_error_present"
+            ],
+            "title": "Historical run validity",
+            "type": "object"
+          }
+        },
+        "required": [
+          "record_id",
+          "run_name",
+          "source_run_id",
+          "started_at",
+          "finished_at",
+          "status",
+          "model_key",
+          "configuration",
+          "metrics",
+          "artifacts",
+          "validity"
+        ],
+        "title": "Historical run record",
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "shard": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "shard",
+    "records"
+  ],
+  "title": "Legacy run-index shard",
+  "type": "object"
+}

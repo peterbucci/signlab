@@ -1,0 +1,135 @@
+{
+  "artifacts": [
+    {
+      "label_map": {
+        "bytes": 88,
+        "labels": {
+          "0": "hello",
+          "1": "no",
+          "2": "please",
+          "3": "thank you",
+          "4": "yes"
+        },
+        "quarantine_uri": "quarantine://sha256/c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d.json",
+        "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+      },
+      "model": {
+        "bytes": 2428032,
+        "quarantine_uri": "quarantine://sha256/f69c07838a477df0853a6cdb71b1acb9a933e0de1491359da0cae5462584e46c.keras",
+        "sha256": "f69c07838a477df0853a6cdb71b1acb9a933e0de1491359da0cae5462584e46c",
+        "storage_status": "local-quarantine"
+      },
+      "model_key": "causal_gru",
+      "preprocessing_plan": "pos_vel_handscale_smooth_30f",
+      "run_id": "20251222_154233_gru_phase_3_run_001",
+      "validity": {
+        "data_role": "development-only",
+        "eligible_for_locked_test": false,
+        "notes": [
+          "sample-level-split-without-signer-or-session-grouping",
+          "test-split-repeatedly-inspected",
+          "parity-candidate-not-champion"
+        ]
+      }
+    },
+    {
+      "label_map": {
+        "bytes": 88,
+        "labels": {
+          "0": "hello",
+          "1": "no",
+          "2": "please",
+          "3": "thank you",
+          "4": "yes"
+        },
+        "quarantine_uri": "quarantine://sha256/c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d.json",
+        "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+      },
+      "model": {
+        "bytes": 3210098,
+        "quarantine_uri": "quarantine://sha256/b175174c2daa4ccd33bb9fb49120d7399a61aab95c3bdfa378ba40aa57ace7ee.keras",
+        "sha256": "b175174c2daa4ccd33bb9fb49120d7399a61aab95c3bdfa378ba40aa57ace7ee",
+        "storage_status": "local-quarantine"
+      },
+      "model_key": "causal_lstm",
+      "preprocessing_plan": "pos_vel_handscale_smooth_30f",
+      "run_id": "20251222_161016_lstm_phase_c_run_003",
+      "validity": {
+        "data_role": "development-only",
+        "eligible_for_locked_test": false,
+        "notes": [
+          "sample-level-split-without-signer-or-session-grouping",
+          "test-split-repeatedly-inspected",
+          "parity-candidate-not-champion"
+        ]
+      }
+    },
+    {
+      "label_map": {
+        "bytes": 88,
+        "labels": {
+          "0": "hello",
+          "1": "no",
+          "2": "please",
+          "3": "thank you",
+          "4": "yes"
+        },
+        "quarantine_uri": "quarantine://sha256/c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d.json",
+        "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+      },
+      "model": {
+        "bytes": 2458533,
+        "quarantine_uri": "quarantine://sha256/d5e3d15cead7436342c15229e94a6becdfd41b1254f3caa5332cf64ad9cf3f0c.keras",
+        "sha256": "d5e3d15cead7436342c15229e94a6becdfd41b1254f3caa5332cf64ad9cf3f0c",
+        "storage_status": "local-quarantine"
+      },
+      "model_key": "causal_tcn",
+      "preprocessing_plan": "pos_vel_handscale_smooth_30f",
+      "run_id": "20251222_162425_tcn_phase_c_run_003",
+      "validity": {
+        "data_role": "development-only",
+        "eligible_for_locked_test": false,
+        "notes": [
+          "sample-level-split-without-signer-or-session-grouping",
+          "test-split-repeatedly-inspected",
+          "parity-candidate-not-champion"
+        ]
+      }
+    },
+    {
+      "label_map": {
+        "bytes": 88,
+        "labels": {
+          "0": "hello",
+          "1": "no",
+          "2": "please",
+          "3": "thank you",
+          "4": "yes"
+        },
+        "quarantine_uri": "quarantine://sha256/c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d.json",
+        "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+      },
+      "model": {
+        "bytes": 467230,
+        "quarantine_uri": "quarantine://sha256/89647b516068950818bffabb9c269f31bef924bdcce0230ea509af9fea17559e.keras",
+        "sha256": "89647b516068950818bffabb9c269f31bef924bdcce0230ea509af9fea17559e",
+        "storage_status": "local-quarantine"
+      },
+      "model_key": "mamba",
+      "preprocessing_plan": "pos_vel_handscale_smooth_30f",
+      "run_id": "20251222_163528_mamba_phase_c_run_001",
+      "validity": {
+        "data_role": "development-only",
+        "eligible_for_locked_test": false,
+        "notes": [
+          "sample-level-split-without-signer-or-session-grouping",
+          "test-split-repeatedly-inspected",
+          "parity-candidate-not-champion",
+          "misleading-legacy-mamba-name"
+        ]
+      }
+    }
+  ],
+  "kind": "signlab.legacy-promoted-artifacts",
+  "schema_version": 1
+}

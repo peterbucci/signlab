@@ -125,10 +125,10 @@ was therefore repeatedly inspected and cannot serve as a locked final test set.
 | Asset | Decision | Rationale |
 | --- | --- | --- |
 | Exact Git commit | Preserve by hash | Historical code and behavior reference |
-| Four live-imported model files | Preserve hashes; export under #8 | Useful parity and regression candidates, not champions |
-| Run summaries, predictions, configs, label maps | Sanitize and index under #8 | Reproduces historical integer outcomes and failure cases |
+| Four live-imported model files | Preserved in the #8 quarantine with public hashes | Useful parity and regression candidates, not champions |
+| Run summaries, predictions, configs, label maps | Sanitized and indexed by #8 | Reproduces historical integer outcomes and failure cases |
 | Preprocessing plans | Preserve as historical evidence | Inputs for parity tests; not yet portable contracts |
-| Feedback and live attempts | Quarantine and sanitize under #8 | Previously inspected development data with privacy risk |
+| Feedback and live attempts | Quarantined and sanitized by #8 | Previously inspected development data with privacy risk |
 | Raw videos | Do not migrate until consent review | Unknown redistribution/training scope |
 | Derived landmarks | Re-create from approved media | Extractor/version provenance is incomplete |
 | Sweep checkpoints and old result trees | Retire after compact indexing | High storage cost and invalid selection protocol |
@@ -160,6 +160,10 @@ evidence only; it must never be described as a durable backup.
 These hashes identify the source material for story #8. They do not grant consent,
 make the old evaluation valid, or authorize copying private content. Any exported
 record must be schema-validated, sanitized, and marked as development evidence.
+The resulting two-layer format and standalone validation commands are documented in
+[`docs/legacy-export.md`](legacy-export.md). The committed layer contains only
+portable manifests, schemas, aggregate counts, and hashes; participant-derived bytes
+remain in the ignored, local-only quarantine.
 
 ## Baseline conclusion
 

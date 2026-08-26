@@ -19,7 +19,10 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Typing :: Typed",
 ]
-dependencies = ["typer>=0.27.1,<0.28"]
+dependencies = [
+  "jsonschema>=4.26,<5",
+  "typer>=0.27.1,<0.28",
+]
 
 [project.urls]
 Homepage = "https://github.com/peterbucci/signlab"
@@ -38,6 +41,7 @@ dev = [
   "pytest>=9.1.1,<10",
   "pytest-cov>=7,<8",
   "ruff==0.16.3",
+  "types-jsonschema==4.26.0.20260518",
 ]
 
 [tool.hatch.version]
