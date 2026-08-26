@@ -27,13 +27,23 @@ def test_top_level_help_exposes_thin_command_groups(runner: CliRunner) -> None:
         "doctor",
         "taxonomy",
         "governance",
+        "contracts",
     ):
         assert command in result.output
 
 
 @pytest.mark.parametrize(
     "command",
-    ["data", "train", "evaluate", "export", "doctor", "taxonomy", "governance"],
+    [
+        "data",
+        "train",
+        "evaluate",
+        "export",
+        "doctor",
+        "taxonomy",
+        "governance",
+        "contracts",
+    ],
 )
 def test_command_group_help_has_no_pipeline_prerequisites(
     runner: CliRunner,
@@ -82,6 +92,13 @@ def test_invalid_command_has_a_stable_usage_error(runner: CliRunner) -> None:
             "extra",
         ],
         ["governance", "not-a-command-private-sentinel"],
+        [
+            "contracts",
+            "validate",
+            f"{chr(67)}:{chr(92)}private{chr(92)}participant-name.json",
+            "extra-private-token",
+        ],
+        ["contracts", "not-a-command-private-sentinel"],
     ],
 )
 def test_usage_errors_do_not_echo_untrusted_tokens(

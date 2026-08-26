@@ -76,9 +76,17 @@ After a governance-contract, policy, or synthetic lineage-scenario change, run:
 uv run python scripts/generate_governance_resources.py
 ```
 
-Both generators are deterministic. The test suite and `signlab governance
-evidence-check` fail when generated resources drift from the Pydantic source of
-truth or the committed synthetic dry-run evidence.
+After a pipeline-contract or coherent synthetic contract-chain change, run:
+
+```shell
+uv run python scripts/generate_contract_resources.py
+uv run signlab contracts validate-resources
+```
+
+All generators are deterministic. The test suite, `signlab contracts
+validate-resources`, and `signlab governance evidence-check` fail when generated
+resources drift from the Pydantic source of truth, the frozen compatibility corpus,
+or the committed synthetic dry-run evidence.
 
 Generated governance JSON Schemas enforce structure and the semantic constraints
 that JSON Schema can express. They do not replace application validation for
@@ -89,6 +97,11 @@ Tests compare every committed schema byte-for-byte at the JSON-document level an
 verify that the wheel contains both schemas and immutable taxonomy instances. A
 semantic change to a published taxonomy requires a new versioned artifact and a new
 golden digest, not an in-place edit.
+
+The six pipeline-contract examples form a coherent synthetic dataset-to-model
+chain. Their RFC 8785 hashes are published compatibility goldens. An incompatible
+change requires a new instance schema version, schema `$id`, example, and explicit
+migration; never rewrite a retained v1 resource or silently change its digest.
 
 Never place completed consent forms, identity-vault exports, raw recordings, or
 participant-derived fixtures in this repository. Governance examples and evidence

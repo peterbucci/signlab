@@ -1,0 +1,554 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab Pydantic and application compatibility validation remains authoritative for canonical digests, dataset membership and leakage closure, preprocessing schema chains, cross-contract reference reconciliation, run provenance, and model-output binding.",
+  "$defs": {
+    "ArtifactRefV1": {
+      "additionalProperties": false,
+      "description": "Exact bytes plus a portable location; the location is never the identity.",
+      "properties": {
+        "artifact_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "media_type": {
+          "maxLength": 127,
+          "minLength": 3,
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$",
+          "title": "Media Type",
+          "type": "string"
+        },
+        "role": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "artifact-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "role",
+        "media_type",
+        "sha256",
+        "size_bytes",
+        "locator"
+      ],
+      "title": "ArtifactRefV1",
+      "type": "object"
+    },
+    "ArtifactUriLocatorV1": {
+      "additionalProperties": false,
+      "description": "A storage-independent logical URI resolved by a future artifact adapter.",
+      "properties": {
+        "kind": {
+          "const": "artifact_uri",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 1024,
+          "minLength": 12,
+          "pattern": "^signlab://[a-z][a-z0-9-]{0,63}(/[a-z][a-z0-9._-]{0,127})+$",
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "uri"
+      ],
+      "title": "ArtifactUriLocatorV1",
+      "type": "object"
+    },
+    "ContractRefV1": {
+      "additionalProperties": false,
+      "description": "Digest-bound identity of another versioned SignLab contract.",
+      "properties": {
+        "canonicalization": {
+          "const": "rfc8785/1",
+          "title": "Canonicalization",
+          "type": "string"
+        },
+        "contract_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "contract_schema_version": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9-]*/[1-9][0-9]*$",
+          "title": "Contract Schema Version",
+          "type": "string"
+        },
+        "contract_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "dataset",
+            "split",
+            "preprocessing",
+            "resolved_configuration",
+            "run",
+            "model"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "schema_version": {
+          "const": "contract-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "contract_schema_version",
+        "contract_id",
+        "contract_version",
+        "canonicalization",
+        "sha256",
+        "locator"
+      ],
+      "title": "ContractRefV1",
+      "type": "object"
+    },
+    "FailureRecordV1": {
+      "additionalProperties": false,
+      "description": "Structured failure metadata that deliberately excludes messages and tracebacks.",
+      "properties": {
+        "code": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Code",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "stage": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "stage",
+        "retryable"
+      ],
+      "title": "FailureRecordV1",
+      "type": "object"
+    },
+    "MetricRecordV1": {
+      "additionalProperties": false,
+      "description": "One finite, registered aggregate without per-participant data.",
+      "properties": {
+        "name": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "partition": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ],
+          "title": "Partition",
+          "type": "string"
+        },
+        "unit": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "partition",
+        "value",
+        "unit"
+      ],
+      "title": "MetricRecordV1",
+      "type": "object"
+    },
+    "RuntimeIdentityV1": {
+      "additionalProperties": false,
+      "description": "Non-identifying runtime facts that affect reproducibility.",
+      "properties": {
+        "accelerator": {
+          "enum": [
+            "cpu",
+            "cuda",
+            "directml",
+            "mps",
+            "other"
+          ],
+          "title": "Accelerator",
+          "type": "string"
+        },
+        "deterministic_algorithms": {
+          "const": true,
+          "title": "Deterministic Algorithms",
+          "type": "boolean"
+        },
+        "os_family": {
+          "enum": [
+            "linux",
+            "windows",
+            "macos"
+          ],
+          "title": "Os Family",
+          "type": "string"
+        },
+        "python_version": {
+          "pattern": "^3\\.12\\.[0-9]+$",
+          "title": "Python Version",
+          "type": "string"
+        },
+        "signlab_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Signlab Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "signlab_version",
+        "python_version",
+        "os_family",
+        "accelerator",
+        "deterministic_algorithms"
+      ],
+      "title": "RuntimeIdentityV1",
+      "type": "object"
+    },
+    "SourceIdentityV1": {
+      "additionalProperties": false,
+      "description": "Sanitized, immutable code identity required for reproducible runs.",
+      "properties": {
+        "git_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Git Commit",
+          "type": "string"
+        },
+        "lockfile_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Lockfile Sha256",
+          "type": "string"
+        },
+        "repository": {
+          "const": "https://github.com/peterbucci/signlab",
+          "title": "Repository",
+          "type": "string"
+        },
+        "working_tree_clean": {
+          "const": true,
+          "title": "Working Tree Clean",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "repository",
+        "git_commit",
+        "lockfile_sha256",
+        "working_tree_clean"
+      ],
+      "title": "SourceIdentityV1",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/run-record-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "properties": {
+        "resolved_configuration": {
+          "properties": {
+            "kind": {
+              "const": "resolved_configuration"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "dataset": {
+          "properties": {
+            "kind": {
+              "const": "dataset"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "split": {
+          "properties": {
+            "kind": {
+              "const": "split"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "preprocessing": {
+          "properties": {
+            "kind": {
+              "const": "preprocessing"
+            }
+          }
+        }
+      }
+    },
+    {
+      "else": {
+        "properties": {
+          "failure": {
+            "not": {
+              "type": "null"
+            }
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "status": {
+            "const": "succeeded"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "failure": {
+            "type": "null"
+          },
+          "outputs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "description": "Immutable terminal experiment record with complete upstream provenance.",
+  "properties": {
+    "dataset": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "dataset_data_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Dataset Data Sha256",
+      "type": "string"
+    },
+    "failure": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FailureRecordV1"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "finished_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Finished At",
+      "type": "string"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/MetricRecordV1"
+      },
+      "title": "Metrics",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/ArtifactRefV1"
+      },
+      "title": "Outputs",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "preprocessing": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "resolved_configuration": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "run_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "runtime": {
+      "$ref": "#/$defs/RuntimeIdentityV1"
+    },
+    "schema_version": {
+      "const": "run-record/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceIdentityV1"
+    },
+    "split": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "started_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Started At",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "succeeded",
+        "failed",
+        "cancelled"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "run_id",
+    "version",
+    "status",
+    "started_at",
+    "finished_at",
+    "source",
+    "runtime",
+    "resolved_configuration",
+    "dataset",
+    "dataset_data_sha256",
+    "split",
+    "preprocessing",
+    "metrics",
+    "outputs",
+    "failure"
+  ],
+  "title": "RunRecordV1",
+  "type": "object"
+}

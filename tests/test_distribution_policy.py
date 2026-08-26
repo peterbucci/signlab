@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import subprocess
 import tarfile
 import zipfile
 from collections.abc import Iterable
@@ -9,6 +10,7 @@ from pathlib import Path
 import pytest
 from scripts import verify_distribution as distribution_verifier
 from scripts.verify_distribution import (
+    EXPECTED_CONTRACT_RESOURCES,
     EXPECTED_GOVERNANCE_RESOURCES,
     EXPECTED_TAXONOMY_SCHEMAS,
     _inspect_sdist,
@@ -18,14 +20,23 @@ from scripts.verify_distribution import (
 )
 
 
-def _write_sdist(path: Path, governance_resources: Iterable[str]) -> None:
+def _write_sdist(
+    path: Path,
+    governance_resources: Iterable[str],
+    contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
+) -> None:
     archive_root = path.name.removesuffix(".tar.gz")
     member_names = [
         f"{archive_root}/src/signlab/py.typed",
+        f"{archive_root}/src/signlab/resources/contracts/__init__.py",
         f"{archive_root}/src/signlab/resources/governance/__init__.py",
         *(
             f"{archive_root}/src/signlab/resources/governance/{resource}"
             for resource in governance_resources
+        ),
+        *(
+            f"{archive_root}/src/signlab/resources/contracts/{resource}"
+            for resource in contract_resources
         ),
     ]
     with tarfile.open(path, mode="w:gz") as archive:
@@ -36,14 +47,20 @@ def _write_sdist(path: Path, governance_resources: Iterable[str]) -> None:
             archive.addfile(member, io.BytesIO(payload))
 
 
-def _write_wheel(path: Path, governance_resources: Iterable[str]) -> None:
+def _write_wheel(
+    path: Path,
+    governance_resources: Iterable[str],
+    contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
+) -> None:
     member_names = [
         "signlab/py.typed",
         "signlab/commands/__init__.py",
+        "signlab/resources/contracts/__init__.py",
         "signlab/resources/governance/__init__.py",
         "signlab/resources/taxonomies/signlab-five-1.0.0.json",
         *(f"signlab/resources/schemas/{name}" for name in EXPECTED_TAXONOMY_SCHEMAS),
         *(f"signlab/resources/governance/{name}" for name in governance_resources),
+        *(f"signlab/resources/contracts/{name}" for name in contract_resources),
         "signlab-0.1.0.dist-info/METADATA",
         "signlab-0.1.0.dist-info/entry_points.txt",
     ]
@@ -128,6 +145,84 @@ def test_wheel_rejects_duplicate_governance_resources(tmp_path: Path) -> None:
     assert _inspect_wheel(wheel) == (
         "wheel does not contain the exact participant-governance resource set",
     )
+
+
+@pytest.mark.parametrize("archive_kind", ["wheel", "sdist"])
+@pytest.mark.parametrize("mutation", ["missing", "extra", "duplicate"])
+def test_archives_require_the_exact_nonduplicate_contract_resource_set(
+    tmp_path: Path,
+    archive_kind: str,
+    mutation: str,
+) -> None:
+    resources = sorted(EXPECTED_CONTRACT_RESOURCES)
+    if mutation == "missing":
+        resources.remove("schemas/run-record-1.schema.json")
+    elif mutation == "extra":
+        resources.append("schemas/unexpected-1.schema.json")
+    else:
+        resources.append("schemas/run-record-1.schema.json")
+
+    if archive_kind == "wheel":
+        archive = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+        if mutation == "duplicate":
+            with pytest.warns(UserWarning, match="Duplicate name"):
+                _write_wheel(archive, EXPECTED_GOVERNANCE_RESOURCES, resources)
+        else:
+            _write_wheel(archive, EXPECTED_GOVERNANCE_RESOURCES, resources)
+        errors = _inspect_wheel(archive)
+        expected_error = "wheel does not contain the exact pipeline-contract resource set"
+    else:
+        archive = tmp_path / "signlab-0.1.0.tar.gz"
+        _write_sdist(archive, EXPECTED_GOVERNANCE_RESOURCES, resources)
+        errors = _inspect_sdist(archive)
+        expected_error = (
+            "source distribution does not contain the exact pipeline-contract resource set"
+        )
+
+    assert errors == (expected_error,)
+
+
+def test_archives_accept_the_exact_contract_resource_set(tmp_path: Path) -> None:
+    wheel = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+    sdist = tmp_path / "signlab-0.1.0.tar.gz"
+    _write_wheel(wheel, EXPECTED_GOVERNANCE_RESOURCES)
+    _write_sdist(sdist, EXPECTED_GOVERNANCE_RESOURCES)
+
+    assert _inspect_wheel(wheel) == ()
+    assert _inspect_sdist(sdist) == ()
+
+
+def test_isolated_smoke_tests_remove_pythonpath_and_use_temporary_cwd(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    distribution = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+    calls: list[tuple[tuple[str, ...], dict[str, str], Path | None]] = []
+
+    def fake_run(
+        command: Iterable[str],
+        *,
+        environment: dict[str, str],
+        cwd: Path | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        normalized_command = tuple(command)
+        calls.append((normalized_command, dict(environment), cwd))
+        stdout = "0.1.0\n" if "--version" in normalized_command else ""
+        return subprocess.CompletedProcess(normalized_command, 0, stdout, "")
+
+    monkeypatch.setenv("PYTHONPATH", str(tmp_path / "checkout"))
+    monkeypatch.setattr(distribution_verifier, "_run", fake_run)
+
+    distribution_verifier._install_and_smoke_test(distribution)
+
+    assert calls
+    assert all("PYTHONPATH" not in environment for _, environment, _ in calls)
+    working_directories = {cwd for _, _, cwd in calls}
+    assert len(working_directories) == 1
+    assert None not in working_directories
+    commands = {command[-2:] for command, _, _ in calls if len(command) >= 2}
+    assert ("contracts", "--help") in commands
+    assert ("contracts", "validate-resources") in commands
 
 
 def test_distribution_verification_smoke_tests_wheel_and_sdist_without_network(

@@ -1,0 +1,327 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab Pydantic and application compatibility validation remains authoritative for canonical digests, dataset membership and leakage closure, preprocessing schema chains, cross-contract reference reconciliation, run provenance, and model-output binding.",
+  "$defs": {
+    "ArtifactUriLocatorV1": {
+      "additionalProperties": false,
+      "description": "A storage-independent logical URI resolved by a future artifact adapter.",
+      "properties": {
+        "kind": {
+          "const": "artifact_uri",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 1024,
+          "minLength": 12,
+          "pattern": "^signlab://[a-z][a-z0-9-]{0,63}(/[a-z][a-z0-9._-]{0,127})+$",
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "uri"
+      ],
+      "title": "ArtifactUriLocatorV1",
+      "type": "object"
+    },
+    "ContractRefV1": {
+      "additionalProperties": false,
+      "description": "Digest-bound identity of another versioned SignLab contract.",
+      "properties": {
+        "canonicalization": {
+          "const": "rfc8785/1",
+          "title": "Canonicalization",
+          "type": "string"
+        },
+        "contract_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "contract_schema_version": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9-]*/[1-9][0-9]*$",
+          "title": "Contract Schema Version",
+          "type": "string"
+        },
+        "contract_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "dataset",
+            "split",
+            "preprocessing",
+            "resolved_configuration",
+            "run",
+            "model"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "schema_version": {
+          "const": "contract-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "contract_schema_version",
+        "contract_id",
+        "contract_version",
+        "canonicalization",
+        "sha256",
+        "locator"
+      ],
+      "title": "ContractRefV1",
+      "type": "object"
+    },
+    "SplitPartitionV1": {
+      "additionalProperties": false,
+      "description": "Exact membership and grouping closure for one immutable partition.",
+      "properties": {
+        "name": {
+          "enum": [
+            "train",
+            "validation",
+            "test"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "participant_ids": {
+          "items": {
+            "pattern": "^participant_[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Participant Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "sample_ids": {
+          "items": {
+            "pattern": "^sample_[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Sample Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "session_ids": {
+          "items": {
+            "pattern": "^session_[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Session Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "source_recording_ids": {
+          "items": {
+            "pattern": "^recording_[0-9a-f]{32}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Source Recording Ids",
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "name",
+        "sample_ids",
+        "participant_ids",
+        "session_ids",
+        "source_recording_ids"
+      ],
+      "title": "SplitPartitionV1",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/split-manifest-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "properties": {
+        "dataset": {
+          "properties": {
+            "kind": {
+              "const": "dataset"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "description": "Leakage-resistant participant-and-session grouped split membership.",
+  "properties": {
+    "dataset": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "dataset_data_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Dataset Data Sha256",
+      "type": "string"
+    },
+    "partitions": {
+      "maxItems": 3,
+      "minItems": 3,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/SplitPartitionV1"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "train"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/SplitPartitionV1"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "validation"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/SplitPartitionV1"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "test"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            }
+          ]
+        }
+      ],
+      "title": "Partitions",
+      "type": "array"
+    },
+    "random_seed": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "title": "Random Seed",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "split-manifest/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "split_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Split Id",
+      "type": "string"
+    },
+    "strategy": {
+      "const": "participant-and-session-grouped",
+      "title": "Strategy",
+      "type": "string"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "split_id",
+    "version",
+    "dataset",
+    "dataset_data_sha256",
+    "strategy",
+    "random_seed",
+    "partitions"
+  ],
+  "title": "SplitManifestV1",
+  "type": "object"
+}

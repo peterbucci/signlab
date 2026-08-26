@@ -1,0 +1,88 @@
+{
+  "dataset": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_gesture_dataset",
+    "contract_schema_version": "dataset-manifest/1",
+    "contract_version": "1.0.0",
+    "kind": "dataset",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/dataset-manifest.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:ed55707743ddf6ca144124ee671994ceb8eb7cea06c8f7d97ec10203d5dd8717"
+  },
+  "dataset_data_sha256": "sha256:fbffd3da3f63b969660c52c1d57af12833e44ec69231821f2b29d1b298624b25",
+  "partitions": [
+    {
+      "name": "train",
+      "participant_ids": [
+        "participant_00000000000000000000000000000001",
+        "participant_00000000000000000000000000000002",
+        "participant_00000000000000000000000000000003",
+        "participant_00000000000000000000000000000004",
+        "participant_00000000000000000000000000000005",
+        "participant_00000000000000000000000000000006"
+      ],
+      "sample_ids": [
+        "sample_00000000000000000000000000000001",
+        "sample_00000000000000000000000000000002",
+        "sample_00000000000000000000000000000003",
+        "sample_00000000000000000000000000000004",
+        "sample_00000000000000000000000000000005",
+        "sample_00000000000000000000000000000006"
+      ],
+      "session_ids": [
+        "session_00000000000000000000000000000001",
+        "session_00000000000000000000000000000002",
+        "session_00000000000000000000000000000003",
+        "session_00000000000000000000000000000004",
+        "session_00000000000000000000000000000005",
+        "session_00000000000000000000000000000006"
+      ],
+      "source_recording_ids": [
+        "recording_00000000000000000000000000000001",
+        "recording_00000000000000000000000000000002",
+        "recording_00000000000000000000000000000003",
+        "recording_00000000000000000000000000000004",
+        "recording_00000000000000000000000000000005",
+        "recording_00000000000000000000000000000006"
+      ]
+    },
+    {
+      "name": "validation",
+      "participant_ids": [
+        "participant_00000000000000000000000000000007"
+      ],
+      "sample_ids": [
+        "sample_00000000000000000000000000000007"
+      ],
+      "session_ids": [
+        "session_00000000000000000000000000000007"
+      ],
+      "source_recording_ids": [
+        "recording_00000000000000000000000000000007"
+      ]
+    },
+    {
+      "name": "test",
+      "participant_ids": [
+        "participant_00000000000000000000000000000008"
+      ],
+      "sample_ids": [
+        "sample_00000000000000000000000000000008"
+      ],
+      "session_ids": [
+        "session_00000000000000000000000000000008"
+      ],
+      "source_recording_ids": [
+        "recording_00000000000000000000000000000008"
+      ]
+    }
+  ],
+  "random_seed": 20260826,
+  "schema_version": "split-manifest/1",
+  "split_id": "synthetic_grouped_split",
+  "strategy": "participant-and-session-grouped",
+  "version": "1.0.0"
+}

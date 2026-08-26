@@ -11,7 +11,7 @@ from typer import _click
 from typer.core import TyperGroup
 
 from signlab import __version__
-from signlab.commands import data, doctor, evaluate, export, governance, taxonomy, train
+from signlab.commands import contracts, data, doctor, evaluate, export, governance, taxonomy, train
 
 
 class PrivacySafeTyperGroup(TyperGroup):
@@ -72,6 +72,7 @@ app.add_typer(export.app, name="export")
 app.add_typer(doctor.app, name="doctor")
 app.add_typer(taxonomy.app, name="taxonomy")
 app.add_typer(governance.app, name="governance")
+app.add_typer(contracts.app, name="contracts")
 
 
 @app.callback()
