@@ -14,15 +14,14 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path, PurePosixPath
 
 MAX_MEMBER_BYTES = 1_048_576
-FORBIDDEN_PARTS = {
-    ".dvc",
-    ".env",
+FORBIDDEN_REPOSITORY_ROOTS = {
     "artifacts",
     "data",
     "mlruns",
     "models",
     "runs",
 }
+FORBIDDEN_ANY_PARTS = {".dvc", ".env"}
 FORBIDDEN_SUFFIXES = {
     ".a",
     ".avi",
@@ -65,10 +64,20 @@ def validate_member_names(member_names: Iterable[str]) -> tuple[str, ...]:
     errors: list[str] = []
     for member_name in member_names:
         path = PurePosixPath(member_name)
-        lowered_parts = {part.lower() for part in path.parts}
+        lowered_parts = tuple(part.lower() for part in path.parts)
         if path.is_absolute() or ".." in path.parts:
             errors.append("archive contains a non-portable member path")
-        if lowered_parts & FORBIDDEN_PARTS or path.suffix.lower() in FORBIDDEN_SUFFIXES:
+        repository_parts = lowered_parts
+        if repository_parts and repository_parts[0].startswith("signlab-"):
+            repository_parts = repository_parts[1:]
+        has_forbidden_root = bool(
+            repository_parts and repository_parts[0] in FORBIDDEN_REPOSITORY_ROOTS
+        )
+        if (
+            set(lowered_parts) & FORBIDDEN_ANY_PARTS
+            or has_forbidden_root
+            or path.suffix.lower() in FORBIDDEN_SUFFIXES
+        ):
             errors.append("archive contains a private or generated artifact")
     return tuple(sorted(set(errors)))
 
