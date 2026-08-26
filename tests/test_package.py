@@ -14,3 +14,7 @@ def test_distribution_metadata_is_complete() -> None:
     assert package_metadata["Name"] == "signlab"
     assert package_metadata["License-Expression"] == "MIT"
     assert package_metadata["Requires-Python"] == "<3.13,>=3.12"
+    requirements = tuple(package_metadata.get_all("Requires-Dist") or ())
+    assert not any(
+        requirement.casefold().startswith(("dvc", "dvc-s3")) for requirement in requirements
+    )

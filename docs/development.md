@@ -11,7 +11,8 @@
 | `examples/` | Learning surface | Small demonstrations using public or synthetic inputs |
 | `scripts/` | Repository automation | Thin maintenance, verification, and release adapters |
 | `.github/` | Delivery controls | Review ownership, dependency updates, and CI policy |
-| `data/`, `artifacts/`, `models/`, `runs/` | External/private storage | Never committed; later referenced through approved DVC metadata |
+| `data/`, `artifacts/`, `models/`, `runs/` | External/private storage | Never committed; referenced through approved DVC metadata outside public Git |
+| `dvc.yaml`, `dvc.lock`, `.dvc/` | Public synthetic proof | Generated stage graph, fixture-only lock, and safe tracked defaults; never private pointers or remotes |
 
 The project owner is the default reviewer through `.github/CODEOWNERS`. A later
 story may split ownership when the Python pipeline and browser application have
@@ -39,6 +40,8 @@ uv python install
 uv sync --locked --all-groups
 uv run pre-commit install
 uv run signlab --help
+uv run python scripts/generate_dvc_pipeline.py --check
+uv run dvc repro --force --no-run-cache
 ```
 
 Before a pull request:
@@ -50,14 +53,23 @@ uv run ruff format --check .
 uv run mypy
 uv run pytest
 uv run python scripts/check_repository_hygiene.py
+uv run python scripts/generate_dvc_pipeline.py --check
 uv build --no-build-isolation
 uv run python scripts/verify_distribution.py dist
 ```
 
 CI repeats the locked install and checks on clean Linux and Windows runners. The
 Linux job performs the full quality suite; Windows repeats the tests, package build,
-clean-wheel install, CLI smoke test, and checkout-cleanliness proof. A separate job
-scans complete pull-request history for secrets.
+clean-wheel install, CLI smoke test, DVC clean-room reproduction, and
+checkout-cleanliness proof. A separate job scans complete pull-request history for
+secrets.
+
+DVC and its S3 transport are exact locked dependencies in the `reproducibility`
+group, not dependencies of the published wheel. PyYAML is a runtime dependency only
+because the installed SignLab provenance reader validates `dvc.lock`. Change the
+typed stage registry, regenerate `dvc.yaml`, and run `dvc repro --force
+--no-run-cache`; never hand-edit `dvc.lock`. The complete public/private boundary and
+authorized-machine procedure are in [data-versioning.md](data-versioning.md).
 
 ## Generated and private state
 

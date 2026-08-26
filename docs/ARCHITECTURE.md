@@ -17,6 +17,12 @@ Research surface: Python CLI, DVC, MLflow, Parquet
 Public surface: React/Vite, Web Worker, MediaPipe Tasks, ONNX Runtime Web
 ```
 
+The root DVC graph is generated from the typed SignLab stage registry and ends at
+the split/feature data boundary. A future Prefect flow schedules those same services
+or DVC targets; it cannot define a second DAG. Public Git contains only the synthetic
+fixture lock. Participant-data pointers and production lock history live in a
+separate protected metadata repository. See [data versioning](data-versioning.md).
+
 ## State model
 
 - **Inactive:** no candidate event is currently present; owned by the candidate-event detector.

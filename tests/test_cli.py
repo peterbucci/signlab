@@ -58,7 +58,7 @@ def test_command_group_help_has_no_pipeline_prerequisites(
 def test_cli_import_does_not_load_optional_ml_runtimes() -> None:
     probe = (
         "import sys; import signlab.cli; "
-        "blocked = {'mediapipe', 'mlflow', 'onnxruntime', 'torch'} & set(sys.modules); "
+        "blocked = {'dvc', 'mediapipe', 'mlflow', 'onnxruntime', 'torch'} & set(sys.modules); "
         "raise SystemExit(','.join(sorted(blocked)) if blocked else 0)"
     )
 

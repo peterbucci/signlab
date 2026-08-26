@@ -1,0 +1,260 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python -m signlab.cli data run-reproduction-stage ingest
+    deps:
+    - path: .python-version
+      hash: md5
+      md5: 33cc10613bb12360280f703cb78cd6c0
+      size: 8
+    - path: configs/pipeline/synthetic-dvc.json
+      hash: md5
+      md5: 9aa9c6a6c5024de12193cdf1cf77375d
+      size: 180
+    - path: pyproject.toml
+      hash: md5
+      md5: 045d36c0bfc40357a6f4b2c449fc4fb1
+      size: 2663
+    - path: src/signlab
+      hash: md5
+      md5: dee45089727815eccc525771a75151df.dir
+      size: 1007514
+      nfiles: 113
+    - path: tests/fixtures/public/dvc/source.json
+      hash: md5
+      md5: 13fac458dfeb1cc5089db4411199d25d
+      size: 1286
+    - path: uv.lock
+      hash: md5
+      md5: ea19b30ff8d3beb08edb727d05beea50
+      size: 214085
+    outs:
+    - path: data/raw/dvc-public-fixture/ingest.json
+      hash: md5
+      md5: 9cec667ac4a69d8c270308add5508392
+      size: 1266
+  validate:
+    cmd: python -m signlab.cli data run-reproduction-stage validate
+    deps:
+    - path: .python-version
+      hash: md5
+      md5: 33cc10613bb12360280f703cb78cd6c0
+      size: 8
+    - path: configs/pipeline/synthetic-dvc.json
+      hash: md5
+      md5: 9aa9c6a6c5024de12193cdf1cf77375d
+      size: 180
+    - path: data/raw/dvc-public-fixture/ingest.json
+      hash: md5
+      md5: 9cec667ac4a69d8c270308add5508392
+      size: 1266
+    - path: pyproject.toml
+      hash: md5
+      md5: 045d36c0bfc40357a6f4b2c449fc4fb1
+      size: 2663
+    - path: src/signlab
+      hash: md5
+      md5: dee45089727815eccc525771a75151df.dir
+      size: 1007514
+      nfiles: 113
+    - path: tests/fixtures/public/dvc/source.json
+      hash: md5
+      md5: 13fac458dfeb1cc5089db4411199d25d
+      size: 1286
+    - path: uv.lock
+      hash: md5
+      md5: ea19b30ff8d3beb08edb727d05beea50
+      size: 214085
+    outs:
+    - path: data/interim/dvc-public-fixture/validate.json
+      hash: md5
+      md5: 7541845cba7e081aa55b7b6e55eac452
+      size: 1276
+  extract:
+    cmd: python -m signlab.cli data run-reproduction-stage extract
+    deps:
+    - path: .python-version
+      hash: md5
+      md5: 33cc10613bb12360280f703cb78cd6c0
+      size: 8
+    - path: configs/pipeline/synthetic-dvc.json
+      hash: md5
+      md5: 9aa9c6a6c5024de12193cdf1cf77375d
+      size: 180
+    - path: data/interim/dvc-public-fixture/validate.json
+      hash: md5
+      md5: 7541845cba7e081aa55b7b6e55eac452
+      size: 1276
+    - path: data/raw/dvc-public-fixture/ingest.json
+      hash: md5
+      md5: 9cec667ac4a69d8c270308add5508392
+      size: 1266
+    - path: pyproject.toml
+      hash: md5
+      md5: 045d36c0bfc40357a6f4b2c449fc4fb1
+      size: 2663
+    - path: src/signlab
+      hash: md5
+      md5: dee45089727815eccc525771a75151df.dir
+      size: 1007514
+      nfiles: 113
+    - path: tests/fixtures/public/dvc/source.json
+      hash: md5
+      md5: 13fac458dfeb1cc5089db4411199d25d
+      size: 1286
+    - path: uv.lock
+      hash: md5
+      md5: ea19b30ff8d3beb08edb727d05beea50
+      size: 214085
+    outs:
+    - path: data/interim/dvc-public-fixture/extract.json
+      hash: md5
+      md5: 901a33a652ce59ea7316727edfc13df7
+      size: 1335
+  quality:
+    cmd: python -m signlab.cli data run-reproduction-stage quality
+    deps:
+    - path: .python-version
+      hash: md5
+      md5: 33cc10613bb12360280f703cb78cd6c0
+      size: 8
+    - path: configs/pipeline/synthetic-dvc.json
+      hash: md5
+      md5: 9aa9c6a6c5024de12193cdf1cf77375d
+      size: 180
+    - path: data/interim/dvc-public-fixture/extract.json
+      hash: md5
+      md5: 901a33a652ce59ea7316727edfc13df7
+      size: 1335
+    - path: data/interim/dvc-public-fixture/validate.json
+      hash: md5
+      md5: 7541845cba7e081aa55b7b6e55eac452
+      size: 1276
+    - path: data/raw/dvc-public-fixture/ingest.json
+      hash: md5
+      md5: 9cec667ac4a69d8c270308add5508392
+      size: 1266
+    - path: pyproject.toml
+      hash: md5
+      md5: 045d36c0bfc40357a6f4b2c449fc4fb1
+      size: 2663
+    - path: src/signlab
+      hash: md5
+      md5: dee45089727815eccc525771a75151df.dir
+      size: 1007514
+      nfiles: 113
+    - path: tests/fixtures/public/dvc/source.json
+      hash: md5
+      md5: 13fac458dfeb1cc5089db4411199d25d
+      size: 1286
+    - path: uv.lock
+      hash: md5
+      md5: ea19b30ff8d3beb08edb727d05beea50
+      size: 214085
+    outs:
+    - path: data/interim/dvc-public-fixture/quality.json
+      hash: md5
+      md5: 1ffe6429177e3b931f69bddcd9165915
+      size: 1521
+  split:
+    cmd: python -m signlab.cli data run-reproduction-stage split
+    deps:
+    - path: .python-version
+      hash: md5
+      md5: 33cc10613bb12360280f703cb78cd6c0
+      size: 8
+    - path: configs/pipeline/synthetic-dvc.json
+      hash: md5
+      md5: 9aa9c6a6c5024de12193cdf1cf77375d
+      size: 180
+    - path: data/interim/dvc-public-fixture/extract.json
+      hash: md5
+      md5: 901a33a652ce59ea7316727edfc13df7
+      size: 1335
+    - path: data/interim/dvc-public-fixture/quality.json
+      hash: md5
+      md5: 1ffe6429177e3b931f69bddcd9165915
+      size: 1521
+    - path: data/interim/dvc-public-fixture/validate.json
+      hash: md5
+      md5: 7541845cba7e081aa55b7b6e55eac452
+      size: 1276
+    - path: data/raw/dvc-public-fixture/ingest.json
+      hash: md5
+      md5: 9cec667ac4a69d8c270308add5508392
+      size: 1266
+    - path: pyproject.toml
+      hash: md5
+      md5: 045d36c0bfc40357a6f4b2c449fc4fb1
+      size: 2663
+    - path: src/signlab
+      hash: md5
+      md5: dee45089727815eccc525771a75151df.dir
+      size: 1007514
+      nfiles: 113
+    - path: tests/fixtures/public/dvc/source.json
+      hash: md5
+      md5: 13fac458dfeb1cc5089db4411199d25d
+      size: 1286
+    - path: uv.lock
+      hash: md5
+      md5: ea19b30ff8d3beb08edb727d05beea50
+      size: 214085
+    outs:
+    - path: data/processed/dvc-public-fixture/split.json
+      hash: md5
+      md5: c538720ee66e02b59921c9f1b3077783
+      size: 1689
+  feature:
+    cmd: python -m signlab.cli data run-reproduction-stage feature
+    deps:
+    - path: .python-version
+      hash: md5
+      md5: 33cc10613bb12360280f703cb78cd6c0
+      size: 8
+    - path: configs/pipeline/synthetic-dvc.json
+      hash: md5
+      md5: 9aa9c6a6c5024de12193cdf1cf77375d
+      size: 180
+    - path: data/interim/dvc-public-fixture/extract.json
+      hash: md5
+      md5: 901a33a652ce59ea7316727edfc13df7
+      size: 1335
+    - path: data/interim/dvc-public-fixture/quality.json
+      hash: md5
+      md5: 1ffe6429177e3b931f69bddcd9165915
+      size: 1521
+    - path: data/interim/dvc-public-fixture/validate.json
+      hash: md5
+      md5: 7541845cba7e081aa55b7b6e55eac452
+      size: 1276
+    - path: data/processed/dvc-public-fixture/split.json
+      hash: md5
+      md5: c538720ee66e02b59921c9f1b3077783
+      size: 1689
+    - path: data/raw/dvc-public-fixture/ingest.json
+      hash: md5
+      md5: 9cec667ac4a69d8c270308add5508392
+      size: 1266
+    - path: pyproject.toml
+      hash: md5
+      md5: 045d36c0bfc40357a6f4b2c449fc4fb1
+      size: 2663
+    - path: src/signlab
+      hash: md5
+      md5: dee45089727815eccc525771a75151df.dir
+      size: 1007514
+      nfiles: 113
+    - path: tests/fixtures/public/dvc/source.json
+      hash: md5
+      md5: 13fac458dfeb1cc5089db4411199d25d
+      size: 1286
+    - path: uv.lock
+      hash: md5
+      md5: ea19b30ff8d3beb08edb727d05beea50
+      size: 214085
+    outs:
+    - path: data/processed/dvc-public-fixture/feature.json
+      hash: md5
+      md5: 71c4f8ef1d58d1ac63420369acb42b0f
+      size: 1261

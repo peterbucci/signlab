@@ -1,0 +1,82 @@
+stages:
+  ingest:
+    cmd: python -m signlab.cli data run-reproduction-stage ingest
+    deps:
+      - configs/pipeline/synthetic-dvc.json
+      - .python-version
+      - pyproject.toml
+      - src/signlab
+      - uv.lock
+      - tests/fixtures/public/dvc/source.json
+    outs:
+      - data/raw/dvc-public-fixture/ingest.json
+  validate:
+    cmd: python -m signlab.cli data run-reproduction-stage validate
+    deps:
+      - configs/pipeline/synthetic-dvc.json
+      - .python-version
+      - pyproject.toml
+      - src/signlab
+      - uv.lock
+      - tests/fixtures/public/dvc/source.json
+      - data/raw/dvc-public-fixture/ingest.json
+    outs:
+      - data/interim/dvc-public-fixture/validate.json
+  extract:
+    cmd: python -m signlab.cli data run-reproduction-stage extract
+    deps:
+      - configs/pipeline/synthetic-dvc.json
+      - .python-version
+      - pyproject.toml
+      - src/signlab
+      - uv.lock
+      - tests/fixtures/public/dvc/source.json
+      - data/raw/dvc-public-fixture/ingest.json
+      - data/interim/dvc-public-fixture/validate.json
+    outs:
+      - data/interim/dvc-public-fixture/extract.json
+  quality:
+    cmd: python -m signlab.cli data run-reproduction-stage quality
+    deps:
+      - configs/pipeline/synthetic-dvc.json
+      - .python-version
+      - pyproject.toml
+      - src/signlab
+      - uv.lock
+      - tests/fixtures/public/dvc/source.json
+      - data/raw/dvc-public-fixture/ingest.json
+      - data/interim/dvc-public-fixture/validate.json
+      - data/interim/dvc-public-fixture/extract.json
+    outs:
+      - data/interim/dvc-public-fixture/quality.json
+  split:
+    cmd: python -m signlab.cli data run-reproduction-stage split
+    deps:
+      - configs/pipeline/synthetic-dvc.json
+      - .python-version
+      - pyproject.toml
+      - src/signlab
+      - uv.lock
+      - tests/fixtures/public/dvc/source.json
+      - data/raw/dvc-public-fixture/ingest.json
+      - data/interim/dvc-public-fixture/validate.json
+      - data/interim/dvc-public-fixture/extract.json
+      - data/interim/dvc-public-fixture/quality.json
+    outs:
+      - data/processed/dvc-public-fixture/split.json
+  feature:
+    cmd: python -m signlab.cli data run-reproduction-stage feature
+    deps:
+      - configs/pipeline/synthetic-dvc.json
+      - .python-version
+      - pyproject.toml
+      - src/signlab
+      - uv.lock
+      - tests/fixtures/public/dvc/source.json
+      - data/raw/dvc-public-fixture/ingest.json
+      - data/interim/dvc-public-fixture/validate.json
+      - data/interim/dvc-public-fixture/extract.json
+      - data/interim/dvc-public-fixture/quality.json
+      - data/processed/dvc-public-fixture/split.json
+    outs:
+      - data/processed/dvc-public-fixture/feature.json
