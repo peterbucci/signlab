@@ -14,6 +14,7 @@ PUBLIC_FIXTURE_PREFIX = PurePosixPath("tests/fixtures/public")
 PRIVATE_ROOTS = (
     PurePosixPath("artifacts"),
     PurePosixPath("data/interim"),
+    PurePosixPath("data/private"),
     PurePosixPath("data/processed"),
     PurePosixPath("data/raw"),
     PurePosixPath("mlruns"),
@@ -21,25 +22,37 @@ PRIVATE_ROOTS = (
     PurePosixPath("runs"),
 )
 PRIVATE_SUFFIXES = {
+    ".a",
     ".avi",
     ".db",
+    ".dll",
+    ".dylib",
+    ".exe",
     ".h5",
     ".hdf5",
+    ".joblib",
     ".keras",
     ".key",
+    ".lib",
     ".mov",
     ".mp4",
     ".npy",
     ".npz",
+    ".o",
     ".onnx",
     ".parquet",
     ".pem",
+    ".pickle",
+    ".pkl",
     ".pt",
     ".pth",
     ".pyc",
     ".pyd",
     ".sqlite",
     ".sqlite3",
+    ".safetensors",
+    ".so",
+    ".tflite",
     ".webm",
     ".whl",
 }
@@ -93,20 +106,21 @@ def _is_within(path: PurePosixPath, parent: PurePosixPath) -> bool:
 def inspect_tracked_file(relative_path: str, content: bytes) -> tuple[Violation, ...]:
     """Inspect one tracked blob without returning any matching secret or path value."""
     path = PurePosixPath(relative_path)
+    policy_path = PurePosixPath(relative_path.lower())
     violations: list[Violation] = []
-    is_public_fixture = _is_within(path, PUBLIC_FIXTURE_PREFIX)
+    is_public_fixture = _is_within(policy_path, PUBLIC_FIXTURE_PREFIX)
 
     if len(content) > MAX_TRACKED_BYTES:
         violations.append(
             Violation(relative_path, "size", "tracked file exceeds the 1 MiB Git limit")
         )
-    if any(_is_within(path, private_root) for private_root in PRIVATE_ROOTS):
+    if any(_is_within(policy_path, private_root) for private_root in PRIVATE_ROOTS):
         violations.append(
             Violation(relative_path, "private-root", "private/generated directory is tracked")
         )
-    if path.name.startswith(".env") and path.name != ".env.example":
+    if policy_path.name.startswith(".env") and path.name != ".env.example":
         violations.append(Violation(relative_path, "secret-file", "environment file is tracked"))
-    suffix = path.suffix.lower()
+    suffix = policy_path.suffix
     allowed_public_fixture = is_public_fixture and suffix in PUBLIC_FIXTURE_SUFFIXES
     if suffix in PRIVATE_SUFFIXES and not allowed_public_fixture:
         violations.append(

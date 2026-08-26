@@ -14,3 +14,10 @@
 *.pth binary
 *.keras binary
 *.h5 binary
+*.a binary
+*.dll binary
+*.dylib binary
+*.exe binary
+*.lib binary
+*.o binary
+*.so binary

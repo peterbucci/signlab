@@ -55,7 +55,7 @@ uv run ruff format --check .
 uv run mypy
 uv run pytest
 uv run python scripts/check_repository_hygiene.py
-uv build
+uv build --no-build-isolation
 uv run python scripts/verify_distribution.py dist
 ```
 

@@ -26,9 +26,11 @@ Python 3.13 becomes supported only after the complete native smoke matrix passes
 installability alone is not an upgrade criterion.
 
 `uv` 0.12.6 owns interpreter installation, dependency resolution, the virtual
-environment, and the cross-platform lock. Change dependencies through `uv add` or
-`uv remove`, then review and commit `pyproject.toml` and `uv.lock` together. Never
-hand-edit `uv.lock` or maintain a parallel requirements file.
+environment, and the cross-platform lock. Hatchling is pinned as both the build
+backend and a locked development dependency; builds disable isolation so they use
+that reviewed version. Change dependencies through `uv add` or `uv remove`, then
+review and commit `pyproject.toml` and `uv.lock` together. Never hand-edit `uv.lock`
+or maintain a parallel requirements file.
 
 ## Canonical workflow
 
@@ -48,7 +50,7 @@ uv run ruff format --check .
 uv run mypy
 uv run pytest
 uv run python scripts/check_repository_hygiene.py
-uv build
+uv build --no-build-isolation
 uv run python scripts/verify_distribution.py dist
 ```
 

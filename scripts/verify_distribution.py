@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import subprocess
 import sys
 import tarfile
@@ -23,17 +24,39 @@ FORBIDDEN_PARTS = {
     "runs",
 }
 FORBIDDEN_SUFFIXES = {
+    ".a",
+    ".avi",
     ".db",
+    ".dll",
+    ".dylib",
+    ".exe",
     ".h5",
+    ".hdf5",
+    ".joblib",
     ".keras",
     ".key",
+    ".lib",
+    ".mov",
+    ".mp4",
+    ".npy",
+    ".npz",
+    ".o",
     ".onnx",
     ".parquet",
     ".pem",
+    ".pickle",
+    ".pkl",
     ".pt",
     ".pth",
+    ".pyc",
+    ".pyd",
+    ".safetensors",
+    ".so",
     ".sqlite",
     ".sqlite3",
+    ".tflite",
+    ".webm",
+    ".whl",
 }
 
 
@@ -62,6 +85,21 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             errors.append("wheel is missing CLI command modules")
         if not any(name.endswith(".dist-info/METADATA") for name in names):
             errors.append("wheel is missing distribution metadata")
+        entry_point_members = [
+            member for member in members if member.filename.endswith(".dist-info/entry_points.txt")
+        ]
+        if len(entry_point_members) != 1:
+            errors.append("wheel is missing unambiguous console-script metadata")
+        else:
+            entry_points = archive.read(entry_point_members[0]).decode("utf-8")
+            if (
+                re.search(
+                    r"(?m)^signlab\s*=\s*signlab\.cli:main\s*$",
+                    entry_points,
+                )
+                is None
+            ):
+                errors.append("wheel has an invalid SignLab console-script entry point")
         if any(member.file_size > MAX_MEMBER_BYTES for member in members):
             errors.append("wheel contains a member larger than 1 MiB")
     return tuple(sorted(set(errors)))
@@ -79,10 +117,10 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
     return tuple(sorted(set(errors)))
 
 
-def _venv_python(environment: Path) -> Path:
+def _venv_executable(environment: Path, name: str) -> Path:
     if os.name == "nt":
-        return environment / "Scripts" / "python.exe"
-    return environment / "bin" / "python"
+        return environment / "Scripts" / f"{name}.exe"
+    return environment / "bin" / name
 
 
 def _run(
@@ -110,7 +148,7 @@ def _install_and_smoke_test(wheel: Path) -> None:
             ["uv", "venv", "--python", sys.executable, str(virtual_environment)],
             environment=environment,
         )
-        python = _venv_python(virtual_environment)
+        python = _venv_executable(virtual_environment, "python")
         _run(
             ["uv", "pip", "install", "--python", str(python), str(wheel)],
             environment=environment,
@@ -121,13 +159,15 @@ def _install_and_smoke_test(wheel: Path) -> None:
         )
         if not version.stdout.strip():
             raise RuntimeError("isolated wheel did not expose a version")
+        console_script = _venv_executable(virtual_environment, "signlab")
+        _run([str(console_script), "--version"], environment=environment)
         for command in ("data", "train", "evaluate", "export", "doctor"):
             _run(
-                [str(python), "-m", "signlab.cli", command, "--help"],
+                [str(console_script), command, "--help"],
                 environment=environment,
             )
         _run(
-            [str(python), "-m", "signlab.cli", "doctor", "check"],
+            [str(console_script), "doctor", "check"],
             environment=environment,
         )
 

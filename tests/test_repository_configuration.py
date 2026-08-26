@@ -17,6 +17,8 @@ def test_python_and_uv_versions_are_pinned() -> None:
     assert _read(".python-version").strip() == "3.12.14"
     assert 'requires-python = ">=3.12,<3.13"' in pyproject
     assert 'required-version = "==0.12.6"' in pyproject
+    assert 'requires = ["hatchling==1.32.0"]' in pyproject
+    assert '"hatchling==1.32.0"' in pyproject
 
 
 def test_ci_uses_immutable_actions_and_required_cross_platform_gates() -> None:
@@ -30,7 +32,7 @@ def test_ci_uses_immutable_actions_and_required_cross_platform_gates() -> None:
     for command in (
         "uv lock --check",
         "scripts/check_repository_hygiene.py",
-        "uv build",
+        "uv build --no-build-isolation",
         "scripts/verify_distribution.py dist",
         "gitleaks/gitleaks-action@",
     ):
