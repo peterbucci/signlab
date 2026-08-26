@@ -1,9 +1,12 @@
 # SignLab
 
-SignLab is a reproducible research and deployment project for a small-vocabulary,
-continuous hand-gesture recognition system. It replaces an earlier Streamlit
-prototype with a UI-independent ML pipeline, leakage-resistant evaluation, and
-a privacy-preserving browser demo.
+SignLab is a research prototype for recognizing isolated performances of five
+predefined hand gestures within continuous webcam video. It separates non-target
+events (`other`) from no active event (`inactive`) and uncertain decisions
+(`abstain`); no sign-language or translation capability is claimed.
+
+The project replaces an earlier Streamlit prototype with a UI-independent ML
+pipeline, leakage-resistant evaluation, and a privacy-preserving browser demo.
 
 ## Project goals
 
@@ -62,6 +65,10 @@ uv run python scripts/verify_distribution.py dist
 See [docs/development.md](docs/development.md) for directory ownership, dependency
 updates, generated-file policy, and the Python-version decision.
 
+The [gesture taxonomy and claim boundary](docs/gesture-taxonomy.md) define the
+versioned six-output classifier vocabulary and the evidence required before making
+any named-language claim.
+
 The [legacy audit](docs/legacy-audit.md) and
 [portable evidence export](docs/legacy-export.md) document what was retained from
 the school project, why it is development-only, and how to validate it without any
@@ -92,10 +99,10 @@ implementation backlog.
 
 ## Repository status
 
-The immutable legacy audit, reproducible developer foundation, and sanitized legacy
-evidence export are established. Taxonomy and core contracts are still under
-construction; no headline model result is considered valid until the grouped
-evaluation foundations are complete.
+The immutable legacy audit, reproducible developer foundation, sanitized legacy
+evidence export, and versioned gesture taxonomy are established. The remaining core
+contracts are still under construction; no headline model result is considered
+valid until the grouped evaluation foundations are complete.
 
 ## Data and privacy
 

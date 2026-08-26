@@ -1,0 +1,230 @@
+{
+  "annotation_dispositions": [
+    {
+      "description": "The visible evidence cannot support a reliable class decision; adjudication is required before training or evaluation.",
+      "id": "ambiguous"
+    },
+    {
+      "description": "The region must not be trained or scored under the evaluator's declared overlap rule, and a reason is required.",
+      "id": "ignore"
+    }
+  ],
+  "claim": {
+    "profile": "predefined_gestures",
+    "statement": "SignLab is a research prototype for recognizing isolated performances of five predefined hand gestures within continuous webcam video. It separates non-target events (`other`) from no active event (`inactive`) and uncertain decisions (`abstain`); no sign-language or translation capability is claimed."
+  },
+  "concepts": [
+    {
+      "description": "No finalized candidate event is active; this state belongs to the event detector and is never a classifier label.",
+      "id": "inactive",
+      "role": "detector_state"
+    },
+    {
+      "description": "A complete candidate event is confidently not one of the five targets; this is the required learned negative class.",
+      "id": "other",
+      "role": "learned_class"
+    },
+    {
+      "description": "A finalized candidate cannot be named at the accepted risk threshold; this is a decision-policy outcome, not a class.",
+      "id": "abstain",
+      "role": "decision_outcome"
+    }
+  ],
+  "consumer_references": [
+    {
+      "consumer": "collection",
+      "required": true,
+      "schema_id": "https://signlab.dev/schemas/collection-taxonomy-binding-1.schema.json"
+    },
+    {
+      "consumer": "annotation",
+      "required": true,
+      "schema_id": "https://signlab.dev/schemas/annotation-taxonomy-binding-1.schema.json"
+    },
+    {
+      "consumer": "training",
+      "required": true,
+      "schema_id": "https://signlab.dev/schemas/training-taxonomy-binding-1.schema.json"
+    },
+    {
+      "consumer": "evaluation",
+      "required": true,
+      "schema_id": "https://signlab.dev/schemas/evaluation-taxonomy-binding-1.schema.json"
+    },
+    {
+      "consumer": "bundle",
+      "required": true,
+      "schema_id": "https://signlab.dev/schemas/bundle-taxonomy-binding-1.schema.json"
+    },
+    {
+      "consumer": "public_copy",
+      "required": true,
+      "schema_id": "https://signlab.dev/schemas/public-copy-taxonomy-binding-1.schema.json"
+    }
+  ],
+  "decision_precedence": [
+    "inactive",
+    "target",
+    "other",
+    "abstain"
+  ],
+  "labels": [
+    {
+      "description": "Open hand near the temple or upper face with a short outward or side-to-side wave.",
+      "display_name": "Hello",
+      "examples": {
+        "ambiguous": [
+          "The face or hand location is unavailable, the active hand is occluded, or the defining wave is clipped."
+        ],
+        "negative": [
+          "A static raised palm, a low chest-level wave, or a chin-origin outward stroke."
+        ],
+        "positive": [
+          "An open hand near the temple or upper face, palm generally outward, makes a short outward or side-to-side wave."
+        ],
+        "transition": [
+          "Arm raising and hand pre-shaping before the wave, plus lowering or relaxation after it, are outside the event."
+        ]
+      },
+      "id": "hello",
+      "index": 0,
+      "role": "target"
+    },
+    {
+      "description": "Thumb closes toward extended index and middle fingertips one or more times.",
+      "display_name": "No",
+      "examples": {
+        "ambiguous": [
+          "The thumb or fingertips are occluded, or closure toward the fingertips cannot be established."
+        ],
+        "negative": [
+          "A whole-hand fist or opening, a static two-finger pose, a head shake alone, or a closed-fist vertical nod."
+        ],
+        "positive": [
+          "The thumb closes toward the extended index and middle fingertips one or more times."
+        ],
+        "transition": [
+          "Hand raising and pre-shaping before the first closure, plus relaxation after the final closure, are outside the event."
+        ]
+      },
+      "id": "no",
+      "index": 1,
+      "role": "target"
+    },
+    {
+      "description": "Flat or open palm at the upper chest with a small circular stroke.",
+      "display_name": "Please",
+      "examples": {
+        "ambiguous": [
+          "The chest anchor is missing, the circular stroke is clipped, or the motion path is indeterminate."
+        ],
+        "negative": [
+          "Static chest contact, a straight chest rub, a circle away from the chest, or a chin-origin outward stroke."
+        ],
+        "positive": [
+          "A flat or open palm at or near the upper chest makes a small circular stroke."
+        ],
+        "transition": [
+          "Approach to the chest before the circle and withdrawal after the circle are outside the target interval."
+        ]
+      },
+      "id": "please",
+      "index": 2,
+      "role": "target"
+    },
+    {
+      "description": "Flat or open hand begins at the chin or lower face and moves outward in one stroke.",
+      "display_name": "Thank you",
+      "examples": {
+        "ambiguous": [
+          "The origin at the chin or lower face is unavailable, or the outward stroke is occluded or clipped."
+        ],
+        "negative": [
+          "A forehead-origin wave, a chest circle, or an unrelated hand movement near the mouth."
+        ],
+        "positive": [
+          "A flat or open hand starts at the chin or lower face and moves outward, usually slightly downward, in one stroke."
+        ],
+        "transition": [
+          "Approach to the chin before the stroke and the return or drop after the stroke are outside the event."
+        ]
+      },
+      "id": "thank_you",
+      "index": 3,
+      "role": "target"
+    },
+    {
+      "description": "Closed fist near the upper torso performs one or more wrist-driven vertical nods.",
+      "display_name": "Yes",
+      "examples": {
+        "ambiguous": [
+          "The fist shape or the wrist-driven vertical motion cannot be observed reliably."
+        ],
+        "negative": [
+          "A static fist, thumbs-up, punch, whole-hand opening, or thumb-to-fingertip closure."
+        ],
+        "positive": [
+          "A closed fist near the upper torso performs one or more wrist-driven vertical nods."
+        ],
+        "transition": [
+          "Fist formation or raising before the first nod and opening or lowering after the last nod are outside the event."
+        ]
+      },
+      "id": "yes",
+      "index": 4,
+      "role": "target"
+    },
+    {
+      "description": "A complete candidate event that is confidently outside the five-target vocabulary.",
+      "display_name": "Other",
+      "examples": {
+        "ambiguous": [
+          "A candidate whose defining motion or hand shape is not visible enough to determine whether it is a target."
+        ],
+        "negative": [
+          "A complete, correctly bounded performance of any of the five target gestures."
+        ],
+        "positive": [
+          "A complete out-of-vocabulary gesture, a clearly incomplete target attempt, or unrelated intentional hand activity."
+        ],
+        "transition": [
+          "A derived target transition may be a training hard negative only on train or development splits, never relabeled source truth."
+        ]
+      },
+      "id": "other",
+      "index": 5,
+      "role": "learned_negative"
+    }
+  ],
+  "legacy_import": {
+    "aliases": [
+      {
+        "source": "thank you",
+        "target": "thank_you"
+      }
+    ],
+    "quarantined": [
+      "nothing"
+    ]
+  },
+  "other_kinds": [
+    "partial_target",
+    "transition_fragment",
+    "oov_gesture",
+    "incidental_activity",
+    "two_hand_non_target"
+  ],
+  "rules": {
+    "ambiguous_annotations": "Ambiguous records require adjudication before they become trainable or evaluable.",
+    "handedness": "Either hand is accepted only after handedness normalization is recorded explicitly.",
+    "ignore_regions": "Ignore regions require a documented reason such as consent exclusion, camera setup, third-party presence, unresolved conflict, or unusable occlusion.",
+    "out_of_vocabulary": "A complete gesture candidate outside the five targets is other with kind oov_gesture.",
+    "partial_gesture": "A clearly incomplete target attempt is other with kind partial_target; insufficient visibility is ambiguous instead.",
+    "poor_segmentation": "Poor segmentation never changes source event truth; continuous evaluation still records detector misses and fragmentation.",
+    "second_hand": "An incidental second hand is allowed only when it does not contact, occlude, or alter the active-hand form; coordinated two-hand activity is other.",
+    "transitions": "Transitions are not automatically training examples; derived transition fragments may be other only on train or development splits."
+  },
+  "schema_version": "gesture-taxonomy/1",
+  "taxonomy_id": "signlab-five",
+  "version": "1.0.0"
+}

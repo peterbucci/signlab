@@ -19,11 +19,11 @@ def test_top_level_help_exposes_thin_command_groups(runner: CliRunner) -> None:
     result = runner.invoke(cli.app, ["--help"])
 
     assert result.exit_code == 0
-    for command in ("data", "train", "evaluate", "export", "doctor"):
+    for command in ("data", "train", "evaluate", "export", "doctor", "taxonomy"):
         assert command in result.output
 
 
-@pytest.mark.parametrize("command", ["data", "train", "evaluate", "export", "doctor"])
+@pytest.mark.parametrize("command", ["data", "train", "evaluate", "export", "doctor", "taxonomy"])
 def test_command_group_help_has_no_pipeline_prerequisites(
     runner: CliRunner,
     command: str,
