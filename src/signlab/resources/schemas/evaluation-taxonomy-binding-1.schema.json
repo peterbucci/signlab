@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "TaxonomyRef": {
+      "$id": "https://signlab.dev/schemas/taxonomy-reference-1.schema.json",
+      "additionalProperties": false,
+      "description": "Portable identity embedded in downstream manifests and bundles.",
+      "oneOf": [
+        {
+          "const": {
+            "id": "signlab-five",
+            "schema_version": "taxonomy-reference/1",
+            "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+            "version": "1.0.0"
+          }
+        }
+      ],
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "taxonomy-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "sha256"
+      ],
+      "title": "TaxonomyRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/evaluation-taxonomy-binding-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "evaluation-taxonomy-binding/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "taxonomy": {
+      "$ref": "#/$defs/TaxonomyRef"
+    }
+  },
+  "required": [
+    "schema_version",
+    "taxonomy"
+  ],
+  "title": "EvaluationTaxonomyBinding",
+  "type": "object"
+}

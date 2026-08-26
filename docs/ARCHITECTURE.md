@@ -28,6 +28,12 @@ versioned and evaluated separately.
 
 ## Data contracts
 
+Every collection, annotation, training, evaluation, bundle, and public-copy
+contract embeds the same immutable taxonomy reference: `signlab-five@1.0.0` plus
+the canonical SHA-256. The [taxonomy](gesture-taxonomy.md) is authoritative for
+label order, event boundaries, negative examples, legacy aliases, and the public
+claim. Downstream contracts may add fields but cannot reinterpret its identifiers.
+
 The sample manifest will include stable identifiers for clips, signers, sessions,
 source recordings, devices, capture conditions, handedness, mirroring, consent,
 and checksums. Derived samples inherit the source recording and split.

@@ -61,6 +61,19 @@ scans complete pull-request history for secrets.
 
 ## Generated and private state
 
+Pydantic models in `src/signlab/contracts/` are authoritative. Reviewable JSON
+Schemas under `src/signlab/resources/schemas/` are generated package data. After a
+taxonomy-model change, run:
+
+```shell
+uv run python scripts/generate_taxonomy_schemas.py
+```
+
+Tests compare every committed schema byte-for-byte at the JSON-document level and
+verify that the wheel contains both schemas and immutable taxonomy instances. A
+semantic change to a published taxonomy requires a new versioned artifact and a new
+golden digest, not an in-place edit.
+
 The Git ignore rules cover local environments, caches, coverage, builds, DVC cache,
 tracking databases, datasets, videos, features, checkpoints, and model bundles. The
 repository guard independently rejects ignored high-risk path families, artifact

@@ -7,7 +7,7 @@ from typing import Annotated
 import typer
 
 from signlab import __version__
-from signlab.commands import data, doctor, evaluate, export, train
+from signlab.commands import data, doctor, evaluate, export, taxonomy, train
 
 
 def _show_version(value: bool) -> None:
@@ -28,6 +28,7 @@ app.add_typer(train.app, name="train")
 app.add_typer(evaluate.app, name="evaluate")
 app.add_typer(export.app, name="export")
 app.add_typer(doctor.app, name="doctor")
+app.add_typer(taxonomy.app, name="taxonomy")
 
 
 @app.callback()

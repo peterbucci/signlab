@@ -10,13 +10,18 @@ drift from training, and idle/unknown behavior was underspecified.
 
 ## Product claim
 
-Until validated by fluent signers and a documented language source, SignLab is:
+Until the gestures are reviewed by a qualified signer against documented lexical
+sources, SignLab's approved claim is:
 
-> A five-class isolated hand-gesture recognition system with continuous webcam
-> segmentation and calibrated rejection.
+> SignLab is a research prototype for recognizing isolated performances of five
+> predefined hand gestures within continuous webcam video. It separates non-target
+> events (`other`) from no active event (`inactive`) and uncertain decisions
+> (`abstain`); no sign-language or translation capability is claimed.
 
-It is not described as sign-language translation, a complete accessibility
-solution, or a system that understands a sign language.
+The five targets plus learned `other` produce six classifier outputs. `inactive`
+belongs to event detection and `abstain` to the decision policy; neither is a class.
+SignLab is not described as a complete accessibility solution or as understanding
+a named sign language.
 
 ## Primary outcome
 

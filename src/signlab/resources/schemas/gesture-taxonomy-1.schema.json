@@ -1,0 +1,675 @@
+{
+  "$defs": {
+    "AnnotationDisposition": {
+      "additionalProperties": false,
+      "description": "A non-class annotation disposition and its handling rule.",
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "enum": [
+            "ambiguous",
+            "ignore"
+          ],
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "description"
+      ],
+      "title": "AnnotationDisposition",
+      "type": "object"
+    },
+    "ConsumerReferenceRule": {
+      "additionalProperties": false,
+      "description": "A domain contract that must embed an immutable taxonomy reference.",
+      "properties": {
+        "consumer": {
+          "enum": [
+            "collection",
+            "annotation",
+            "training",
+            "evaluation",
+            "bundle",
+            "public_copy"
+          ],
+          "title": "Consumer",
+          "type": "string"
+        },
+        "required": {
+          "const": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "schema_id": {
+          "pattern": "^https://signlab\\.dev/schemas/.+$",
+          "title": "Schema Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "consumer",
+        "schema_id",
+        "required"
+      ],
+      "title": "ConsumerReferenceRule",
+      "type": "object"
+    },
+    "GestureDefinition": {
+      "additionalProperties": false,
+      "description": "One learned classifier output and its operational definition.",
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Description",
+          "type": "string"
+        },
+        "display_name": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Display Name",
+          "type": "string"
+        },
+        "examples": {
+          "$ref": "#/$defs/GestureExamples"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "index": {
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "role": {
+          "enum": [
+            "target",
+            "learned_negative"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "id",
+        "display_name",
+        "role",
+        "description",
+        "examples"
+      ],
+      "title": "GestureDefinition",
+      "type": "object"
+    },
+    "GestureExamples": {
+      "additionalProperties": false,
+      "description": "Observable inclusion and boundary examples for one class.",
+      "properties": {
+        "ambiguous": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Ambiguous",
+          "type": "array"
+        },
+        "negative": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Negative",
+          "type": "array"
+        },
+        "positive": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Positive",
+          "type": "array"
+        },
+        "transition": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Transition",
+          "type": "array"
+        }
+      },
+      "required": [
+        "positive",
+        "negative",
+        "ambiguous",
+        "transition"
+      ],
+      "title": "GestureExamples",
+      "type": "object"
+    },
+    "LegacyAlias": {
+      "additionalProperties": false,
+      "description": "One explicit, reviewable legacy spelling migration.",
+      "properties": {
+        "source": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target"
+      ],
+      "title": "LegacyAlias",
+      "type": "object"
+    },
+    "LegacyImportPolicy": {
+      "additionalProperties": false,
+      "description": "Explicit migration behavior for historical labels.",
+      "properties": {
+        "aliases": {
+          "items": {
+            "$ref": "#/$defs/LegacyAlias"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "quarantined": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^\\S(?:.*\\S)?$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Quarantined",
+          "type": "array"
+        }
+      },
+      "required": [
+        "aliases",
+        "quarantined"
+      ],
+      "title": "LegacyImportPolicy",
+      "type": "object"
+    },
+    "ProductClaim": {
+      "additionalProperties": false,
+      "description": "The only public claim authorized for the current reviewed taxonomy.",
+      "properties": {
+        "profile": {
+          "const": "predefined_gestures",
+          "title": "Profile",
+          "type": "string"
+        },
+        "statement": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile",
+        "statement"
+      ],
+      "title": "ProductClaim",
+      "type": "object"
+    },
+    "RuntimeConcept": {
+      "additionalProperties": false,
+      "description": "A state or outcome that must not be conflated with other pipeline layers.",
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "enum": [
+            "inactive",
+            "other",
+            "abstain"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "detector_state",
+            "learned_class",
+            "decision_outcome"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "role",
+        "description"
+      ],
+      "title": "RuntimeConcept",
+      "type": "object"
+    },
+    "TaxonomyRules": {
+      "additionalProperties": false,
+      "description": "Cross-cutting decisions for edge cases and event boundaries.",
+      "properties": {
+        "ambiguous_annotations": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Ambiguous Annotations",
+          "type": "string"
+        },
+        "handedness": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Handedness",
+          "type": "string"
+        },
+        "ignore_regions": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Ignore Regions",
+          "type": "string"
+        },
+        "out_of_vocabulary": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Out Of Vocabulary",
+          "type": "string"
+        },
+        "partial_gesture": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Partial Gesture",
+          "type": "string"
+        },
+        "poor_segmentation": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Poor Segmentation",
+          "type": "string"
+        },
+        "second_hand": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Second Hand",
+          "type": "string"
+        },
+        "transitions": {
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Transitions",
+          "type": "string"
+        }
+      },
+      "required": [
+        "handedness",
+        "second_hand",
+        "partial_gesture",
+        "out_of_vocabulary",
+        "poor_segmentation",
+        "transitions",
+        "ignore_regions",
+        "ambiguous_annotations"
+      ],
+      "title": "TaxonomyRules",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/gesture-taxonomy-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The authoritative, versioned definition of SignLab's learned vocabulary.",
+  "oneOf": [
+    {
+      "const": {
+        "annotation_dispositions": [
+          {
+            "description": "The visible evidence cannot support a reliable class decision; adjudication is required before training or evaluation.",
+            "id": "ambiguous"
+          },
+          {
+            "description": "The region must not be trained or scored under the evaluator's declared overlap rule, and a reason is required.",
+            "id": "ignore"
+          }
+        ],
+        "claim": {
+          "profile": "predefined_gestures",
+          "statement": "SignLab is a research prototype for recognizing isolated performances of five predefined hand gestures within continuous webcam video. It separates non-target events (`other`) from no active event (`inactive`) and uncertain decisions (`abstain`); no sign-language or translation capability is claimed."
+        },
+        "concepts": [
+          {
+            "description": "No finalized candidate event is active; this state belongs to the event detector and is never a classifier label.",
+            "id": "inactive",
+            "role": "detector_state"
+          },
+          {
+            "description": "A complete candidate event is confidently not one of the five targets; this is the required learned negative class.",
+            "id": "other",
+            "role": "learned_class"
+          },
+          {
+            "description": "A finalized candidate cannot be named at the accepted risk threshold; this is a decision-policy outcome, not a class.",
+            "id": "abstain",
+            "role": "decision_outcome"
+          }
+        ],
+        "consumer_references": [
+          {
+            "consumer": "collection",
+            "required": true,
+            "schema_id": "https://signlab.dev/schemas/collection-taxonomy-binding-1.schema.json"
+          },
+          {
+            "consumer": "annotation",
+            "required": true,
+            "schema_id": "https://signlab.dev/schemas/annotation-taxonomy-binding-1.schema.json"
+          },
+          {
+            "consumer": "training",
+            "required": true,
+            "schema_id": "https://signlab.dev/schemas/training-taxonomy-binding-1.schema.json"
+          },
+          {
+            "consumer": "evaluation",
+            "required": true,
+            "schema_id": "https://signlab.dev/schemas/evaluation-taxonomy-binding-1.schema.json"
+          },
+          {
+            "consumer": "bundle",
+            "required": true,
+            "schema_id": "https://signlab.dev/schemas/bundle-taxonomy-binding-1.schema.json"
+          },
+          {
+            "consumer": "public_copy",
+            "required": true,
+            "schema_id": "https://signlab.dev/schemas/public-copy-taxonomy-binding-1.schema.json"
+          }
+        ],
+        "decision_precedence": [
+          "inactive",
+          "target",
+          "other",
+          "abstain"
+        ],
+        "labels": [
+          {
+            "description": "Open hand near the temple or upper face with a short outward or side-to-side wave.",
+            "display_name": "Hello",
+            "examples": {
+              "ambiguous": [
+                "The face or hand location is unavailable, the active hand is occluded, or the defining wave is clipped."
+              ],
+              "negative": [
+                "A static raised palm, a low chest-level wave, or a chin-origin outward stroke."
+              ],
+              "positive": [
+                "An open hand near the temple or upper face, palm generally outward, makes a short outward or side-to-side wave."
+              ],
+              "transition": [
+                "Arm raising and hand pre-shaping before the wave, plus lowering or relaxation after it, are outside the event."
+              ]
+            },
+            "id": "hello",
+            "index": 0,
+            "role": "target"
+          },
+          {
+            "description": "Thumb closes toward extended index and middle fingertips one or more times.",
+            "display_name": "No",
+            "examples": {
+              "ambiguous": [
+                "The thumb or fingertips are occluded, or closure toward the fingertips cannot be established."
+              ],
+              "negative": [
+                "A whole-hand fist or opening, a static two-finger pose, a head shake alone, or a closed-fist vertical nod."
+              ],
+              "positive": [
+                "The thumb closes toward the extended index and middle fingertips one or more times."
+              ],
+              "transition": [
+                "Hand raising and pre-shaping before the first closure, plus relaxation after the final closure, are outside the event."
+              ]
+            },
+            "id": "no",
+            "index": 1,
+            "role": "target"
+          },
+          {
+            "description": "Flat or open palm at the upper chest with a small circular stroke.",
+            "display_name": "Please",
+            "examples": {
+              "ambiguous": [
+                "The chest anchor is missing, the circular stroke is clipped, or the motion path is indeterminate."
+              ],
+              "negative": [
+                "Static chest contact, a straight chest rub, a circle away from the chest, or a chin-origin outward stroke."
+              ],
+              "positive": [
+                "A flat or open palm at or near the upper chest makes a small circular stroke."
+              ],
+              "transition": [
+                "Approach to the chest before the circle and withdrawal after the circle are outside the target interval."
+              ]
+            },
+            "id": "please",
+            "index": 2,
+            "role": "target"
+          },
+          {
+            "description": "Flat or open hand begins at the chin or lower face and moves outward in one stroke.",
+            "display_name": "Thank you",
+            "examples": {
+              "ambiguous": [
+                "The origin at the chin or lower face is unavailable, or the outward stroke is occluded or clipped."
+              ],
+              "negative": [
+                "A forehead-origin wave, a chest circle, or an unrelated hand movement near the mouth."
+              ],
+              "positive": [
+                "A flat or open hand starts at the chin or lower face and moves outward, usually slightly downward, in one stroke."
+              ],
+              "transition": [
+                "Approach to the chin before the stroke and the return or drop after the stroke are outside the event."
+              ]
+            },
+            "id": "thank_you",
+            "index": 3,
+            "role": "target"
+          },
+          {
+            "description": "Closed fist near the upper torso performs one or more wrist-driven vertical nods.",
+            "display_name": "Yes",
+            "examples": {
+              "ambiguous": [
+                "The fist shape or the wrist-driven vertical motion cannot be observed reliably."
+              ],
+              "negative": [
+                "A static fist, thumbs-up, punch, whole-hand opening, or thumb-to-fingertip closure."
+              ],
+              "positive": [
+                "A closed fist near the upper torso performs one or more wrist-driven vertical nods."
+              ],
+              "transition": [
+                "Fist formation or raising before the first nod and opening or lowering after the last nod are outside the event."
+              ]
+            },
+            "id": "yes",
+            "index": 4,
+            "role": "target"
+          },
+          {
+            "description": "A complete candidate event that is confidently outside the five-target vocabulary.",
+            "display_name": "Other",
+            "examples": {
+              "ambiguous": [
+                "A candidate whose defining motion or hand shape is not visible enough to determine whether it is a target."
+              ],
+              "negative": [
+                "A complete, correctly bounded performance of any of the five target gestures."
+              ],
+              "positive": [
+                "A complete out-of-vocabulary gesture, a clearly incomplete target attempt, or unrelated intentional hand activity."
+              ],
+              "transition": [
+                "A derived target transition may be a training hard negative only on train or development splits, never relabeled source truth."
+              ]
+            },
+            "id": "other",
+            "index": 5,
+            "role": "learned_negative"
+          }
+        ],
+        "legacy_import": {
+          "aliases": [
+            {
+              "source": "thank you",
+              "target": "thank_you"
+            }
+          ],
+          "quarantined": [
+            "nothing"
+          ]
+        },
+        "other_kinds": [
+          "partial_target",
+          "transition_fragment",
+          "oov_gesture",
+          "incidental_activity",
+          "two_hand_non_target"
+        ],
+        "rules": {
+          "ambiguous_annotations": "Ambiguous records require adjudication before they become trainable or evaluable.",
+          "handedness": "Either hand is accepted only after handedness normalization is recorded explicitly.",
+          "ignore_regions": "Ignore regions require a documented reason such as consent exclusion, camera setup, third-party presence, unresolved conflict, or unusable occlusion.",
+          "out_of_vocabulary": "A complete gesture candidate outside the five targets is other with kind oov_gesture.",
+          "partial_gesture": "A clearly incomplete target attempt is other with kind partial_target; insufficient visibility is ambiguous instead.",
+          "poor_segmentation": "Poor segmentation never changes source event truth; continuous evaluation still records detector misses and fragmentation.",
+          "second_hand": "An incidental second hand is allowed only when it does not contact, occlude, or alter the active-hand form; coordinated two-hand activity is other.",
+          "transitions": "Transitions are not automatically training examples; derived transition fragments may be other only on train or development splits."
+        },
+        "schema_version": "gesture-taxonomy/1",
+        "taxonomy_id": "signlab-five",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "properties": {
+    "annotation_dispositions": {
+      "items": {
+        "$ref": "#/$defs/AnnotationDisposition"
+      },
+      "title": "Annotation Dispositions",
+      "type": "array"
+    },
+    "claim": {
+      "$ref": "#/$defs/ProductClaim"
+    },
+    "concepts": {
+      "items": {
+        "$ref": "#/$defs/RuntimeConcept"
+      },
+      "title": "Concepts",
+      "type": "array"
+    },
+    "consumer_references": {
+      "items": {
+        "$ref": "#/$defs/ConsumerReferenceRule"
+      },
+      "title": "Consumer References",
+      "type": "array"
+    },
+    "decision_precedence": {
+      "items": {
+        "enum": [
+          "inactive",
+          "target",
+          "other",
+          "abstain"
+        ],
+        "type": "string"
+      },
+      "title": "Decision Precedence",
+      "type": "array"
+    },
+    "labels": {
+      "items": {
+        "$ref": "#/$defs/GestureDefinition"
+      },
+      "title": "Labels",
+      "type": "array"
+    },
+    "legacy_import": {
+      "$ref": "#/$defs/LegacyImportPolicy"
+    },
+    "other_kinds": {
+      "items": {
+        "pattern": "^[a-z][a-z0-9_-]*$",
+        "type": "string"
+      },
+      "title": "Other Kinds",
+      "type": "array"
+    },
+    "rules": {
+      "$ref": "#/$defs/TaxonomyRules"
+    },
+    "schema_version": {
+      "const": "gesture-taxonomy/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "taxonomy_id": {
+      "const": "signlab-five",
+      "title": "Taxonomy Id",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "taxonomy_id",
+    "version",
+    "claim",
+    "labels",
+    "concepts",
+    "annotation_dispositions",
+    "decision_precedence",
+    "other_kinds",
+    "rules",
+    "legacy_import",
+    "consumer_references"
+  ],
+  "title": "GestureTaxonomy",
+  "type": "object"
+}

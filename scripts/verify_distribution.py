@@ -14,6 +14,16 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path, PurePosixPath
 
 MAX_MEMBER_BYTES = 1_048_576
+EXPECTED_TAXONOMY_SCHEMAS = {
+    "annotation-taxonomy-binding-1.schema.json",
+    "bundle-taxonomy-binding-1.schema.json",
+    "collection-taxonomy-binding-1.schema.json",
+    "evaluation-taxonomy-binding-1.schema.json",
+    "gesture-taxonomy-1.schema.json",
+    "public-copy-taxonomy-binding-1.schema.json",
+    "taxonomy-reference-1.schema.json",
+    "training-taxonomy-binding-1.schema.json",
+}
 FORBIDDEN_REPOSITORY_ROOTS = {
     "artifacts",
     "data",
@@ -92,6 +102,20 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             errors.append("wheel is missing the typed-package marker")
         if not any(name.startswith("signlab/commands/") for name in names):
             errors.append("wheel is missing CLI command modules")
+        taxonomy_members = {
+            PurePosixPath(name).name
+            for name in names
+            if name.startswith("signlab/resources/taxonomies/") and name.endswith(".json")
+        }
+        if taxonomy_members != {"signlab-five-1.0.0.json"}:
+            errors.append("wheel is missing the built-in gesture taxonomy")
+        schema_members = {
+            PurePosixPath(name).name
+            for name in names
+            if name.startswith("signlab/resources/schemas/") and name.endswith(".json")
+        }
+        if schema_members != EXPECTED_TAXONOMY_SCHEMAS:
+            errors.append("wheel does not contain the exact generated taxonomy schema set")
         if not any(name.endswith(".dist-info/METADATA") for name in names):
             errors.append("wheel is missing distribution metadata")
         entry_point_members = [
@@ -170,13 +194,21 @@ def _install_and_smoke_test(wheel: Path) -> None:
             raise RuntimeError("isolated wheel did not expose a version")
         console_script = _venv_executable(virtual_environment, "signlab")
         _run([str(console_script), "--version"], environment=environment)
-        for command in ("data", "train", "evaluate", "export", "doctor"):
+        for command in ("data", "train", "evaluate", "export", "doctor", "taxonomy"):
             _run(
                 [str(console_script), command, "--help"],
                 environment=environment,
             )
         _run(
             [str(console_script), "doctor", "check"],
+            environment=environment,
+        )
+        _run(
+            [str(console_script), "taxonomy", "validate"],
+            environment=environment,
+        )
+        _run(
+            [str(console_script), "taxonomy", "validate-resources"],
             environment=environment,
         )
 
