@@ -161,6 +161,18 @@ def _output_hashes(repository: Path) -> DigestMap:
     return hashes
 
 
+def _normalize_dvc_lock_newlines(repository: Path) -> None:
+    """Restore the LF form required by ``.gitattributes`` after Windows DVC writes."""
+
+    path = repository / "dvc.lock"
+    payload = path.read_bytes()
+    normalized = payload.replace(b"\r\n", b"\n")
+    if b"\r" in normalized:
+        raise ValueError("dvc.lock contains invalid newlines")
+    if normalized != payload:
+        path.write_bytes(normalized)
+
+
 def _dvc_is_clean(repository: Path, environment: Mapping[str, str]) -> bool:
     return parse_json_object(_dvc(repository, environment, "status", "--json")) == {}
 
@@ -364,6 +376,7 @@ def run_clean_room(source_repository: Path, report_path: Path) -> JsonObject:
 
         def reproduce() -> DigestMap:
             _dvc(producer, producer_environment, "repro", "--force", "--no-run-cache")
+            _normalize_dvc_lock_newlines(producer)
             hashes = _output_hashes(producer)
             if not _dvc_is_clean(producer, producer_environment):
                 raise ValueError("producer DVC state is not clean")

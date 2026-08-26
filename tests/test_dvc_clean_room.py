@@ -189,6 +189,17 @@ def test_subprocess_failure_does_not_echo_command_output(
     assert secret not in str(captured.value)
 
 
+def test_windows_dvc_lock_newlines_are_normalized_without_changing_content(
+    tmp_path: Path,
+) -> None:
+    lock = tmp_path / "dvc.lock"
+    lock.write_bytes(b"schema: '2.0'\r\nstages: {}\r\n")
+
+    clean_room._normalize_dvc_lock_newlines(tmp_path)
+
+    assert lock.read_bytes() == b"schema: '2.0'\nstages: {}\n"
+
+
 def test_success_report_is_canonical_and_requires_matching_outputs() -> None:
     report = _valid_report()
 
