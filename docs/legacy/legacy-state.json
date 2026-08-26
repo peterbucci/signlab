@@ -1,0 +1,344 @@
+{
+  "schema_version": 2,
+  "repository": {
+    "branch": "master",
+    "commit_timestamp": "2025-12-22T22:37:21-05:00",
+    "head_commit": "0e630168727e0d526a1f040ce912db26c1cefc72",
+    "identification_anchor": "git-object:0e630168727e0d526a1f040ce912db26c1cefc72",
+    "remotes": [],
+    "recovery": {
+      "artifact_locator": "relative logical paths under an operator-supplied legacy root",
+      "code_locator": "Git objects in an operator-supplied legacy repository",
+      "limitation": "No tag, remote, Git bundle, or durable artifact backup was available during the audit.",
+      "status": "incomplete-local-only"
+    },
+    "tags": [],
+    "tree_object": "828edda9a38ef5bdd0f0e501265482b49de000be",
+    "tracked_files": {
+      "bytecode_files": 183,
+      "file_count": 303,
+      "python_source_files": 114
+    },
+    "worktree": {
+      "modified_files": 0,
+      "untracked_files": 1,
+      "untracked_note": "One local archive was present. Its contents were not inspected, copied, or treated as evidence."
+    }
+  },
+  "artifact_inventory": [
+    {
+      "bytes": 341300064,
+      "file_count": 310,
+      "logical_path": "data/raw_videos",
+      "policy": "quarantine pending consent review"
+    },
+    {
+      "bytes": 54683024,
+      "file_count": 3712,
+      "logical_path": "data/landmarks",
+      "policy": "recompute from approved raw inputs; do not treat as canonical"
+    },
+    {
+      "bytes": 2043571289,
+      "file_count": 4954,
+      "logical_path": "data/nothing_label",
+      "policy": "quarantine as development-only hard-negative material"
+    },
+    {
+      "bytes": 210305035,
+      "file_count": 220,
+      "logical_path": "data/results",
+      "policy": "preserve compact metadata and selected model hashes only"
+    },
+    {
+      "bytes": 429307581,
+      "file_count": 1102,
+      "logical_path": "data/results_old",
+      "policy": "index summaries; do not migrate bulk artifacts"
+    },
+    {
+      "bytes": 16508757238,
+      "file_count": 17461,
+      "logical_path": "runs/sweeps",
+      "policy": "index summaries; do not migrate checkpoints"
+    },
+    {
+      "bytes": 2050135,
+      "file_count": 8,
+      "logical_path": "data/models",
+      "policy": "preserve database hashes and export sanitized records under story #8"
+    },
+    {
+      "bytes": 3410,
+      "file_count": 1,
+      "logical_path": "data/plans",
+      "policy": "preserve as historical preprocessing evidence"
+    },
+    {
+      "bytes": 6059649,
+      "file_count": 530,
+      "logical_path": "data/live_eval",
+      "policy": "quarantine as development evidence; never use as locked final test data"
+    }
+  ],
+  "dataset_snapshot": {
+    "labels": {
+      "hello": 60,
+      "no": 71,
+      "please": 58,
+      "thank you": 53,
+      "yes": 68
+    },
+    "negative_material": {
+      "derived_landmark_files": 4951,
+      "included_in_reported_five_class_runs": false,
+      "raw_video_files": 3
+    },
+    "reported_split": {
+      "method": "two stratified sample-level train_test_split calls",
+      "random_state": 42,
+      "test_fraction": 0.2,
+      "test_samples": 62,
+      "train_fraction": 0.6,
+      "train_samples": 186,
+      "validation_fraction": 0.2,
+      "validation_samples": 62
+    },
+    "selected_representation": "pos_vel_handscale_smooth_30f",
+    "sequence_length": 30,
+    "total_samples": 310
+  },
+  "live_state": {
+    "feedback_database": {
+      "detections": 45,
+      "feedback_records": 408,
+      "sessions": 5
+    },
+    "live_evaluation_database": {
+      "attempts": 532,
+      "replay_results": 0
+    },
+    "run_database": {
+      "by_model": {
+        "causal_gru": 130,
+        "causal_lstm": 130,
+        "causal_tcn": 77,
+        "mamba": 127
+      },
+      "by_status": {
+        "failed": 6,
+        "running": 1,
+        "succeeded": 457
+      },
+      "runs": 464
+    }
+  },
+  "reported_label_order": [
+    "hello",
+    "no",
+    "please",
+    "thank you",
+    "yes"
+  ],
+  "reported_runs": [
+    {
+      "confusion_matrix": [
+        [10, 0, 0, 1, 1],
+        [0, 12, 0, 1, 1],
+        [0, 0, 11, 0, 0],
+        [0, 2, 0, 9, 0],
+        [0, 1, 0, 2, 11]
+      ],
+      "correct_test_predictions": 53,
+      "live_imported": true,
+      "macro_f1": 0.860298386160455,
+      "model_bytes": 2428032,
+      "model_key": "causal_gru",
+      "model_logical_path": "data/results/20251222_154233_gru_phase_3_run_001/sign_model_best.keras",
+      "model_sha256": "f69c07838a477df0853a6cdb71b1acb9a933e0de1491359da0cae5462584e46c",
+      "source_evidence": [
+        {
+          "bytes": 15715,
+          "logical_path": "data/results/20251222_154233_gru_phase_3_run_001/test_predictions.csv",
+          "sha256": "48714ee48008b9c43edc70c6f4347d7f864f08058dd880bb72fbc6a14d9f83d3"
+        },
+        {
+          "bytes": 527,
+          "logical_path": "data/results/20251222_154233_gru_phase_3_run_001/confusion_matrix.json",
+          "sha256": "9f1c88e7523a5191b0c7901dcbf73f3146ed7df68415c3b21b574aa48284f3b6"
+        },
+        {
+          "bytes": 88,
+          "logical_path": "data/results/20251222_154233_gru_phase_3_run_001/label_map.json",
+          "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+        },
+        {
+          "bytes": 1046,
+          "logical_path": "data/results/20251222_154233_gru_phase_3_run_001/metrics.json",
+          "sha256": "8b3ea92cec2c1d002e8e2242e8a7a26a7c89333a3f9e4865dd91ab20de8ff794"
+        }
+      ],
+      "run_id": "20251222_154233_gru_phase_3_run_001",
+      "test_accuracy": 0.854838728904724,
+      "test_samples": 62,
+      "train_accuracy": 0.983870967741935,
+      "validation_accuracy": 0.806451612903226
+    },
+    {
+      "confusion_matrix": [
+        [10, 1, 0, 1, 0],
+        [0, 12, 0, 1, 1],
+        [1, 0, 10, 0, 0],
+        [0, 2, 0, 8, 1],
+        [0, 1, 0, 2, 11]
+      ],
+      "correct_test_predictions": 51,
+      "live_imported": true,
+      "macro_f1": 0.826482631700023,
+      "model_bytes": 3210098,
+      "model_key": "causal_lstm",
+      "model_logical_path": "data/results/20251222_161016_lstm_phase_c_run_003/sign_model_best.keras",
+      "model_sha256": "b175174c2daa4ccd33bb9fb49120d7399a61aab95c3bdfa378ba40aa57ace7ee",
+      "source_evidence": [
+        {
+          "bytes": 15600,
+          "logical_path": "data/results/20251222_161016_lstm_phase_c_run_003/test_predictions.csv",
+          "sha256": "d619db0b9cb2de83f2f1347cb2edb3f3c41edd831de35ed29c737b0e30ea5ade"
+        },
+        {
+          "bytes": 527,
+          "logical_path": "data/results/20251222_161016_lstm_phase_c_run_003/confusion_matrix.json",
+          "sha256": "05b4c624fe8a8d2e8a2ed322fc97ada43057219f78575ae8b1330513ebe3cf0f"
+        },
+        {
+          "bytes": 88,
+          "logical_path": "data/results/20251222_161016_lstm_phase_c_run_003/label_map.json",
+          "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+        },
+        {
+          "bytes": 1061,
+          "logical_path": "data/results/20251222_161016_lstm_phase_c_run_003/metrics.json",
+          "sha256": "6e96d05cbdef41a28bc90ef989564b4e2ba29304b14dbd502aedaf3c56d2cd20"
+        }
+      ],
+      "run_id": "20251222_161016_lstm_phase_c_run_003",
+      "test_accuracy": 0.822580635547638,
+      "test_samples": 62,
+      "train_accuracy": 0.940860215053763,
+      "validation_accuracy": 0.774193548387097
+    },
+    {
+      "confusion_matrix": [
+        [10, 0, 0, 1, 1],
+        [0, 12, 0, 1, 1],
+        [0, 0, 11, 0, 0],
+        [0, 1, 0, 10, 0],
+        [0, 1, 0, 2, 11]
+      ],
+      "correct_test_predictions": 54,
+      "live_imported": true,
+      "macro_f1": 0.876209716209716,
+      "model_bytes": 2458533,
+      "model_key": "causal_tcn",
+      "model_logical_path": "data/results/20251222_162425_tcn_phase_c_run_003/sign_model_best.keras",
+      "model_sha256": "d5e3d15cead7436342c15229e94a6becdfd41b1254f3caa5332cf64ad9cf3f0c",
+      "source_evidence": [
+        {
+          "bytes": 15516,
+          "logical_path": "data/results/20251222_162425_tcn_phase_c_run_003/test_predictions.csv",
+          "sha256": "55a7f62b003d1403b42701cda7ce3d7257d6dfa968cbffd310dff9e8132ffcc7"
+        },
+        {
+          "bytes": 528,
+          "logical_path": "data/results/20251222_162425_tcn_phase_c_run_003/confusion_matrix.json",
+          "sha256": "d5635cdf363f88e7945f826f968c8885089cc8ab2bdc4e08e0c769477cec4889"
+        },
+        {
+          "bytes": 88,
+          "logical_path": "data/results/20251222_162425_tcn_phase_c_run_003/label_map.json",
+          "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+        },
+        {
+          "bytes": 1046,
+          "logical_path": "data/results/20251222_162425_tcn_phase_c_run_003/metrics.json",
+          "sha256": "4bae18905924f1f9c089a15c199cd9bbe7d09e4346e4ff4e9ea6b141f1342131"
+        }
+      ],
+      "run_id": "20251222_162425_tcn_phase_c_run_003",
+      "test_accuracy": 0.870967745780945,
+      "test_samples": 62,
+      "train_accuracy": 0.983870967741935,
+      "validation_accuracy": 0.838709677419355
+    },
+    {
+      "confusion_matrix": [
+        [11, 1, 0, 0, 0],
+        [2, 11, 0, 1, 0],
+        [0, 0, 11, 0, 0],
+        [0, 2, 0, 9, 0],
+        [0, 2, 0, 2, 10]
+      ],
+      "correct_test_predictions": 52,
+      "live_imported": true,
+      "macro_f1": 0.845855072463768,
+      "model_bytes": 467230,
+      "model_key": "mamba",
+      "model_logical_path": "data/results/20251222_163528_mamba_phase_c_run_001/sign_model_best.keras",
+      "model_sha256": "89647b516068950818bffabb9c269f31bef924bdcce0230ea509af9fea17559e",
+      "source_evidence": [
+        {
+          "bytes": 15427,
+          "logical_path": "data/results/20251222_163528_mamba_phase_c_run_001/test_predictions.csv",
+          "sha256": "5483a37500fd5b406545d4a845725df7a01da7b19e8b0826742e303f78ae94d9"
+        },
+        {
+          "bytes": 527,
+          "logical_path": "data/results/20251222_163528_mamba_phase_c_run_001/confusion_matrix.json",
+          "sha256": "20ec133ec420a9ab9009b5100b5ac03dbfce584eb1ee3a411e2d362d7b5e5bfc"
+        },
+        {
+          "bytes": 88,
+          "logical_path": "data/results/20251222_163528_mamba_phase_c_run_001/label_map.json",
+          "sha256": "c0a1e624ee1d6353d6377c2391030df15106ec2bea193323c07f0da1a4c9499d"
+        },
+        {
+          "bytes": 1045,
+          "logical_path": "data/results/20251222_163528_mamba_phase_c_run_001/metrics.json",
+          "sha256": "4575ed4ec7e4cfaa6bbfac53d5ab85c98c6cb03866852077a3b1a2706f692db3"
+        }
+      ],
+      "run_id": "20251222_163528_mamba_phase_c_run_001",
+      "test_accuracy": 0.838709652423859,
+      "test_samples": 62,
+      "train_accuracy": 0.940860215053763,
+      "validation_accuracy": 0.82258064516129
+    }
+  ],
+  "integrity": [
+    {
+      "bytes": 3410,
+      "logical_path": "data/plans/plans.json",
+      "sha256": "5a727cc6218dcc2f82cb72cdec00bd7348f1f9d924677011548e2200d32cea0d"
+    },
+    {
+      "bytes": 200,
+      "logical_path": "data/live/live_imports.json",
+      "sha256": "fa20489bb2181462f80940ec3bcfc34ad546273e85ee1dd385e4838af9552598"
+    },
+    {
+      "bytes": 1769472,
+      "logical_path": "data/models/runs.db",
+      "sha256": "b23da61e7600ebaf9eb03336af50716a0170a4264b1db518b241777af5815921"
+    },
+    {
+      "bytes": 274432,
+      "logical_path": "data/models/live_feedback.db",
+      "sha256": "1cfaf5185278a5722b869f66c4e4e00d80c4540e9147b931b781524b9e6a75b5"
+    },
+    {
+      "bytes": 413696,
+      "logical_path": "data/live_eval/live_eval.db",
+      "sha256": "0f606831befc27cd488004e62bf7f96ef87582d02fbefe795f4cd512c6ad952b"
+    }
+  ]
+}
