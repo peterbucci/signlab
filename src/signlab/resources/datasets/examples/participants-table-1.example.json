@@ -1,0 +1,9 @@
+{
+  "rows": [
+    {
+      "handedness": "right",
+      "participant_id": "participant_00000000000000000000000000000001"
+    }
+  ],
+  "schema_version": "participants-table/1"
+}

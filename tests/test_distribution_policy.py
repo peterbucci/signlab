@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import stat
 import subprocess
 import tarfile
 import zipfile
@@ -11,6 +12,7 @@ import pytest
 from scripts import verify_distribution as distribution_verifier
 from scripts.verify_distribution import (
     EXPECTED_CONTRACT_RESOURCES,
+    EXPECTED_DATASET_RESOURCES,
     EXPECTED_GOVERNANCE_RESOURCES,
     EXPECTED_TAXONOMY_SCHEMAS,
     _inspect_sdist,
@@ -24,11 +26,14 @@ def _write_sdist(
     path: Path,
     governance_resources: Iterable[str],
     contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
+    dataset_resources: Iterable[str] = EXPECTED_DATASET_RESOURCES,
+    extra_members: Iterable[tarfile.TarInfo] = (),
 ) -> None:
     archive_root = path.name.removesuffix(".tar.gz")
     member_names = [
         f"{archive_root}/src/signlab/py.typed",
         f"{archive_root}/src/signlab/resources/contracts/__init__.py",
+        f"{archive_root}/src/signlab/resources/datasets/__init__.py",
         f"{archive_root}/src/signlab/resources/governance/__init__.py",
         *(
             f"{archive_root}/src/signlab/resources/governance/{resource}"
@@ -38,6 +43,10 @@ def _write_sdist(
             f"{archive_root}/src/signlab/resources/contracts/{resource}"
             for resource in contract_resources
         ),
+        *(
+            f"{archive_root}/src/signlab/resources/datasets/{resource}"
+            for resource in dataset_resources
+        ),
     ]
     with tarfile.open(path, mode="w:gz") as archive:
         for member_name in sorted(member_names):
@@ -45,22 +54,27 @@ def _write_sdist(
             member = tarfile.TarInfo(member_name)
             member.size = len(payload)
             archive.addfile(member, io.BytesIO(payload))
+        for member in extra_members:
+            archive.addfile(member)
 
 
 def _write_wheel(
     path: Path,
     governance_resources: Iterable[str],
     contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
+    dataset_resources: Iterable[str] = EXPECTED_DATASET_RESOURCES,
 ) -> None:
     member_names = [
         "signlab/py.typed",
         "signlab/commands/__init__.py",
         "signlab/resources/contracts/__init__.py",
+        "signlab/resources/datasets/__init__.py",
         "signlab/resources/governance/__init__.py",
         "signlab/resources/taxonomies/signlab-five-1.0.0.json",
         *(f"signlab/resources/schemas/{name}" for name in EXPECTED_TAXONOMY_SCHEMAS),
         *(f"signlab/resources/governance/{name}" for name in governance_resources),
         *(f"signlab/resources/contracts/{name}" for name in contract_resources),
+        *(f"signlab/resources/datasets/{name}" for name in dataset_resources),
         "signlab-0.1.0.dist-info/METADATA",
         "signlab-0.1.0.dist-info/entry_points.txt",
     ]
@@ -102,6 +116,75 @@ def test_distribution_policy_rejects_traversal_and_private_artifacts() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "member_name",
+    [
+        f"{chr(67)}:/outside.txt",
+        r"..\outside.txt",
+        r"\\server\share\outside.txt",
+        "signlab//module.py",
+        "signlab/./module.py",
+        "signlab/CON.py",
+        "signlab/module.py.",
+        "signlab/module.py ",
+        "signlab/module" + chr(10) + ".py",
+        "signlab/module" + chr(127) + ".py",
+    ],
+)
+def test_distribution_policy_rejects_nonportable_windows_and_noncanonical_paths(
+    member_name: str,
+) -> None:
+    assert validate_member_names((member_name,)) == ("archive contains a non-portable member path",)
+
+
+@pytest.mark.parametrize(
+    "member_names",
+    [
+        ("signlab/module.py", "signlab/module.py"),
+        ("signlab/Module.py", "signlab/module.py"),
+        ("signlab/package", "signlab/package/"),
+    ],
+)
+def test_distribution_policy_rejects_duplicate_and_case_colliding_paths(
+    member_names: tuple[str, str],
+) -> None:
+    assert validate_member_names(member_names) == (
+        "archive contains duplicate or case-colliding member paths",
+    )
+
+
+@pytest.mark.parametrize("member_type", [tarfile.SYMTYPE, tarfile.LNKTYPE])
+def test_sdist_rejects_link_members(
+    tmp_path: Path,
+    member_type: bytes,
+) -> None:
+    sdist = tmp_path / "signlab-0.1.0.tar.gz"
+    archive_root = sdist.name.removesuffix(".tar.gz")
+    link = tarfile.TarInfo(f"{archive_root}/src/signlab/linked-module.py")
+    link.type = member_type
+    link.linkname = f"{archive_root}/src/signlab/__init__.py"
+    _write_sdist(
+        sdist,
+        EXPECTED_GOVERNANCE_RESOURCES,
+        extra_members=(link,),
+    )
+
+    assert _inspect_sdist(sdist) == ("source distribution contains a non-regular member",)
+
+
+@pytest.mark.parametrize("member_name", ["signlab/linked-module.py", "signlab/linked-directory/"])
+def test_wheel_rejects_symbolic_link_members(tmp_path: Path, member_name: str) -> None:
+    wheel = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+    _write_wheel(wheel, EXPECTED_GOVERNANCE_RESOURCES)
+    link = zipfile.ZipInfo(member_name)
+    link.create_system = 3
+    link.external_attr = (stat.S_IFLNK | 0o777) << 16
+    with zipfile.ZipFile(wheel, mode="a") as archive:
+        archive.writestr(link, b"__init__.py")
+
+    assert _inspect_wheel(wheel) == ("wheel contains a non-regular member",)
+
+
 def test_sdist_requires_the_exact_governance_resource_set(tmp_path: Path) -> None:
     sdist = tmp_path / "signlab-0.1.0.tar.gz"
     missing = set(EXPECTED_GOVERNANCE_RESOURCES)
@@ -129,6 +212,7 @@ def test_sdist_rejects_duplicate_governance_resources(tmp_path: Path) -> None:
     _write_sdist(sdist, resources)
 
     assert _inspect_sdist(sdist) == (
+        "archive contains duplicate or case-colliding member paths",
         "source distribution does not contain the exact participant-governance resource set",
     )
 
@@ -143,6 +227,7 @@ def test_wheel_rejects_duplicate_governance_resources(tmp_path: Path) -> None:
         _write_wheel(wheel, resources)
 
     assert _inspect_wheel(wheel) == (
+        "archive contains duplicate or case-colliding member paths",
         "wheel does not contain the exact participant-governance resource set",
     )
 
@@ -179,7 +264,13 @@ def test_archives_require_the_exact_nonduplicate_contract_resource_set(
             "source distribution does not contain the exact pipeline-contract resource set"
         )
 
-    assert errors == (expected_error,)
+    expected_errors: tuple[str, ...] = (expected_error,)
+    if mutation == "duplicate":
+        expected_errors = (
+            "archive contains duplicate or case-colliding member paths",
+            expected_error,
+        )
+    assert errors == expected_errors
 
 
 def test_archives_accept_the_exact_contract_resource_set(tmp_path: Path) -> None:
@@ -190,6 +281,60 @@ def test_archives_accept_the_exact_contract_resource_set(tmp_path: Path) -> None
 
     assert _inspect_wheel(wheel) == ()
     assert _inspect_sdist(sdist) == ()
+
+
+@pytest.mark.parametrize("archive_kind", ["wheel", "sdist"])
+@pytest.mark.parametrize("mutation", ["missing", "extra", "duplicate"])
+def test_archives_require_the_exact_nonduplicate_dataset_resource_set(
+    tmp_path: Path,
+    archive_kind: str,
+    mutation: str,
+) -> None:
+    resources = sorted(EXPECTED_DATASET_RESOURCES)
+    if mutation == "missing":
+        resources.remove("schemas/participants-table-1.schema.json")
+    elif mutation == "extra":
+        resources.append("schemas/unexpected-table-1.schema.json")
+    else:
+        resources.append("schemas/participants-table-1.schema.json")
+
+    if archive_kind == "wheel":
+        archive = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+        if mutation == "duplicate":
+            with pytest.warns(UserWarning, match="Duplicate name"):
+                _write_wheel(
+                    archive,
+                    EXPECTED_GOVERNANCE_RESOURCES,
+                    EXPECTED_CONTRACT_RESOURCES,
+                    resources,
+                )
+        else:
+            _write_wheel(
+                archive,
+                EXPECTED_GOVERNANCE_RESOURCES,
+                EXPECTED_CONTRACT_RESOURCES,
+                resources,
+            )
+        errors = _inspect_wheel(archive)
+        expected_error = "wheel does not contain the exact dataset resource set"
+    else:
+        archive = tmp_path / "signlab-0.1.0.tar.gz"
+        _write_sdist(
+            archive,
+            EXPECTED_GOVERNANCE_RESOURCES,
+            EXPECTED_CONTRACT_RESOURCES,
+            resources,
+        )
+        errors = _inspect_sdist(archive)
+        expected_error = "source distribution does not contain the exact dataset resource set"
+
+    expected_errors: tuple[str, ...] = (expected_error,)
+    if mutation == "duplicate":
+        expected_errors = (
+            "archive contains duplicate or case-colliding member paths",
+            expected_error,
+        )
+    assert errors == expected_errors
 
 
 def test_isolated_smoke_tests_remove_pythonpath_and_use_temporary_cwd(
@@ -223,6 +368,7 @@ def test_isolated_smoke_tests_remove_pythonpath_and_use_temporary_cwd(
     commands = {command[-2:] for command, _, _ in calls if len(command) >= 2}
     assert ("contracts", "--help") in commands
     assert ("contracts", "validate-resources") in commands
+    assert ("data", "validate-resources") in commands
 
 
 def test_distribution_verification_smoke_tests_wheel_and_sdist_without_network(

@@ -1,0 +1,21 @@
+{
+  "rows": [
+    {
+      "camera_facing": "front",
+      "capture_mode": "continuous",
+      "capture_software_version": "1.0.0",
+      "device_id": "device_00000000000000000000000000000001",
+      "finished_at": "2026-08-26T12:30:00Z",
+      "frame_height_px": 1080,
+      "frame_rate_denominator": 1001,
+      "frame_rate_numerator": 30000,
+      "frame_width_px": 1920,
+      "mirror_state": "mirrored",
+      "participant_id": "participant_00000000000000000000000000000001",
+      "rotation_degrees": 0,
+      "session_id": "session_00000000000000000000000000000001",
+      "started_at": "2026-08-26T12:00:00Z"
+    }
+  ],
+  "schema_version": "sessions-table/1"
+}

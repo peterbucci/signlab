@@ -1,0 +1,23 @@
+{
+  "rows": [
+    {
+      "annotation_id": "annotation_00000000000000000000000000000001",
+      "clip_id": "clip_00000000000000000000000000000001",
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 3750000,
+        "schema_version": "media-interval/1",
+        "start_us": 250000
+      },
+      "label_id": "hello",
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000001",
+      "source_recording_id": "recording_00000000000000000000000000000031"
+    }
+  ],
+  "schema_version": "annotations-table/1"
+}

@@ -1,4 +1,4 @@
-"""Authoritative v1 identities and compatibility rules for the SignLab pipeline."""
+"""Authoritative versioned identities and compatibility rules for the SignLab pipeline."""
 
 from __future__ import annotations
 
@@ -35,15 +35,28 @@ from signlab.contracts.core import (
     same_artifact_reference,
     same_contract_reference,
 )
-from signlab.contracts.governance import DocumentRef, ParticipantId
+from signlab.contracts.dataset import (
+    DatasetContent,
+    DatasetContentV1,
+    DatasetContentV2,
+    DatasetContractError,
+    DatasetManifest,
+    DatasetManifestV1,
+    DatasetManifestV2,
+    DatasetSampleIdentityV1,
+    LabelId,
+    PartitionName,
+    RecordingId,
+    SampleId,
+    SessionId,
+)
+from signlab.contracts.dataset import (
+    dataset_content_digest as _dataset_content_digest,
+)
+from signlab.contracts.governance import ParticipantId
 from signlab.contracts.taxonomy import EXPECTED_CLASS_IDS, Sha256Digest, TaxonomyRef
 
-SampleId = Annotated[str, StringConstraints(pattern=r"^sample_[0-9a-f]{32}$")]
-SessionId = Annotated[str, StringConstraints(pattern=r"^session_[0-9a-f]{32}$")]
-RecordingId = Annotated[str, StringConstraints(pattern=r"^recording_[0-9a-f]{32}$")]
 PythonVersion = Annotated[str, StringConstraints(pattern=r"^3\.12\.[0-9]+$")]
-LabelId = Literal["hello", "no", "please", "thank_you", "yes", "other"]
-PartitionName = Literal["train", "validation", "test"]
 
 _EXPECTED_PARTITIONS: Final = ("train", "validation", "test")
 
@@ -56,101 +69,13 @@ class ContractVersionError(PipelineContractError):
     """Raised before model validation when a reader cannot handle a schema version."""
 
 
-class DatasetSampleIdentityV1(StrictContractModel):
-    """Minimal membership and leakage-group identity for one immutable sample."""
-
-    sample_id: SampleId
-    participant_id: ParticipantId
-    session_id: SessionId
-    source_recording_id: RecordingId
-    label_id: LabelId
-    artifact: ArtifactRefV1
-
-    @model_validator(mode="after")
-    def _bind_artifact_to_sample(self) -> Self:
-        if self.artifact.artifact_id != self.sample_id or self.artifact.role != "sample_data":
-            raise ValueError("sample artifact identity and role must bind to the sample")
-        return self
-
-
-class DatasetContentV1(StrictContractModel):
-    """Storage-independent semantic content used to calculate a stable data identity."""
-
-    schema_version: Literal["dataset-content/1"]
-    taxonomy: TaxonomyRef
-    governance_policy: DocumentRef
-    lineage_inventory_sha256: Sha256Digest
-    sample_schema_version: SchemaName
-    samples: tuple[DatasetSampleIdentityV1, ...] = Field(min_length=1)
-
-    @model_validator(mode="after")
-    def _require_canonical_unique_samples(self) -> Self:
-        if self.governance_policy.document_type != "governance_policy":
-            raise ValueError("dataset content must bind the registered governance policy")
-        sample_ids = tuple(sample.sample_id for sample in self.samples)
-        if sample_ids != tuple(sorted(set(sample_ids))):
-            raise ValueError("dataset samples must have unique IDs in sorted order")
-        artifact_digests = tuple(sample.artifact.sha256 for sample in self.samples)
-        if len(artifact_digests) != len(set(artifact_digests)):
-            raise ValueError("dataset samples must not duplicate artifact content")
-        return self
-
-
-def _dataset_semantic_payload(content: DatasetContentV1) -> dict[str, object]:
-    return {
-        "schema_version": content.schema_version,
-        "taxonomy": content.taxonomy.model_dump(mode="json", round_trip=True),
-        "governance_policy": content.governance_policy.model_dump(mode="json", round_trip=True),
-        "lineage_inventory_sha256": content.lineage_inventory_sha256,
-        "sample_schema_version": content.sample_schema_version,
-        "samples": [
-            {
-                "sample_id": sample.sample_id,
-                "participant_id": sample.participant_id,
-                "session_id": sample.session_id,
-                "source_recording_id": sample.source_recording_id,
-                "label_id": sample.label_id,
-                "artifact": {
-                    "artifact_id": sample.artifact.artifact_id,
-                    "role": sample.artifact.role,
-                    "media_type": sample.artifact.media_type,
-                    "sha256": sample.artifact.sha256,
-                    "size_bytes": sample.artifact.size_bytes,
-                },
-            }
-            for sample in content.samples
-        ],
-    }
-
-
-def dataset_content_digest(content: DatasetContentV1) -> str:
-    """Hash logical sample content independently of machine or storage location."""
+def dataset_content_digest(content: DatasetContent) -> str:
+    """Hash logical dataset content with the retained pipeline error surface."""
 
     try:
-        return canonical_sha256(
-            _dataset_semantic_payload(content),
-            domain=content.schema_version,
-        )
-    except CanonicalizationError as error:
+        return _dataset_content_digest(content)
+    except DatasetContractError as error:
         raise PipelineContractError("dataset content cannot be canonicalized") from error
-
-
-class DatasetManifestV1(StrictContractModel):
-    """Portable dataset envelope; detailed participant tables arrive in Story #15."""
-
-    model_config = contract_config("dataset-manifest-1.schema.json")
-
-    schema_version: Literal["dataset-manifest/1"]
-    dataset_id: StableId
-    version: SemanticVersion
-    content: DatasetContentV1
-    data_sha256: Sha256Digest
-
-    @model_validator(mode="after")
-    def _verify_data_identity(self) -> Self:
-        if self.data_sha256 != dataset_content_digest(self.content):
-            raise ValueError("data_sha256 does not match canonical storage-independent content")
-        return self
 
 
 class SplitPartitionV1(StrictContractModel):
@@ -422,6 +347,7 @@ class ModelManifestV1(StrictContractModel):
 
 type CoreContract = (
     DatasetManifestV1
+    | DatasetManifestV2
     | SplitManifestV1
     | PreprocessingPlanV1
     | ResolvedConfigurationV1
@@ -432,6 +358,7 @@ type ContractInput = CoreContract | str | bytes | bytearray | Mapping[str, objec
 
 CORE_CONTRACT_MODELS: Final[dict[str, type[BaseModel]]] = {
     "dataset-manifest/1": DatasetManifestV1,
+    "dataset-manifest/2": DatasetManifestV2,
     "split-manifest/1": SplitManifestV1,
     "preprocessing-plan/1": PreprocessingPlanV1,
     "resolved-configuration/1": ResolvedConfigurationV1,
@@ -440,12 +367,14 @@ CORE_CONTRACT_MODELS: Final[dict[str, type[BaseModel]]] = {
 }
 CORE_CONTRACT_SCHEMA_FILENAMES: Final[dict[str, str]] = {
     "dataset-manifest/1": "dataset-manifest-1.schema.json",
+    "dataset-manifest/2": "dataset-manifest-2.schema.json",
     "split-manifest/1": "split-manifest-1.schema.json",
     "preprocessing-plan/1": "preprocessing-plan-1.schema.json",
     "resolved-configuration/1": "resolved-configuration-1.schema.json",
     "run-record/1": "run-record-1.schema.json",
     "model-manifest/1": "model-manifest-1.schema.json",
 }
+_DATASET_MANIFEST_SCHEMA_VERSIONS: Final = frozenset({"dataset-manifest/1", "dataset-manifest/2"})
 
 
 def _parse_utc(value: str) -> datetime:
@@ -522,10 +451,38 @@ def _validate_as(
     return checked
 
 
-def validate_dataset_manifest(document: ContractInput) -> DatasetManifestV1:
+def validate_dataset_manifest(document: ContractInput) -> DatasetManifest:
+    """Validate either retained dataset manifest version without migration."""
+
+    payload = _document_object(document)
+    if payload.get("schema_version") not in _DATASET_MANIFEST_SCHEMA_VERSIONS:
+        supported = ", ".join(sorted(_DATASET_MANIFEST_SCHEMA_VERSIONS))
+        raise ContractVersionError(
+            "unsupported or missing dataset schema version; "
+            f"supported: {supported}; no implicit migration is performed; see "
+            "docs/contracts.md#compatibility-and-migration"
+        )
+    checked = validate_contract(payload)
+    if not isinstance(checked, (DatasetManifestV1, DatasetManifestV2)):  # pragma: no cover
+        raise PipelineContractError("dataset reader returned an incompatible model")
+    return checked
+
+
+def validate_dataset_manifest_v1(document: ContractInput) -> DatasetManifestV1:
+    """Validate exactly the retained Story #13 dataset contract."""
+
     return cast(
         DatasetManifestV1,
         _validate_as(document, "dataset-manifest/1", DatasetManifestV1),
+    )
+
+
+def validate_dataset_manifest_v2(document: ContractInput) -> DatasetManifestV2:
+    """Validate exactly the current table-backed dataset contract."""
+
+    return cast(
+        DatasetManifestV2,
+        _validate_as(document, "dataset-manifest/2", DatasetManifestV2),
     )
 
 
@@ -593,7 +550,7 @@ def model_manifest_digest(document: ContractInput) -> str:
 
 
 def _contract_identity(document: CoreContract) -> tuple[ContractKind, StableId, SemanticVersion]:
-    if isinstance(document, DatasetManifestV1):
+    if isinstance(document, (DatasetManifestV1, DatasetManifestV2)):
         return "dataset", document.dataset_id, document.version
     if isinstance(document, SplitManifestV1):
         return "split", document.split_id, document.version
@@ -634,7 +591,7 @@ def _assert_reference(
         raise PipelineContractError(f"{label} does not match the referenced contract identity")
 
 
-def assert_split_compatible(dataset: DatasetManifestV1, split: SplitManifestV1) -> None:
+def assert_split_compatible(dataset: DatasetManifest, split: SplitManifestV1) -> None:
     """Prove exact sample coverage and participant/session/recording isolation."""
 
     dataset = validate_dataset_manifest(dataset)
@@ -665,7 +622,7 @@ def assert_split_compatible(dataset: DatasetManifestV1, split: SplitManifestV1) 
 
 
 def assert_resolved_configuration_compatible(
-    dataset: DatasetManifestV1,
+    dataset: DatasetManifest,
     split: SplitManifestV1,
     preprocessing: PreprocessingPlanV1,
     configuration: ResolvedConfigurationV1,
@@ -693,7 +650,7 @@ def assert_resolved_configuration_compatible(
 
 
 def assert_run_compatible(
-    dataset: DatasetManifestV1,
+    dataset: DatasetManifest,
     split: SplitManifestV1,
     preprocessing: PreprocessingPlanV1,
     configuration: ResolvedConfigurationV1,
@@ -714,7 +671,7 @@ def assert_run_compatible(
 
 
 def assert_model_compatible(
-    dataset: DatasetManifestV1,
+    dataset: DatasetManifest,
     split: SplitManifestV1,
     preprocessing: PreprocessingPlanV1,
     configuration: ResolvedConfigurationV1,
@@ -772,8 +729,12 @@ __all__ = [
     "CORE_CONTRACT_MODELS",
     "CORE_CONTRACT_SCHEMA_FILENAMES",
     "ContractVersionError",
+    "DatasetContent",
     "DatasetContentV1",
+    "DatasetContentV2",
+    "DatasetManifest",
     "DatasetManifestV1",
+    "DatasetManifestV2",
     "DatasetSampleIdentityV1",
     "FailureRecordV1",
     "MetricRecordV1",
@@ -804,6 +765,8 @@ __all__ = [
     "split_manifest_digest",
     "validate_contract",
     "validate_dataset_manifest",
+    "validate_dataset_manifest_v1",
+    "validate_dataset_manifest_v2",
     "validate_model_manifest",
     "validate_preprocessing_plan",
     "validate_resolved_configuration",

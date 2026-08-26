@@ -1,0 +1,249 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab's strict table and dataset validators remain authoritative for canonical ordering, semantic hashes, foreign keys, intervals, consent binding, lineage, sample projection, split inheritance, and artifact-byte verification.",
+  "$defs": {
+    "ArtifactRefV1": {
+      "additionalProperties": false,
+      "description": "Exact bytes plus a portable location; the location is never the identity.",
+      "properties": {
+        "artifact_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "media_type": {
+          "maxLength": 127,
+          "minLength": 3,
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$",
+          "title": "Media Type",
+          "type": "string"
+        },
+        "role": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "artifact-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "role",
+        "media_type",
+        "sha256",
+        "size_bytes",
+        "locator"
+      ],
+      "title": "ArtifactRefV1",
+      "type": "object"
+    },
+    "ArtifactUriLocatorV1": {
+      "additionalProperties": false,
+      "description": "A storage-independent logical URI resolved by a future artifact adapter.",
+      "properties": {
+        "kind": {
+          "const": "artifact_uri",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 1024,
+          "minLength": 12,
+          "pattern": "^signlab://[a-z][a-z0-9-]{0,63}(/[a-z][a-z0-9._-]{0,127})+$",
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "uri"
+      ],
+      "title": "ArtifactUriLocatorV1",
+      "type": "object"
+    },
+    "ClipRowV1": {
+      "additionalProperties": false,
+      "description": "One temporal view whose coordinates remain rooted in the source recording.",
+      "properties": {
+        "artifact": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ArtifactRefV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "clip_id": {
+          "pattern": "^clip_[0-9a-f]{32}$",
+          "title": "Clip Id",
+          "type": "string"
+        },
+        "handedness": {
+          "enum": [
+            "left",
+            "right",
+            "both",
+            "ambidextrous",
+            "unknown"
+          ],
+          "title": "Handedness",
+          "type": "string"
+        },
+        "interval": {
+          "$ref": "#/$defs/MediaIntervalV1"
+        },
+        "mirror_state": {
+          "enum": [
+            "not_mirrored",
+            "mirrored"
+          ],
+          "title": "Mirror State",
+          "type": "string"
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        },
+        "session_id": {
+          "pattern": "^session_[0-9a-f]{32}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "source_recording_id": {
+          "pattern": "^recording_[0-9a-f]{32}$",
+          "title": "Source Recording Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "clip_id",
+        "participant_id",
+        "session_id",
+        "source_recording_id",
+        "interval",
+        "handedness",
+        "mirror_state",
+        "artifact"
+      ],
+      "title": "ClipRowV1",
+      "type": "object"
+    },
+    "MediaIntervalV1": {
+      "additionalProperties": false,
+      "description": "A non-empty half-open interval in root-recording microseconds.",
+      "properties": {
+        "end_us": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "End Us",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "media-interval/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "start_us": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Start Us",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "start_us",
+        "end_us"
+      ],
+      "title": "MediaIntervalV1",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/clips-table-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ClipRowV1"
+      },
+      "title": "Rows",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "clips-table/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rows"
+  ],
+  "title": "ClipsTableV1",
+  "type": "object"
+}

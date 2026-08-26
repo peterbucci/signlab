@@ -1,0 +1,28 @@
+{
+  "allowed_schema_metadata": {
+    "signlab:content_sha256": "sha256:<64 lowercase hex characters>",
+    "signlab:schema_sha256": "sha256:7fed454333fbb8ee7841ff97734946c842063cb7310ef20356baf42b25d5de95",
+    "signlab:schema_version": "participants-table/1",
+    "signlab:table_kind": "participants"
+  },
+  "fields": [
+    {
+      "field_id": 1,
+      "name": "participant_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 2,
+      "name": "handedness",
+      "nullable": false,
+      "type": "utf8"
+    }
+  ],
+  "format": "arrow-schema-snapshot/1",
+  "schema_version": "participants-table/1",
+  "table_name": "participants",
+  "writer_generated_file_metadata": {
+    "ARROW:schema": "authoritative Arrow schema encoding"
+  }
+}

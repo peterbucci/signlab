@@ -15,7 +15,6 @@ from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 from pydantic import BaseModel
 
 from signlab.contracts.core import (
-    CURRENT_CONTRACT_SCHEMAS,
     ArtifactRefV1,
     ArtifactUriLocatorV1,
     ComponentSpecV1,
@@ -74,6 +73,16 @@ CONTRACT_EXAMPLE_FILENAMES: Final[dict[ContractKind, str]] = {
     "resolved_configuration": "resolved-configuration.example.json",
     "run": "run-record.example.json",
     "model": "model-manifest.example.json",
+}
+# These published examples are the immutable Story #13 v1 compatibility corpus.
+# They deliberately do not follow CURRENT_CONTRACT_SCHEMAS when a writer advances.
+PUBLISHED_EXAMPLE_SCHEMA_VERSIONS: Final[dict[ContractKind, str]] = {
+    "dataset": "dataset-manifest/1",
+    "split": "split-manifest/1",
+    "preprocessing": "preprocessing-plan/1",
+    "resolved_configuration": "resolved-configuration/1",
+    "run": "run-record/1",
+    "model": "model-manifest/1",
 }
 CONTRACT_SCHEMA_MODELS: Final[dict[str, type[BaseModel]]] = {
     CORE_CONTRACT_SCHEMA_FILENAMES[schema_version]: model
@@ -715,12 +724,15 @@ def load_packaged_contract_example(kind: ContractKind) -> ContractExample:
 
     try:
         relative_name = f"examples/{CONTRACT_EXAMPLE_FILENAMES[kind]}"
-        expected_schema_version = CURRENT_CONTRACT_SCHEMAS[kind]
+        expected_schema_version = PUBLISHED_EXAMPLE_SCHEMA_VERSIONS[kind]
     except KeyError as error:
         raise ContractResourceError("unsupported packaged contract example kind") from error
-    return validate_contract(
-        _resource_bytes(relative_name),
-        expected_schema_version=expected_schema_version,
+    return cast(
+        ContractExample,
+        validate_contract(
+            _resource_bytes(relative_name),
+            expected_schema_version=expected_schema_version,
+        ),
     )
 
 
@@ -768,6 +780,7 @@ __all__ = [
     "CONTRACT_SCHEMA_MODELS",
     "GENERATED_RESOURCE_NAMES",
     "PUBLISHED_EXAMPLE_CONTRACT_DIGESTS",
+    "PUBLISHED_EXAMPLE_SCHEMA_VERSIONS",
     "ContractResourceError",
     "build_example_contract_chain",
     "generated_contract_resource_texts",

@@ -1,0 +1,30 @@
+{
+  "rows": [
+    {
+      "artifact": {
+        "artifact_id": "clip_00000000000000000000000000000001",
+        "locator": {
+          "kind": "workspace_relative",
+          "path": "objects/sha256/p-80/sha256-803f6657efbdeb337bfa4b644e86e50ca81bcd4d46f9be93ea2d236bdeec2852/clip_00000000000000000000000000000001"
+        },
+        "media_type": "video/mp4",
+        "role": "clip_media",
+        "schema_version": "artifact-reference/1",
+        "sha256": "sha256:803f6657efbdeb337bfa4b644e86e50ca81bcd4d46f9be93ea2d236bdeec2852",
+        "size_bytes": 1048576
+      },
+      "clip_id": "clip_00000000000000000000000000000001",
+      "handedness": "right",
+      "interval": {
+        "end_us": 4000000,
+        "schema_version": "media-interval/1",
+        "start_us": 100000
+      },
+      "mirror_state": "mirrored",
+      "participant_id": "participant_00000000000000000000000000000001",
+      "session_id": "session_00000000000000000000000000000001",
+      "source_recording_id": "recording_00000000000000000000000000000031"
+    }
+  ],
+  "schema_version": "clips-table/1"
+}

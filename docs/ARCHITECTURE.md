@@ -46,9 +46,13 @@ the canonical SHA-256. The [taxonomy](gesture-taxonomy.md) is authoritative for
 label order, event boundaries, negative examples, legacy aliases, and the public
 claim. Downstream contracts may add fields but cannot reinterpret its identifiers.
 
-The sample manifest will include stable identifiers for clips, signers, sessions,
-source recordings, devices, capture conditions, handedness, mirroring, consent,
-and checksums. Derived samples inherit the source recording and split.
+The [dataset manifest](dataset-manifests.md) includes stable identifiers for clips,
+participants, sessions, source recordings, devices, capture conditions,
+handedness, mirroring, consent, and checksums. Derived samples inherit the source
+recording and split. Six normalized tables use explicit Arrow schemas and Parquet
+storage while retaining storage-independent semantic hashes. V2 row artifacts use
+hash-derived logical paths whose only filename is the opaque artifact ID; dataset
+locators therefore cannot carry hostnames, participant names, or free-text labels.
 
 ## Participant-data boundary
 

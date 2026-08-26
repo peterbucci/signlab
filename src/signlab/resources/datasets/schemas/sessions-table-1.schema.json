@@ -1,0 +1,144 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab's strict table and dataset validators remain authoritative for canonical ordering, semantic hashes, foreign keys, intervals, consent binding, lineage, sample projection, split inheritance, and artifact-byte verification.",
+  "$defs": {
+    "SessionRowV1": {
+      "additionalProperties": false,
+      "description": "One bounded capture session with non-identifying device facts.",
+      "properties": {
+        "camera_facing": {
+          "enum": [
+            "front",
+            "rear",
+            "external",
+            "unknown"
+          ],
+          "title": "Camera Facing",
+          "type": "string"
+        },
+        "capture_mode": {
+          "enum": [
+            "isolated",
+            "continuous"
+          ],
+          "title": "Capture Mode",
+          "type": "string"
+        },
+        "capture_software_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Capture Software Version",
+          "type": "string"
+        },
+        "device_id": {
+          "pattern": "^device_[0-9a-f]{32}$",
+          "title": "Device Id",
+          "type": "string"
+        },
+        "finished_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Finished At",
+          "type": "string"
+        },
+        "frame_height_px": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Frame Height Px",
+          "type": "integer"
+        },
+        "frame_rate_denominator": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Frame Rate Denominator",
+          "type": "integer"
+        },
+        "frame_rate_numerator": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Frame Rate Numerator",
+          "type": "integer"
+        },
+        "frame_width_px": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Frame Width Px",
+          "type": "integer"
+        },
+        "mirror_state": {
+          "enum": [
+            "not_mirrored",
+            "mirrored"
+          ],
+          "title": "Mirror State",
+          "type": "string"
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        },
+        "rotation_degrees": {
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ],
+          "title": "Rotation Degrees",
+          "type": "integer"
+        },
+        "session_id": {
+          "pattern": "^session_[0-9a-f]{32}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "started_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Started At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "session_id",
+        "participant_id",
+        "device_id",
+        "started_at",
+        "finished_at",
+        "capture_mode",
+        "capture_software_version",
+        "camera_facing",
+        "frame_width_px",
+        "frame_height_px",
+        "frame_rate_numerator",
+        "frame_rate_denominator",
+        "rotation_degrees",
+        "mirror_state"
+      ],
+      "title": "SessionRowV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/sessions-table-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/SessionRowV1"
+      },
+      "title": "Rows",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "sessions-table/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rows"
+  ],
+  "title": "SessionsTableV1",
+  "type": "object"
+}

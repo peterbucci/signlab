@@ -1,0 +1,101 @@
+{
+  "rows": [
+    {
+      "annotation_id": "annotation_00000000000000000000000000000001",
+      "artifact": {
+        "artifact_id": "sample_00000000000000000000000000000001",
+        "locator": {
+          "kind": "workspace_relative",
+          "path": "objects/sha256/p-a4/sha256-a405ee79b8e40f46f696055053d3ac09c96497c6b1a83297699f0e3661aa4ae1/sample_00000000000000000000000000000001"
+        },
+        "media_type": "application/vnd.signlab.feature-window+json",
+        "role": "sample_data",
+        "schema_version": "artifact-reference/1",
+        "sha256": "sha256:a405ee79b8e40f46f696055053d3ac09c96497c6b1a83297699f0e3661aa4ae1",
+        "size_bytes": 2049
+      },
+      "clip_id": "clip_00000000000000000000000000000001",
+      "derivation_kind": "crop",
+      "derived_artifact_id": "derived_artifact_00000000000000000000000000000001",
+      "handedness": "right",
+      "label_id": "hello",
+      "mirror_state": "mirrored",
+      "operation_id": "crop_annotation",
+      "operation_version": "1.0.0",
+      "parent_artifact_ids": [
+        "clip_00000000000000000000000000000001"
+      ],
+      "participant_id": "participant_00000000000000000000000000000001",
+      "partition": "train",
+      "sample_id": "sample_00000000000000000000000000000001",
+      "session_id": "session_00000000000000000000000000000001",
+      "source_recording_id": "recording_00000000000000000000000000000031",
+      "split_id": "synthetic_grouped_split"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000001",
+      "artifact": {
+        "artifact_id": "sample_00000000000000000000000000000002",
+        "locator": {
+          "kind": "workspace_relative",
+          "path": "objects/sha256/p-19/sha256-19af1229a779b90ea2cf7593a7f7b4a939d94b3d7d74ac5fe810346418134975/sample_00000000000000000000000000000002"
+        },
+        "media_type": "application/vnd.signlab.feature-window+json",
+        "role": "sample_data",
+        "schema_version": "artifact-reference/1",
+        "sha256": "sha256:19af1229a779b90ea2cf7593a7f7b4a939d94b3d7d74ac5fe810346418134975",
+        "size_bytes": 2050
+      },
+      "clip_id": "clip_00000000000000000000000000000001",
+      "derivation_kind": "augmentation",
+      "derived_artifact_id": "derived_artifact_00000000000000000000000000000002",
+      "handedness": "right",
+      "label_id": "hello",
+      "mirror_state": "mirrored",
+      "operation_id": "augment_landmarks",
+      "operation_version": "1.0.0",
+      "parent_artifact_ids": [
+        "sample_00000000000000000000000000000001"
+      ],
+      "participant_id": "participant_00000000000000000000000000000001",
+      "partition": "train",
+      "sample_id": "sample_00000000000000000000000000000002",
+      "session_id": "session_00000000000000000000000000000001",
+      "source_recording_id": "recording_00000000000000000000000000000031",
+      "split_id": "synthetic_grouped_split"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000001",
+      "artifact": {
+        "artifact_id": "sample_00000000000000000000000000000003",
+        "locator": {
+          "kind": "workspace_relative",
+          "path": "objects/sha256/p-ed/sha256-ed13059c7d9bf4c68a383bfcdb2e4145c1f7622c1a74a8ccfc9da6bc93869b40/sample_00000000000000000000000000000003"
+        },
+        "media_type": "application/vnd.signlab.feature-window+json",
+        "role": "sample_data",
+        "schema_version": "artifact-reference/1",
+        "sha256": "sha256:ed13059c7d9bf4c68a383bfcdb2e4145c1f7622c1a74a8ccfc9da6bc93869b40",
+        "size_bytes": 2051
+      },
+      "clip_id": "clip_00000000000000000000000000000001",
+      "derivation_kind": "window",
+      "derived_artifact_id": "derived_artifact_00000000000000000000000000000003",
+      "handedness": "right",
+      "label_id": "hello",
+      "mirror_state": "mirrored",
+      "operation_id": "window_landmarks",
+      "operation_version": "1.0.0",
+      "parent_artifact_ids": [
+        "sample_00000000000000000000000000000002"
+      ],
+      "participant_id": "participant_00000000000000000000000000000001",
+      "partition": "train",
+      "sample_id": "sample_00000000000000000000000000000003",
+      "session_id": "session_00000000000000000000000000000001",
+      "source_recording_id": "recording_00000000000000000000000000000031",
+      "split_id": "synthetic_grouped_split"
+    }
+  ],
+  "schema_version": "derived-artifacts-table/1"
+}

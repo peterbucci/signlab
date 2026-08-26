@@ -34,7 +34,7 @@ ContractKind = Literal[
     "model",
 ]
 CURRENT_CONTRACT_SCHEMAS: Final[dict[ContractKind, str]] = {
-    "dataset": "dataset-manifest/1",
+    "dataset": "dataset-manifest/2",
     "split": "split-manifest/1",
     "preprocessing": "preprocessing-plan/1",
     "resolved_configuration": "resolved-configuration/1",
@@ -42,7 +42,7 @@ CURRENT_CONTRACT_SCHEMAS: Final[dict[ContractKind, str]] = {
     "model": "model-manifest/1",
 }
 SUPPORTED_CONTRACT_REFERENCE_SCHEMAS: Final[dict[ContractKind, frozenset[str]]] = {
-    "dataset": frozenset({"dataset-manifest/1"}),
+    "dataset": frozenset({"dataset-manifest/1", "dataset-manifest/2"}),
     "split": frozenset({"split-manifest/1"}),
     "preprocessing": frozenset({"preprocessing-plan/1"}),
     "resolved_configuration": frozenset({"resolved-configuration/1"}),

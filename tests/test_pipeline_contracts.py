@@ -48,6 +48,7 @@ from signlab.contracts.pipeline import (
     split_manifest_digest,
     validate_contract,
     validate_dataset_manifest,
+    validate_dataset_manifest_v1,
     validate_model_manifest,
     validate_preprocessing_plan,
     validate_resolved_configuration,
@@ -174,7 +175,7 @@ def _build_dataset() -> DatasetManifestV1:
             "samples": tuple(samples),
         },
     )
-    return validate_dataset_manifest(
+    return validate_dataset_manifest_v1(
         _json_document(
             {
                 "schema_version": "dataset-manifest/1",
@@ -469,7 +470,7 @@ def chain() -> ContractChain:
 
 def _cases(chain: ContractChain) -> tuple[tuple[PipelineModel, Validator, Digester], ...]:
     return (
-        (chain.dataset, validate_dataset_manifest, dataset_manifest_digest),
+        (chain.dataset, validate_dataset_manifest_v1, dataset_manifest_digest),
         (chain.split, validate_split_manifest, split_manifest_digest),
         (
             chain.preprocessing,
@@ -1354,7 +1355,7 @@ def test_retained_v1_references_are_independent_of_the_current_writer(
 
     assert retained.contract_schema_version == "dataset-manifest/1"
     assert core_contracts.SUPPORTED_CONTRACT_REFERENCE_SCHEMAS["dataset"] == frozenset(
-        {"dataset-manifest/1"}
+        {"dataset-manifest/1", "dataset-manifest/2"}
     )
 
 

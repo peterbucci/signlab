@@ -1,0 +1,110 @@
+{
+  "allowed_schema_metadata": {
+    "signlab:content_sha256": "sha256:<64 lowercase hex characters>",
+    "signlab:schema_sha256": "sha256:be5a13eea37d869a4eff8747a484ab3fedc7f9eacaa1724ec0e5bc59b5906377",
+    "signlab:schema_version": "annotations-table/1",
+    "signlab:table_kind": "annotations"
+  },
+  "fields": [
+    {
+      "field_id": 1,
+      "name": "annotation_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 2,
+      "name": "participant_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 3,
+      "name": "session_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 4,
+      "name": "source_recording_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 5,
+      "name": "clip_id",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 6,
+      "name": "interval",
+      "nullable": false,
+      "type": {
+        "fields": [
+          {
+            "field_id": 7,
+            "name": "schema_version",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 8,
+            "name": "start_us",
+            "nullable": false,
+            "type": "int64"
+          },
+          {
+            "field_id": 9,
+            "name": "end_us",
+            "nullable": false,
+            "type": "int64"
+          }
+        ],
+        "kind": "struct"
+      }
+    },
+    {
+      "field_id": 10,
+      "name": "disposition",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 11,
+      "name": "label_id",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 12,
+      "name": "other_kind",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 13,
+      "name": "reason_code",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 14,
+      "name": "review_status",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 15,
+      "name": "eligible_for_training",
+      "nullable": false,
+      "type": "bool"
+    }
+  ],
+  "format": "arrow-schema-snapshot/1",
+  "schema_version": "annotations-table/1",
+  "table_name": "annotations",
+  "writer_generated_file_metadata": {
+    "ARROW:schema": "authoritative Arrow schema encoding"
+  }
+}
