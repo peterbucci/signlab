@@ -94,8 +94,11 @@ without readiness approval, private storage, and authenticated consent verificat
 The [version-pinned landmark extraction guide](docs/landmark-extraction.md) defines
 the exact MediaPipe/PyAV runtime and model bytes, source-timestamp preservation,
 two-hand tracking, raw hand/body observation masks, deterministic Parquet evidence,
-and the network-isolated private-data boundary. It deliberately leaves quality
-policy and feature engineering to later stories.
+and the network-isolated private-data boundary. The subsequent
+[landmark quality policy](docs/landmark-quality.md) assesses those immutable rows
+with elapsed-time timing and resampling evidence, explicit gap and continuity
+findings, deterministic triage, and a report-only manifest; feature materialization
+remains a later stage.
 
 The [versioned pipeline contracts](docs/contracts.md) give datasets, grouped
 splits, preprocessing plans, resolved configurations, terminal runs, and research

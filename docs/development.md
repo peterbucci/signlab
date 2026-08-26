@@ -116,10 +116,20 @@ multi-megabyte `.task` files are never generated, downloaded, or committed. Test
 fixtures may script detector results but must not substitute fake task bytes for the
 registered production hashes.
 
+After changing a landmark-quality contract or the packaged pilot policy, run:
+
+```shell
+uv run python scripts/generate_quality_resources.py
+```
+
+That generator owns the quality policy and report JSON Schemas plus the packaged
+default policy. Quality outputs are report manifests, not public fixtures or feature
+artifacts; real sequence reports remain consent-bound private research metadata.
+
 All generators are deterministic. The test suite, `signlab contracts
-validate-resources`, and `signlab governance evidence-check` fail when generated
-resources drift from the Pydantic source of truth, the frozen compatibility corpus,
-or the committed synthetic dry-run evidence.
+validate-resources`, `signlab data validate-resources`, and `signlab governance
+evidence-check` fail when generated resources drift from the Pydantic source of
+truth, the frozen compatibility corpus, or the committed synthetic dry-run evidence.
 
 Generated governance JSON Schemas enforce structure and the semantic constraints
 that JSON Schema can express. They do not replace application validation for

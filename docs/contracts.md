@@ -54,6 +54,20 @@ feature construction:
 These are also stage handoffs rather than sample-bearing dataset or preprocessing
 contracts. See [version-pinned landmark extraction](landmark-extraction.md).
 
+Four quality-stage contracts assess those immutable observations without creating
+features or sample identity:
+
+| Contract | Identity and responsibility |
+| --- | --- |
+| `landmark-quality-policy/1` | Exact elapsed-time, gap, confidence, continuity, interpolation-eligibility, and triage rules |
+| `sequence-quality-report/1` | One recording's denominator-carrying metrics, missing intervals, resampling summary, findings, disposition, and self-digest |
+| `dataset-quality-report/1` | Weighted aggregate and readiness status over every sequence report |
+| `landmark-quality-manifest/1` | Self-digested binding from exact raw and extraction manifests plus policy to ordered sequence reports and their aggregate |
+
+The quality bundle contains reports only. It preserves the source landmark masks and
+Parquet bytes and does not materialize Story #22 feature representations. See
+[landmark quality policy](landmark-quality.md).
+
 `assert_model_compatible(...)` validates the complete chain. The narrower
 `assert_split_compatible(...)`, `assert_resolved_configuration_compatible(...)`,
 and `assert_run_compatible(...)` checks are available at earlier pipeline stages.
@@ -162,6 +176,10 @@ before Pydantic validation.
 | MediaPipe extraction config | `mediapipe-extraction-config/1` | `/1` | Never |
 | Landmark frames table | `landmark-frames-table/1` | `/1` | Never |
 | Landmark extraction manifest | `landmark-extraction-manifest/1` | `/1` | Never |
+| Landmark quality policy | `landmark-quality-policy/1` | `/1` | Never |
+| Sequence quality report | `sequence-quality-report/1` | `/1` | Never |
+| Dataset quality report | `dataset-quality-report/1` | `/1` | Never |
+| Landmark quality manifest | `landmark-quality-manifest/1` | `/1` | Never |
 | Split manifest | `split-manifest/1` | `/1` | Never |
 | Preprocessing plan | `preprocessing-plan/1` | `/1` | Never |
 | Resolved configuration | `resolved-configuration/1` | `/1` | Never |
@@ -208,6 +226,7 @@ uv run signlab contracts validate-resources
 uv run signlab contracts validate path/to/contract.json
 uv run signlab data validate-resources
 uv run signlab data validate-extraction --help
+uv run signlab data validate-landmark-quality --help
 ```
 
 Regenerate review artifacts after an authoritative model or synthetic example

@@ -1,0 +1,241 @@
+{
+  "$comment": "This JSON Schema enforces portable landmark-quality structure. SignLab's strict quality validators remain authoritative for canonical hashes, metric directions, severity ordering, gap decisions, weighted aggregates, elapsed-time grids, and extraction bindings.",
+  "$defs": {
+    "QualityThresholdRuleV1": {
+      "additionalProperties": false,
+      "description": "Optional warning/quarantine/reject limits for one registered integer metric.",
+      "properties": {
+        "direction": {
+          "enum": [
+            "higher_is_worse",
+            "lower_is_worse"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "expected_hand_coverage_ppm",
+            "invalid_frame_fraction_ppm",
+            "longest_unfilled_internal_hand_gap_us",
+            "low_handedness_confidence_fraction_ppm",
+            "minimum_pose_anchor_coverage_ppm",
+            "suspected_hand_swap_count",
+            "temporal_discontinuity_count",
+            "timestamp_discontinuity_count"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "quarantine": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Quarantine"
+        },
+        "reject": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reject"
+        },
+        "rule_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "quality-threshold-rule/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "warning": {
+          "anyOf": [
+            {
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Warning"
+        }
+      },
+      "required": [
+        "schema_version",
+        "rule_id",
+        "metric",
+        "direction",
+        "warning",
+        "quarantine",
+        "reject"
+      ],
+      "title": "QualityThresholdRuleV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/landmark-quality-policy-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Fully resolved quality, gap, timing, and swap-diagnostic policy.",
+  "properties": {
+    "expected_hand_cardinality_rule": {
+      "const": "recording_handedness_unknown_means_one",
+      "title": "Expected Hand Cardinality Rule",
+      "type": "string"
+    },
+    "extrapolation_allowed": {
+      "const": false,
+      "title": "Extrapolation Allowed",
+      "type": "boolean"
+    },
+    "handedness_confidence_diagnostic_ppm": {
+      "le": 1000000,
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "title": "Handedness Confidence Diagnostic Ppm",
+      "type": "integer"
+    },
+    "interpolation_method": {
+      "const": "linear_coordinates_only",
+      "title": "Interpolation Method",
+      "type": "string"
+    },
+    "max_interpolated_missing_frames": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "title": "Max Interpolated Missing Frames",
+      "type": "integer"
+    },
+    "max_interpolation_bridge_us": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "title": "Max Interpolation Bridge Us",
+      "type": "integer"
+    },
+    "max_palm_wrist_speed_units_per_second": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Max Palm Wrist Speed Units Per Second",
+      "type": "integer"
+    },
+    "policy_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Policy Id",
+      "type": "string"
+    },
+    "pose_presence_diagnostic_ppm": {
+      "le": 1000000,
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "title": "Pose Presence Diagnostic Ppm",
+      "type": "integer"
+    },
+    "pose_visibility_diagnostic_ppm": {
+      "le": 1000000,
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "title": "Pose Visibility Diagnostic Ppm",
+      "type": "integer"
+    },
+    "resampling_rule": {
+      "const": "nominal_elapsed_time_append_final/1",
+      "title": "Resampling Rule",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "landmark-quality-policy/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "suspected_swap_cost_margin_ppm": {
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "title": "Suspected Swap Cost Margin Ppm",
+      "type": "integer"
+    },
+    "target_rate_denominator": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Target Rate Denominator",
+      "type": "integer"
+    },
+    "target_rate_numerator": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Target Rate Numerator",
+      "type": "integer"
+    },
+    "threshold_rules": {
+      "items": {
+        "$ref": "#/$defs/QualityThresholdRuleV1"
+      },
+      "maxItems": 8,
+      "minItems": 8,
+      "title": "Threshold Rules",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "timestamp_discontinuity_absolute_us": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Timestamp Discontinuity Absolute Us",
+      "type": "integer"
+    },
+    "timestamp_discontinuity_median_multiplier_ppm": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Timestamp Discontinuity Median Multiplier Ppm",
+      "type": "integer"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_id",
+    "version",
+    "expected_hand_cardinality_rule",
+    "target_rate_numerator",
+    "target_rate_denominator",
+    "resampling_rule",
+    "interpolation_method",
+    "extrapolation_allowed",
+    "max_interpolated_missing_frames",
+    "max_interpolation_bridge_us",
+    "handedness_confidence_diagnostic_ppm",
+    "pose_visibility_diagnostic_ppm",
+    "pose_presence_diagnostic_ppm",
+    "timestamp_discontinuity_absolute_us",
+    "timestamp_discontinuity_median_multiplier_ppm",
+    "suspected_swap_cost_margin_ppm",
+    "max_palm_wrist_speed_units_per_second",
+    "threshold_rules"
+  ],
+  "title": "LandmarkQualityPolicyV1",
+  "type": "object"
+}

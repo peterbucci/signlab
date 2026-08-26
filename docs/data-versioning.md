@@ -79,6 +79,13 @@ private stage adapter is a later, reviewed change after the Story #19 authorizat
 and storage gate; it must call the same importable service rather than create a
 parallel graph.
 
+The #20 [landmark quality service](landmark-quality.md) similarly implements the
+canonical `quality` boundary without replacing the fixture receipt. It validates the
+exact raw and extraction bundles, recomputes every per-sequence and dataset finding
+from immutable landmark rows, and atomically publishes a report-only manifest. It
+does not rewrite landmark Parquet or modify `STAGE_REGISTRY`, `dvc.yaml`, or
+`dvc.lock`; a future protected adapter must delegate to this same service.
+
 Install the reproducibility dependencies and check the public scaffold with:
 
 ```shell

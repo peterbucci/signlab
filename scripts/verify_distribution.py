@@ -97,6 +97,11 @@ EXPECTED_EXTRACTION_RESOURCES = {
     "schemas/landmark-frames-table-1.schema.json",
     "schemas/mediapipe-extraction-config-1.schema.json",
 }
+EXPECTED_QUALITY_RESOURCES = {
+    "config/landmark-quality-policy-1.default.json",
+    "schemas/landmark-quality-manifest-1.schema.json",
+    "schemas/landmark-quality-policy-1.schema.json",
+}
 FORBIDDEN_REPOSITORY_ROOTS = {
     "artifacts",
     "data",
@@ -278,6 +283,17 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             expected_extraction_members
         ):
             errors.append("wheel does not contain the exact extraction resource set")
+        quality_prefix = "signlab/resources/quality/"
+        quality_members = [
+            name.removeprefix(quality_prefix)
+            for name in names
+            if name.startswith(quality_prefix) and not name.endswith("/")
+        ]
+        expected_quality_members = EXPECTED_QUALITY_RESOURCES | {"__init__.py"}
+        if set(quality_members) != expected_quality_members or len(quality_members) != len(
+            expected_quality_members
+        ):
+            errors.append("wheel does not contain the exact quality resource set")
         if not any(name.endswith(".dist-info/METADATA") for name in names):
             errors.append("wheel is missing distribution metadata")
         entry_point_members = [
@@ -360,6 +376,17 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
             expected_extraction_members
         ):
             errors.append("source distribution does not contain the exact extraction resource set")
+        quality_prefix = f"{package_prefix}resources/quality/"
+        quality_members = [
+            member.name.removeprefix(quality_prefix)
+            for member in members
+            if member.name.startswith(quality_prefix)
+        ]
+        expected_quality_members = EXPECTED_QUALITY_RESOURCES | {"__init__.py"}
+        if set(quality_members) != expected_quality_members or len(quality_members) != len(
+            expected_quality_members
+        ):
+            errors.append("source distribution does not contain the exact quality resource set")
         if any(member.size > MAX_MEMBER_BYTES for member in members):
             errors.append("source distribution contains a member larger than 1 MiB")
     return tuple(sorted(set(errors)))
