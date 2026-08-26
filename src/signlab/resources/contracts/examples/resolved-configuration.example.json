@@ -1,0 +1,121 @@
+{
+  "config_id": "synthetic_resolved_experiment",
+  "dataset": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_gesture_dataset",
+    "contract_schema_version": "dataset-manifest/1",
+    "contract_version": "1.0.0",
+    "kind": "dataset",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/dataset-manifest.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:ed55707743ddf6ca144124ee671994ceb8eb7cea06c8f7d97ec10203d5dd8717"
+  },
+  "dataset_data_sha256": "sha256:fbffd3da3f63b969660c52c1d57af12833e44ec69231821f2b29d1b298624b25",
+  "deterministic_algorithms": true,
+  "evaluator": {
+    "implementation_id": "classification_metrics",
+    "implementation_version": "1.0.0",
+    "parameters": [
+      {
+        "name": "abstention_enabled",
+        "value": true
+      },
+      {
+        "name": "primary_metric",
+        "value": "macro_f1"
+      }
+    ],
+    "role": "evaluator",
+    "schema_version": "component-spec/1"
+  },
+  "model": {
+    "implementation_id": "gru_classifier",
+    "implementation_version": "1.0.0",
+    "parameters": [
+      {
+        "name": "dropout",
+        "value": 0.2
+      },
+      {
+        "name": "hidden_size",
+        "value": 64
+      },
+      {
+        "name": "layers",
+        "value": 2
+      }
+    ],
+    "role": "model",
+    "schema_version": "component-spec/1"
+  },
+  "optimizer": {
+    "implementation_id": "adamw",
+    "implementation_version": "1.0.0",
+    "parameters": [
+      {
+        "name": "learning_rate",
+        "value": 0.001
+      },
+      {
+        "name": "weight_decay",
+        "value": 0.0001
+      }
+    ],
+    "role": "optimizer",
+    "schema_version": "component-spec/1"
+  },
+  "preprocessing": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_landmark_preprocessing",
+    "contract_schema_version": "preprocessing-plan/1",
+    "contract_version": "1.0.0",
+    "kind": "preprocessing",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/preprocessing-plan.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:5fe847d97c77686900ccc8442d081c2ef428c5609ccf27fd70daf0360e559cbe"
+  },
+  "random_seed": 20260826,
+  "schema_version": "resolved-configuration/1",
+  "split": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_grouped_split",
+    "contract_schema_version": "split-manifest/1",
+    "contract_version": "1.0.0",
+    "kind": "split",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/split-manifest.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:6fea000166d7eddc699f2bf03fbf85b2b88d945a68ff98e236345279255b84a5"
+  },
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "trainer": {
+    "implementation_id": "sequence_trainer",
+    "implementation_version": "1.0.0",
+    "parameters": [
+      {
+        "name": "batch_size",
+        "value": 32
+      },
+      {
+        "name": "epochs",
+        "value": 25
+      }
+    ],
+    "role": "trainer",
+    "schema_version": "component-spec/1"
+  },
+  "version": "1.0.0"
+}

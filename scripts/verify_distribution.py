@@ -52,6 +52,20 @@ EXPECTED_GOVERNANCE_RESOURCES = {
     "schemas/withdrawal-request-1.schema.json",
     "withdrawal-runbook-1.0.0.md",
 }
+EXPECTED_CONTRACT_RESOURCES = {
+    "examples/dataset-manifest.example.json",
+    "examples/model-manifest.example.json",
+    "examples/preprocessing-plan.example.json",
+    "examples/resolved-configuration.example.json",
+    "examples/run-record.example.json",
+    "examples/split-manifest.example.json",
+    "schemas/dataset-manifest-1.schema.json",
+    "schemas/model-manifest-1.schema.json",
+    "schemas/preprocessing-plan-1.schema.json",
+    "schemas/resolved-configuration-1.schema.json",
+    "schemas/run-record-1.schema.json",
+    "schemas/split-manifest-1.schema.json",
+}
 FORBIDDEN_REPOSITORY_ROOTS = {
     "artifacts",
     "data",
@@ -156,6 +170,17 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             governance_members
         ) != len(EXPECTED_GOVERNANCE_RESOURCES):
             errors.append("wheel does not contain the exact participant-governance resource set")
+        contract_prefix = "signlab/resources/contracts/"
+        contract_members = [
+            name.removeprefix(contract_prefix)
+            for name in names
+            if name.startswith(contract_prefix) and not name.endswith("/")
+        ]
+        expected_contract_members = EXPECTED_CONTRACT_RESOURCES | {"__init__.py"}
+        if set(contract_members) != expected_contract_members or len(contract_members) != len(
+            expected_contract_members
+        ):
+            errors.append("wheel does not contain the exact pipeline-contract resource set")
         if not any(name.endswith(".dist-info/METADATA") for name in names):
             errors.append("wheel is missing distribution metadata")
         entry_point_members = [
@@ -200,6 +225,19 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
             errors.append(
                 "source distribution does not contain the exact participant-governance resource set"
             )
+        contract_prefix = f"{package_prefix}resources/contracts/"
+        contract_members = [
+            member.name.removeprefix(contract_prefix)
+            for member in members
+            if member.name.startswith(contract_prefix)
+        ]
+        expected_contract_members = EXPECTED_CONTRACT_RESOURCES | {"__init__.py"}
+        if set(contract_members) != expected_contract_members or len(contract_members) != len(
+            expected_contract_members
+        ):
+            errors.append(
+                "source distribution does not contain the exact pipeline-contract resource set"
+            )
         if any(member.size > MAX_MEMBER_BYTES for member in members):
             errors.append("source distribution contains a member larger than 1 MiB")
     return tuple(sorted(set(errors)))
@@ -215,6 +253,7 @@ def _run(
     command: Sequence[str],
     *,
     environment: dict[str, str],
+    cwd: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
@@ -223,32 +262,48 @@ def _run(
         encoding="utf-8",
         env=environment,
         text=True,
+        cwd=cwd,
     )
 
 
 def _install_and_smoke_test(distribution: Path) -> None:
-    environment = os.environ.copy()
+    environment = {key: value for key, value in os.environ.items() if key.upper() != "PYTHONPATH"}
     environment["NO_COLOR"] = "1"
     environment["PYTHONUTF8"] = "1"
     with tempfile.TemporaryDirectory(prefix="signlab-distribution-") as temporary_directory:
-        virtual_environment = Path(temporary_directory) / "venv"
+        environment_root = Path(temporary_directory)
+        virtual_environment = environment_root / "venv"
         _run(
             ["uv", "venv", "--python", sys.executable, str(virtual_environment)],
             environment=environment,
+            cwd=environment_root,
         )
         python = _venv_executable(virtual_environment, "python")
         _run(
-            ["uv", "pip", "install", "--python", str(python), str(distribution)],
+            [
+                "uv",
+                "pip",
+                "install",
+                "--python",
+                str(python),
+                str(distribution.resolve()),
+            ],
             environment=environment,
+            cwd=environment_root,
         )
         version = _run(
             [str(python), "-m", "signlab.cli", "--version"],
             environment=environment,
+            cwd=environment_root,
         )
         if not version.stdout.strip():
             raise RuntimeError("isolated distribution did not expose a version")
         console_script = _venv_executable(virtual_environment, "signlab")
-        _run([str(console_script), "--version"], environment=environment)
+        _run(
+            [str(console_script), "--version"],
+            environment=environment,
+            cwd=environment_root,
+        )
         for command in (
             "data",
             "train",
@@ -257,26 +312,37 @@ def _install_and_smoke_test(distribution: Path) -> None:
             "doctor",
             "taxonomy",
             "governance",
+            "contracts",
         ):
             _run(
                 [str(console_script), command, "--help"],
                 environment=environment,
+                cwd=environment_root,
             )
         _run(
             [str(console_script), "doctor", "check"],
             environment=environment,
+            cwd=environment_root,
         )
         _run(
             [str(console_script), "taxonomy", "validate"],
             environment=environment,
+            cwd=environment_root,
         )
         _run(
             [str(console_script), "taxonomy", "validate-resources"],
             environment=environment,
+            cwd=environment_root,
         )
         _run(
             [str(console_script), "governance", "evidence-check"],
             environment=environment,
+            cwd=environment_root,
+        )
+        _run(
+            [str(console_script), "contracts", "validate-resources"],
+            environment=environment,
+            cwd=environment_root,
         )
 
 

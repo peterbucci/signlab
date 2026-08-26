@@ -1,0 +1,449 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab Pydantic and application compatibility validation remains authoritative for canonical digests, dataset membership and leakage closure, preprocessing schema chains, cross-contract reference reconciliation, run provenance, and model-output binding.",
+  "$defs": {
+    "ArtifactUriLocatorV1": {
+      "additionalProperties": false,
+      "description": "A storage-independent logical URI resolved by a future artifact adapter.",
+      "properties": {
+        "kind": {
+          "const": "artifact_uri",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 1024,
+          "minLength": 12,
+          "pattern": "^signlab://[a-z][a-z0-9-]{0,63}(/[a-z][a-z0-9._-]{0,127})+$",
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "uri"
+      ],
+      "title": "ArtifactUriLocatorV1",
+      "type": "object"
+    },
+    "ComponentSpecV1": {
+      "additionalProperties": false,
+      "description": "A registered implementation and its fully resolved scalar settings.",
+      "properties": {
+        "implementation_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Implementation Id",
+          "type": "string"
+        },
+        "implementation_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Implementation Version",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ParameterV1"
+          },
+          "title": "Parameters",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "role": {
+          "enum": [
+            "model",
+            "optimizer",
+            "trainer",
+            "evaluator"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "component-spec/1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "role",
+        "implementation_id",
+        "implementation_version",
+        "parameters"
+      ],
+      "title": "ComponentSpecV1",
+      "type": "object"
+    },
+    "ContractRefV1": {
+      "additionalProperties": false,
+      "description": "Digest-bound identity of another versioned SignLab contract.",
+      "properties": {
+        "canonicalization": {
+          "const": "rfc8785/1",
+          "title": "Canonicalization",
+          "type": "string"
+        },
+        "contract_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "contract_schema_version": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9-]*/[1-9][0-9]*$",
+          "title": "Contract Schema Version",
+          "type": "string"
+        },
+        "contract_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "dataset",
+            "split",
+            "preprocessing",
+            "resolved_configuration",
+            "run",
+            "model"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "schema_version": {
+          "const": "contract-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "kind",
+        "contract_schema_version",
+        "contract_id",
+        "contract_version",
+        "canonicalization",
+        "sha256",
+        "locator"
+      ],
+      "title": "ContractRefV1",
+      "type": "object"
+    },
+    "ParameterV1": {
+      "additionalProperties": false,
+      "description": "One immutable, JSON-native component setting without code or path injection.",
+      "properties": {
+        "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "maxLength": 128,
+              "minLength": 3,
+              "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+              "type": "string"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "maxLength": 128,
+                    "minLength": 3,
+                    "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "ParameterV1",
+      "type": "object"
+    },
+    "TaxonomyRef": {
+      "additionalProperties": false,
+      "description": "Portable identity embedded in downstream manifests and bundles.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "taxonomy-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "sha256"
+      ],
+      "title": "TaxonomyRef",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/resolved-configuration-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "properties": {
+        "model": {
+          "properties": {
+            "role": {
+              "const": "model"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "optimizer": {
+          "properties": {
+            "role": {
+              "const": "optimizer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "trainer": {
+          "properties": {
+            "role": {
+              "const": "trainer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "evaluator": {
+          "properties": {
+            "role": {
+              "const": "evaluator"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "dataset": {
+          "properties": {
+            "kind": {
+              "const": "dataset"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "split": {
+          "properties": {
+            "kind": {
+              "const": "split"
+            }
+          }
+        }
+      }
+    },
+    {
+      "properties": {
+        "preprocessing": {
+          "properties": {
+            "kind": {
+              "const": "preprocessing"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "description": "Fully expanded experiment input with immutable upstream identities and defaults.",
+  "properties": {
+    "config_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Config Id",
+      "type": "string"
+    },
+    "dataset": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "dataset_data_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Dataset Data Sha256",
+      "type": "string"
+    },
+    "deterministic_algorithms": {
+      "const": true,
+      "title": "Deterministic Algorithms",
+      "type": "boolean"
+    },
+    "evaluator": {
+      "$ref": "#/$defs/ComponentSpecV1"
+    },
+    "model": {
+      "$ref": "#/$defs/ComponentSpecV1"
+    },
+    "optimizer": {
+      "$ref": "#/$defs/ComponentSpecV1"
+    },
+    "preprocessing": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "random_seed": {
+      "maximum": 9007199254740991,
+      "minimum": -9007199254740991,
+      "title": "Random Seed",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "resolved-configuration/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "split": {
+      "$ref": "#/$defs/ContractRefV1"
+    },
+    "taxonomy": {
+      "$ref": "#/$defs/TaxonomyRef"
+    },
+    "trainer": {
+      "$ref": "#/$defs/ComponentSpecV1"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "config_id",
+    "version",
+    "taxonomy",
+    "dataset",
+    "dataset_data_sha256",
+    "split",
+    "preprocessing",
+    "random_seed",
+    "deterministic_algorithms",
+    "model",
+    "optimizer",
+    "trainer",
+    "evaluator"
+  ],
+  "title": "ResolvedConfigurationV1",
+  "type": "object"
+}

@@ -1,0 +1,101 @@
+{
+  "artifact": {
+    "artifact_id": "synthetic_model_onnx",
+    "locator": {
+      "kind": "artifact_uri",
+      "uri": "signlab://synthetic/models/synthetic_model_onnx"
+    },
+    "media_type": "application/onnx",
+    "role": "model",
+    "schema_version": "artifact-reference/1",
+    "sha256": "sha256:52d50992270a81231b801846cc2de856474060a16d632d5d700818013f181788",
+    "size_bytes": 65536
+  },
+  "dataset": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_gesture_dataset",
+    "contract_schema_version": "dataset-manifest/1",
+    "contract_version": "1.0.0",
+    "kind": "dataset",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/dataset-manifest.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:ed55707743ddf6ca144124ee671994ceb8eb7cea06c8f7d97ec10203d5dd8717"
+  },
+  "dataset_data_sha256": "sha256:fbffd3da3f63b969660c52c1d57af12833e44ec69231821f2b29d1b298624b25",
+  "format_version": "1.16.0",
+  "input_schema_version": "feature-window/1",
+  "label_order": [
+    "hello",
+    "no",
+    "please",
+    "thank_you",
+    "yes",
+    "other"
+  ],
+  "model_format": "onnx",
+  "model_id": "synthetic_gesture_model",
+  "output_schema_version": "gesture-scores/1",
+  "preprocessing": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_landmark_preprocessing",
+    "contract_schema_version": "preprocessing-plan/1",
+    "contract_version": "1.0.0",
+    "kind": "preprocessing",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/preprocessing-plan.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:5fe847d97c77686900ccc8442d081c2ef428c5609ccf27fd70daf0360e559cbe"
+  },
+  "resolved_configuration": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_resolved_experiment",
+    "contract_schema_version": "resolved-configuration/1",
+    "contract_version": "1.0.0",
+    "kind": "resolved_configuration",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/resolved-configuration.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:c7691a990279743d53189a8e7fa9685ad64aba0b04a174cc9b8b59f41fdf3e9b"
+  },
+  "schema_version": "model-manifest/1",
+  "split": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_grouped_split",
+    "contract_schema_version": "split-manifest/1",
+    "contract_version": "1.0.0",
+    "kind": "split",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/split-manifest.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:6fea000166d7eddc699f2bf03fbf85b2b88d945a68ff98e236345279255b84a5"
+  },
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "training_run": {
+    "canonicalization": "rfc8785/1",
+    "contract_id": "synthetic_training_run",
+    "contract_schema_version": "run-record/1",
+    "contract_version": "1.0.0",
+    "kind": "run",
+    "locator": {
+      "kind": "workspace_relative",
+      "path": "src/signlab/resources/contracts/examples/run-record.example.json"
+    },
+    "schema_version": "contract-reference/1",
+    "sha256": "sha256:2aa346eddc0ef19f3bd19dbc7bc0017858641b04fad525706b60fd4e17678aa6"
+  },
+  "version": "1.0.0"
+}

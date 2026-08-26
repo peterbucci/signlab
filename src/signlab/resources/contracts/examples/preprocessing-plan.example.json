@@ -1,0 +1,52 @@
+{
+  "compatible_runtimes": [
+    "python"
+  ],
+  "input_schema_version": "landmark-sequence/1",
+  "output_schema_version": "feature-window/1",
+  "plan_id": "synthetic_landmark_preprocessing",
+  "schema_version": "preprocessing-plan/1",
+  "steps": [
+    {
+      "implementation_version": "1.0.0",
+      "index": 0,
+      "input_schema_version": "landmark-sequence/1",
+      "operation_id": "normalize_coordinates",
+      "output_schema_version": "normalized-landmarks/1",
+      "parameters": [
+        {
+          "name": "center_landmark",
+          "value": "wrist"
+        },
+        {
+          "name": "scale_landmark",
+          "value": "middle_mcp"
+        }
+      ]
+    },
+    {
+      "implementation_version": "1.0.0",
+      "index": 1,
+      "input_schema_version": "normalized-landmarks/1",
+      "operation_id": "resample_sequence",
+      "output_schema_version": "feature-window/1",
+      "parameters": [
+        {
+          "name": "padding_mode",
+          "value": "repeat_edge"
+        },
+        {
+          "name": "sequence_length",
+          "value": 30
+        }
+      ]
+    }
+  ],
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "version": "1.0.0"
+}

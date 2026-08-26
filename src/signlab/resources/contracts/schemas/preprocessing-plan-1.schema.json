@@ -1,0 +1,256 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab Pydantic and application compatibility validation remains authoritative for canonical digests, dataset membership and leakage closure, preprocessing schema chains, cross-contract reference reconciliation, run provenance, and model-output binding.",
+  "$defs": {
+    "ParameterV1": {
+      "additionalProperties": false,
+      "description": "One immutable, JSON-native component setting without code or path injection.",
+      "properties": {
+        "name": {
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "maximum": 9007199254740991,
+              "minimum": -9007199254740991,
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "maxLength": 128,
+              "minLength": 3,
+              "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+              "type": "string"
+            },
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": -9007199254740991,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "maxLength": 128,
+                    "minLength": 3,
+                    "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+                    "type": "string"
+                  }
+                ]
+              },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "ParameterV1",
+      "type": "object"
+    },
+    "PreprocessingStepV1": {
+      "additionalProperties": false,
+      "description": "One ordered, versioned operation with explicit feature-schema compatibility.",
+      "properties": {
+        "implementation_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Implementation Version",
+          "type": "string"
+        },
+        "index": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Index",
+          "type": "integer"
+        },
+        "input_schema_version": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9-]*/[1-9][0-9]*$",
+          "title": "Input Schema Version",
+          "type": "string"
+        },
+        "operation_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "output_schema_version": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9-]*/[1-9][0-9]*$",
+          "title": "Output Schema Version",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ParameterV1"
+          },
+          "title": "Parameters",
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "index",
+        "operation_id",
+        "implementation_version",
+        "input_schema_version",
+        "output_schema_version",
+        "parameters"
+      ],
+      "title": "PreprocessingStepV1",
+      "type": "object"
+    },
+    "TaxonomyRef": {
+      "additionalProperties": false,
+      "description": "Portable identity embedded in downstream manifests and bundles.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "taxonomy-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "sha256"
+      ],
+      "title": "TaxonomyRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/preprocessing-plan-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Ordered preprocessing definition shared by training and inference consumers.",
+  "properties": {
+    "compatible_runtimes": {
+      "items": {
+        "enum": [
+          "python",
+          "typescript"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "oneOf": [
+        {
+          "const": [
+            "python"
+          ]
+        },
+        {
+          "const": [
+            "python",
+            "typescript"
+          ]
+        },
+        {
+          "const": [
+            "typescript"
+          ]
+        }
+      ],
+      "title": "Compatible Runtimes",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "input_schema_version": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9-]*/[1-9][0-9]*$",
+      "title": "Input Schema Version",
+      "type": "string"
+    },
+    "output_schema_version": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9-]*/[1-9][0-9]*$",
+      "title": "Output Schema Version",
+      "type": "string"
+    },
+    "plan_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "preprocessing-plan/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/PreprocessingStepV1"
+      },
+      "minItems": 1,
+      "title": "Steps",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "taxonomy": {
+      "$ref": "#/$defs/TaxonomyRef"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "plan_id",
+    "version",
+    "taxonomy",
+    "input_schema_version",
+    "output_schema_version",
+    "compatible_runtimes",
+    "steps"
+  ],
+  "title": "PreprocessingPlanV1",
+  "type": "object"
+}

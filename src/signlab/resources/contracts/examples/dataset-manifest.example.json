@@ -1,0 +1,180 @@
+{
+  "content": {
+    "governance_policy": {
+      "document_id": "document_00000000000000000000000000000003",
+      "document_type": "governance_policy",
+      "effective_at": "2026-08-26T00:00:00Z",
+      "schema_version": "document-reference/1",
+      "sha256": "sha256:5a29272296198c03f4c118d27ee19955174f4b26141284380a653eb874d4dfa9",
+      "uri": "signlab://governance/data-governance-policy/1.0.0",
+      "version": "1.0.0"
+    },
+    "lineage_inventory_sha256": "sha256:191d80752fff985682bf93cb2dea960e5a38f9a4c3a90be071c36d4a311ee4a7",
+    "sample_schema_version": "landmark-sequence/1",
+    "samples": [
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000001",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000001"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:ad31f56bfc9a68774ab886260bbd85041358a49bc799985bba07da8a49e618ea",
+          "size_bytes": 4097
+        },
+        "label_id": "hello",
+        "participant_id": "participant_00000000000000000000000000000001",
+        "sample_id": "sample_00000000000000000000000000000001",
+        "session_id": "session_00000000000000000000000000000001",
+        "source_recording_id": "recording_00000000000000000000000000000001"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000002",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000002"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:61db9447cce215bdb6f5aa83ff1ada7b29999ac83d3165f9547ba80fbbcafcdc",
+          "size_bytes": 4098
+        },
+        "label_id": "no",
+        "participant_id": "participant_00000000000000000000000000000002",
+        "sample_id": "sample_00000000000000000000000000000002",
+        "session_id": "session_00000000000000000000000000000002",
+        "source_recording_id": "recording_00000000000000000000000000000002"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000003",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000003"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:f5f4e1238ea4add36372342a1ad81bdcf2e31a5c30b17d21263aa99d7bac3624",
+          "size_bytes": 4099
+        },
+        "label_id": "please",
+        "participant_id": "participant_00000000000000000000000000000003",
+        "sample_id": "sample_00000000000000000000000000000003",
+        "session_id": "session_00000000000000000000000000000003",
+        "source_recording_id": "recording_00000000000000000000000000000003"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000004",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000004"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:4ae427336d73762b7db5b6f86f95340a43720775fe5fa034ea7652c80afbfb64",
+          "size_bytes": 4100
+        },
+        "label_id": "thank_you",
+        "participant_id": "participant_00000000000000000000000000000004",
+        "sample_id": "sample_00000000000000000000000000000004",
+        "session_id": "session_00000000000000000000000000000004",
+        "source_recording_id": "recording_00000000000000000000000000000004"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000005",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000005"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:380c402348afa16e8c715013154de770f0e04c15a65ad12ee8ba9ab87ca8b233",
+          "size_bytes": 4101
+        },
+        "label_id": "yes",
+        "participant_id": "participant_00000000000000000000000000000005",
+        "sample_id": "sample_00000000000000000000000000000005",
+        "session_id": "session_00000000000000000000000000000005",
+        "source_recording_id": "recording_00000000000000000000000000000005"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000006",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000006"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:384f56e17b05ed6b3f954d5ee453fa9c93781494e4b2da2d696cf62ee1138fa9",
+          "size_bytes": 4102
+        },
+        "label_id": "other",
+        "participant_id": "participant_00000000000000000000000000000006",
+        "sample_id": "sample_00000000000000000000000000000006",
+        "session_id": "session_00000000000000000000000000000006",
+        "source_recording_id": "recording_00000000000000000000000000000006"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000007",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000007"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:bf550b945bf729e265197414ae50d674fcbc27dd3f3b244225623f8db75e6d74",
+          "size_bytes": 4103
+        },
+        "label_id": "other",
+        "participant_id": "participant_00000000000000000000000000000007",
+        "sample_id": "sample_00000000000000000000000000000007",
+        "session_id": "session_00000000000000000000000000000007",
+        "source_recording_id": "recording_00000000000000000000000000000007"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000008",
+          "locator": {
+            "kind": "artifact_uri",
+            "uri": "signlab://synthetic/samples/sample_00000000000000000000000000000008"
+          },
+          "media_type": "application/vnd.signlab.landmarks+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:5202d018f516702834956bdc881f6d6d0e80324fa3389b8bf0538e8f7cb65549",
+          "size_bytes": 4104
+        },
+        "label_id": "hello",
+        "participant_id": "participant_00000000000000000000000000000008",
+        "sample_id": "sample_00000000000000000000000000000008",
+        "session_id": "session_00000000000000000000000000000008",
+        "source_recording_id": "recording_00000000000000000000000000000008"
+      }
+    ],
+    "schema_version": "dataset-content/1",
+    "taxonomy": {
+      "id": "signlab-five",
+      "schema_version": "taxonomy-reference/1",
+      "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+      "version": "1.0.0"
+    }
+  },
+  "data_sha256": "sha256:fbffd3da3f63b969660c52c1d57af12833e44ec69231821f2b29d1b298624b25",
+  "dataset_id": "synthetic_gesture_dataset",
+  "schema_version": "dataset-manifest/1",
+  "version": "1.0.0"
+}

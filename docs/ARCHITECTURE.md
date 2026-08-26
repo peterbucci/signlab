@@ -28,6 +28,18 @@ versioned and evaluated separately.
 
 ## Data contracts
 
+The [pipeline-contract baseline](contracts.md) gives datasets, grouped splits,
+preprocessing plans, resolved configurations, terminal runs, and research models a
+single digest-bound provenance chain. New contract identities use domain-separated
+RFC 8785 canonical JSON and SHA-256. Physical storage locations remain outside the
+identity boundary: documents carry only normalized workspace-relative paths or
+logical `signlab://` URIs plus exact content digests.
+
+Every reader dispatches on an exact `schema_version` and rejects unknown versions;
+validation never performs an implicit migration. JSON Schema covers portable
+structure, while application validators prove sample coverage, group isolation,
+preprocessing-schema continuity, terminal run state, and cross-document identity.
+
 Every collection, annotation, training, evaluation, bundle, and public-copy
 contract embeds the same immutable taxonomy reference: `signlab-five@1.0.0` plus
 the canonical SHA-256. The [taxonomy](gesture-taxonomy.md) is authoritative for
