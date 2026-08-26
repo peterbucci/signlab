@@ -699,7 +699,7 @@ def test_dataset_aggregation_uses_weighted_denominators_and_rejects_bad_inputs()
     second_table_payload = _table(
         (0, 33_333, 66_667, 100_000, 133_333, 166_667, 200_000),
         invalid_reasons=(None, None, None, None, None, None, "source_frame_invalid"),
-    ).model_dump(mode="json", round_trip=True)
+    ).model_dump(mode="python", round_trip=True)
     for row in second_table_payload["rows"]:
         row["source_recording_id"] = second_recording_id
     second_table = LandmarkFramesTableV1.model_validate(second_table_payload, strict=True)
