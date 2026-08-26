@@ -56,10 +56,12 @@ label order, event boundaries, negative examples, legacy aliases, and the public
 claim. Downstream contracts may add fields but cannot reinterpret its identifiers.
 
 The [dataset manifest](dataset-manifests.md) includes stable identifiers for clips,
-participants, sessions, source recordings, devices, capture conditions,
-handedness, mirroring, consent, and checksums. Derived samples inherit the source
-recording and split. Six normalized tables use explicit Arrow schemas and Parquet
-storage while retaining storage-independent semantic hashes. V2 row artifacts use
+participants, sessions, source recordings, devices, camera facts, handedness,
+mirroring, consent, and checksums. Prompt order and condition assignments live in a
+separate collection sidecar whose production contract belongs to Story #17; they
+must not be smuggled into dataset IDs. Derived samples inherit the source recording
+and split. Six normalized tables use explicit Arrow schemas and Parquet storage
+while retaining storage-independent semantic hashes. V2 row artifacts use
 hash-derived logical paths whose only filename is the opaque artifact ID; dataset
 locators therefore cannot carry hostnames, participant names, or free-text labels.
 

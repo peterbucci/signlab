@@ -37,6 +37,15 @@ Participants are pseudonymous. Sessions and recordings carry only coarse,
 non-identifying device and capture facts. Every recording embeds its exact
 recording-level consent grant. Names, contact details, signatures, device serials,
 hostnames, and identity-vault mappings never belong in these tables.
+
+Prompt IDs, randomized order and seed, repetition numbers, protocol version,
+condition assignments, checklists, technical retries, deviations, and reviewer
+workflow identities are collection-sidecar concerns. They are deliberately not
+fields in the current normalized tables and must not be encoded in filenames,
+device IDs, or reason codes. The draft
+[collection protocol](collection-protocol.md) defines their meaning; Story #17 owns
+the future machine-readable sidecar and capture/import tooling.
+
 Every v2 row artifact uses an enforceable content-addressed location with no
 user-selected path segments:
 

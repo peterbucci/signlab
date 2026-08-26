@@ -80,6 +80,11 @@ executable withdrawal dry run. Real participant collection remains blocked until
 the documented human, institutional, legal, storage, and contact checks are
 resolved outside this public repository.
 
+The [collection and annotation protocol](docs/collection-protocol.md) defines the
+draft pilot design, randomized prompt procedure, capture checklists, temporal
+boundary rules, review workflow, and a no-camera synthetic rehearsal. It does not
+authorize real collection; the governance readiness gate remains authoritative.
+
 The [versioned pipeline contracts](docs/contracts.md) give datasets, grouped
 splits, preprocessing plans, resolved configurations, terminal runs, and research
 models portable RFC 8785 identities with explicit compatibility checks.
