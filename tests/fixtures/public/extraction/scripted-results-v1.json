@@ -1,0 +1,88 @@
+{
+  "fixture_only": true,
+  "frames": [
+    {
+      "hands": [
+        {
+          "handedness": "Left",
+          "point_seed": 0.1,
+          "score": 0.91,
+          "wrist": [0.2, 0.5, 0.0]
+        }
+      ],
+      "pose_present": true,
+      "pts": 0,
+      "source_valid": true,
+      "time_base_denominator": 30,
+      "time_base_numerator": 1
+    },
+    {
+      "hands": [
+        {
+          "handedness": "Left",
+          "point_seed": 0.2,
+          "score": 0.92,
+          "wrist": [0.24, 0.5, 0.0]
+        },
+        {
+          "handedness": "Right",
+          "point_seed": 0.7,
+          "score": 0.93,
+          "wrist": [0.76, 0.5, 0.0]
+        }
+      ],
+      "pose_present": true,
+      "pts": 1,
+      "source_valid": true,
+      "time_base_denominator": 30,
+      "time_base_numerator": 1
+    },
+    {
+      "hands": [
+        {
+          "handedness": "Right",
+          "point_seed": 0.71,
+          "score": 0.94,
+          "wrist": [0.73, 0.5, 0.0]
+        },
+        {
+          "handedness": "Left",
+          "point_seed": 0.21,
+          "score": 0.95,
+          "wrist": [0.27, 0.5, 0.0]
+        }
+      ],
+      "pose_present": false,
+      "pts": 2,
+      "source_valid": true,
+      "time_base_denominator": 30,
+      "time_base_numerator": 1
+    },
+    {
+      "hands": [],
+      "pose_present": false,
+      "pts": 3,
+      "source_valid": true,
+      "time_base_denominator": 30,
+      "time_base_numerator": 1
+    },
+    {
+      "hands": [],
+      "pose_present": false,
+      "pts": 4,
+      "source_valid": false,
+      "time_base_denominator": 30,
+      "time_base_numerator": 1
+    },
+    {
+      "hands": [],
+      "pose_present": false,
+      "pts": 5,
+      "source_valid": true,
+      "task_inference_failure": true,
+      "time_base_denominator": 30,
+      "time_base_numerator": 1
+    }
+  ],
+  "schema_version": "scripted-landmarker-fixture/1"
+}

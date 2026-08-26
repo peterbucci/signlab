@@ -1,0 +1,346 @@
+{
+  "$comment": "This JSON Schema enforces portable extraction structure. SignLab's strict extraction validators remain authoritative for canonical hashes, timeline recurrence, masks, counts, model registration, lineage, and artifact binding.",
+  "$defs": {
+    "MediaPipeTaskAssetV1": {
+      "additionalProperties": false,
+      "description": "Exact identity of one cross-runtime MediaPipe Tasks model bundle.",
+      "properties": {
+        "compatible_runtimes": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "enum": [
+                "browser",
+                "python"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "browser",
+                "python"
+              ],
+              "type": "string"
+            }
+          ],
+          "title": "Compatible Runtimes",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "filename": {
+          "enum": [
+            "hand_landmarker.task",
+            "pose_landmarker_lite.task"
+          ],
+          "title": "Filename",
+          "type": "string"
+        },
+        "model_id": {
+          "enum": [
+            "mediapipe-hand-landmarker-full",
+            "mediapipe-pose-landmarker-lite"
+          ],
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_revision": {
+          "const": "1.0.0",
+          "title": "Model Revision",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "mediapipe-task-asset/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "task_kind": {
+          "enum": [
+            "hand_landmarker",
+            "pose_landmarker"
+          ],
+          "title": "Task Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "task_kind",
+        "model_id",
+        "model_revision",
+        "filename",
+        "sha256",
+        "size_bytes",
+        "compatible_runtimes"
+      ],
+      "title": "MediaPipeTaskAssetV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/mediapipe-extraction-config-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Fully pinned detector, timestamp, and deterministic tracking configuration.",
+  "properties": {
+    "ambiguity_margin": {
+      "maximum": 1e-09,
+      "minimum": 1e-09,
+      "title": "Ambiguity Margin",
+      "type": "number"
+    },
+    "body_anchors": {
+      "maxItems": 6,
+      "minItems": 6,
+      "prefixItems": [
+        {
+          "enum": [
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist"
+          ],
+          "type": "string"
+        },
+        {
+          "enum": [
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist"
+          ],
+          "type": "string"
+        },
+        {
+          "enum": [
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist"
+          ],
+          "type": "string"
+        },
+        {
+          "enum": [
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist"
+          ],
+          "type": "string"
+        },
+        {
+          "enum": [
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist"
+          ],
+          "type": "string"
+        },
+        {
+          "enum": [
+            "left_shoulder",
+            "right_shoulder",
+            "left_elbow",
+            "right_elbow",
+            "left_wrist",
+            "right_wrist"
+          ],
+          "type": "string"
+        }
+      ],
+      "title": "Body Anchors",
+      "type": "array"
+    },
+    "browser_package": {
+      "const": "@mediapipe/tasks-vision",
+      "title": "Browser Package",
+      "type": "string"
+    },
+    "browser_package_version": {
+      "const": "1.0.1",
+      "title": "Browser Package Version",
+      "type": "string"
+    },
+    "config_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Config Id",
+      "type": "string"
+    },
+    "decoder_package": {
+      "const": "av",
+      "title": "Decoder Package",
+      "type": "string"
+    },
+    "decoder_package_version": {
+      "const": "18.1.0",
+      "title": "Decoder Package Version",
+      "type": "string"
+    },
+    "delegate": {
+      "const": "CPU",
+      "title": "Delegate",
+      "type": "string"
+    },
+    "hand_task_asset": {
+      "$ref": "#/$defs/MediaPipeTaskAssetV1"
+    },
+    "handedness_disagreement_penalty": {
+      "maximum": 0.05,
+      "minimum": 0.05,
+      "title": "Handedness Disagreement Penalty",
+      "type": "number"
+    },
+    "max_spatial_cost": {
+      "maximum": 0.25,
+      "minimum": 0.25,
+      "title": "Max Spatial Cost",
+      "type": "number"
+    },
+    "min_hand_detection_confidence": {
+      "maximum": 0.5,
+      "minimum": 0.5,
+      "title": "Min Hand Detection Confidence",
+      "type": "number"
+    },
+    "min_hand_presence_confidence": {
+      "maximum": 0.5,
+      "minimum": 0.5,
+      "title": "Min Hand Presence Confidence",
+      "type": "number"
+    },
+    "min_hand_tracking_confidence": {
+      "maximum": 0.5,
+      "minimum": 0.5,
+      "title": "Min Hand Tracking Confidence",
+      "type": "number"
+    },
+    "min_pose_detection_confidence": {
+      "maximum": 0.5,
+      "minimum": 0.5,
+      "title": "Min Pose Detection Confidence",
+      "type": "number"
+    },
+    "min_pose_presence_confidence": {
+      "maximum": 0.5,
+      "minimum": 0.5,
+      "title": "Min Pose Presence Confidence",
+      "type": "number"
+    },
+    "min_pose_tracking_confidence": {
+      "maximum": 0.5,
+      "minimum": 0.5,
+      "title": "Min Pose Tracking Confidence",
+      "type": "number"
+    },
+    "num_hands": {
+      "const": 2,
+      "title": "Num Hands",
+      "type": "integer"
+    },
+    "num_poses": {
+      "const": 1,
+      "title": "Num Poses",
+      "type": "integer"
+    },
+    "pose_task_asset": {
+      "$ref": "#/$defs/MediaPipeTaskAssetV1"
+    },
+    "python_package": {
+      "const": "mediapipe",
+      "title": "Python Package",
+      "type": "string"
+    },
+    "python_package_version": {
+      "const": "1.0.1",
+      "title": "Python Package Version",
+      "type": "string"
+    },
+    "running_mode": {
+      "const": "VIDEO",
+      "title": "Running Mode",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "mediapipe-extraction-config/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "timestamp_rule": {
+      "const": "source_pts_relative_us_then_strict_monotonic_floor_ms/1",
+      "title": "Timestamp Rule",
+      "type": "string"
+    },
+    "tracking_algorithm": {
+      "const": "deterministic_wrist_mcp_centroid_minimum_cost",
+      "title": "Tracking Algorithm",
+      "type": "string"
+    },
+    "tracking_algorithm_version": {
+      "const": "1.0.0",
+      "title": "Tracking Algorithm Version",
+      "type": "string"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "config_id",
+    "version",
+    "python_package",
+    "python_package_version",
+    "browser_package",
+    "browser_package_version",
+    "decoder_package",
+    "decoder_package_version",
+    "delegate",
+    "running_mode",
+    "num_hands",
+    "num_poses",
+    "min_hand_detection_confidence",
+    "min_hand_presence_confidence",
+    "min_hand_tracking_confidence",
+    "min_pose_detection_confidence",
+    "min_pose_presence_confidence",
+    "min_pose_tracking_confidence",
+    "body_anchors",
+    "timestamp_rule",
+    "tracking_algorithm",
+    "tracking_algorithm_version",
+    "max_spatial_cost",
+    "handedness_disagreement_penalty",
+    "ambiguity_margin",
+    "hand_task_asset",
+    "pose_task_asset"
+  ],
+  "title": "MediaPipeExtractionConfigV1",
+  "type": "object"
+}

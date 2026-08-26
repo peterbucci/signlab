@@ -69,6 +69,16 @@ and `validate` stages remain fixture receipts until their graph adapters are rep
 deliberately alongside the downstream production stages. An authorized real-data
 adapter remains blocked on the governance and storage gates described below.
 
+The #23 [landmark extraction service](landmark-extraction.md) likewise implements
+the canonical `extract` service boundary independently of the root receipt. It consumes an
+exact raw-manifest identity, verifies pinned local MediaPipe task bytes, preserves
+source PTS/time-base and orientation facts, and emits semantic plus exact-byte
+Parquet evidence. It does not modify `STAGE_REGISTRY`, `dvc.yaml`, or the public
+fixture lock, and `dvc repro` still runs `fixture-smoke/1` for `extract`. Wiring a
+private stage adapter is a later, reviewed change after the Story #19 authorization
+and storage gate; it must call the same importable service rather than create a
+parallel graph.
+
 Install the reproducibility dependencies and check the public scaffold with:
 
 ```shell

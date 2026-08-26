@@ -13,6 +13,7 @@ from scripts import verify_distribution as distribution_verifier
 from scripts.verify_distribution import (
     EXPECTED_CONTRACT_RESOURCES,
     EXPECTED_DATASET_RESOURCES,
+    EXPECTED_EXTRACTION_RESOURCES,
     EXPECTED_GOVERNANCE_RESOURCES,
     EXPECTED_TAXONOMY_SCHEMAS,
     _inspect_sdist,
@@ -27,6 +28,7 @@ def _write_sdist(
     governance_resources: Iterable[str],
     contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
     dataset_resources: Iterable[str] = EXPECTED_DATASET_RESOURCES,
+    extraction_resources: Iterable[str] = EXPECTED_EXTRACTION_RESOURCES,
     extra_members: Iterable[tarfile.TarInfo] = (),
 ) -> None:
     archive_root = path.name.removesuffix(".tar.gz")
@@ -34,6 +36,7 @@ def _write_sdist(
         f"{archive_root}/src/signlab/py.typed",
         f"{archive_root}/src/signlab/resources/contracts/__init__.py",
         f"{archive_root}/src/signlab/resources/datasets/__init__.py",
+        f"{archive_root}/src/signlab/resources/extraction/__init__.py",
         f"{archive_root}/src/signlab/resources/governance/__init__.py",
         *(
             f"{archive_root}/src/signlab/resources/governance/{resource}"
@@ -46,6 +49,10 @@ def _write_sdist(
         *(
             f"{archive_root}/src/signlab/resources/datasets/{resource}"
             for resource in dataset_resources
+        ),
+        *(
+            f"{archive_root}/src/signlab/resources/extraction/{resource}"
+            for resource in extraction_resources
         ),
     ]
     with tarfile.open(path, mode="w:gz") as archive:
@@ -63,18 +70,21 @@ def _write_wheel(
     governance_resources: Iterable[str],
     contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
     dataset_resources: Iterable[str] = EXPECTED_DATASET_RESOURCES,
+    extraction_resources: Iterable[str] = EXPECTED_EXTRACTION_RESOURCES,
 ) -> None:
     member_names = [
         "signlab/py.typed",
         "signlab/commands/__init__.py",
         "signlab/resources/contracts/__init__.py",
         "signlab/resources/datasets/__init__.py",
+        "signlab/resources/extraction/__init__.py",
         "signlab/resources/governance/__init__.py",
         "signlab/resources/taxonomies/signlab-five-1.0.0.json",
         *(f"signlab/resources/schemas/{name}" for name in EXPECTED_TAXONOMY_SCHEMAS),
         *(f"signlab/resources/governance/{name}" for name in governance_resources),
         *(f"signlab/resources/contracts/{name}" for name in contract_resources),
         *(f"signlab/resources/datasets/{name}" for name in dataset_resources),
+        *(f"signlab/resources/extraction/{name}" for name in extraction_resources),
         "signlab-0.1.0.dist-info/METADATA",
         "signlab-0.1.0.dist-info/entry_points.txt",
     ]
@@ -112,6 +122,9 @@ def test_distribution_policy_rejects_traversal_and_private_artifacts() -> None:
         "archive contains a private or generated artifact",
     )
     assert validate_member_names(("models/champion.json",)) == (
+        "archive contains a private or generated artifact",
+    )
+    assert validate_member_names(("signlab/models/hand_landmarker.task",)) == (
         "archive contains a private or generated artifact",
     )
 
@@ -344,6 +357,57 @@ def test_archives_require_the_exact_nonduplicate_dataset_resource_set(
         )
         errors = _inspect_sdist(archive)
         expected_error = "source distribution does not contain the exact dataset resource set"
+
+    expected_errors: tuple[str, ...] = (expected_error,)
+    if mutation == "duplicate":
+        expected_errors = (
+            "archive contains duplicate or case-colliding member paths",
+            expected_error,
+        )
+    assert errors == expected_errors
+
+
+@pytest.mark.parametrize("archive_kind", ["wheel", "sdist"])
+@pytest.mark.parametrize("mutation", ["missing", "extra", "duplicate"])
+def test_archives_require_the_exact_nonduplicate_extraction_resource_set(
+    tmp_path: Path,
+    archive_kind: str,
+    mutation: str,
+) -> None:
+    resources = sorted(EXPECTED_EXTRACTION_RESOURCES)
+    if mutation == "missing":
+        resources.remove("models/mediapipe-tasks-1.0.1.lock.json")
+    elif mutation == "extra":
+        resources.append("models/unexpected.lock.json")
+    else:
+        resources.append("config/mediapipe-extraction-config-1.default.json")
+
+    if archive_kind == "wheel":
+        archive = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+        if mutation == "duplicate":
+            with pytest.warns(UserWarning, match="Duplicate name"):
+                _write_wheel(
+                    archive,
+                    EXPECTED_GOVERNANCE_RESOURCES,
+                    extraction_resources=resources,
+                )
+        else:
+            _write_wheel(
+                archive,
+                EXPECTED_GOVERNANCE_RESOURCES,
+                extraction_resources=resources,
+            )
+        errors = _inspect_wheel(archive)
+        expected_error = "wheel does not contain the exact extraction resource set"
+    else:
+        archive = tmp_path / "signlab-0.1.0.tar.gz"
+        _write_sdist(
+            archive,
+            EXPECTED_GOVERNANCE_RESOURCES,
+            extraction_resources=resources,
+        )
+        errors = _inspect_sdist(archive)
+        expected_error = "source distribution does not contain the exact extraction resource set"
 
     expected_errors: tuple[str, ...] = (expected_error,)
     if mutation == "duplicate":

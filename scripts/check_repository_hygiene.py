@@ -57,6 +57,7 @@ PRIVATE_SUFFIXES = {
     ".sqlite3",
     ".safetensors",
     ".so",
+    ".task",
     ".tflite",
     ".webm",
     ".whl",

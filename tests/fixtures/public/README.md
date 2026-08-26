@@ -17,3 +17,10 @@ opaque relative source map. The `.webm` suffix exercises media-path handling onl
 the importer does not claim to probe its codec. These MIT-licensed synthetic bytes
 drive the cross-platform raw-import golden test and do not represent consent,
 collection approval, or usable media.
+
+`extraction/` contains invented detector results, timestamps, and coordinate seeds.
+It is the authoritative input to the scripted batch decoder and inference fake,
+including explicit source-frame and task-inference failures. It exercises
+deterministic hand association, absence and invalid masks, replay, and output
+serialization without shipping a model or representing a person. The scripted
+backend exists only in tests and is not selectable from the SignLab command line.

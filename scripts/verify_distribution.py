@@ -89,6 +89,14 @@ EXPECTED_DATASET_RESOURCES = {
     "schemas/recordings-table-1.schema.json",
     "schemas/sessions-table-1.schema.json",
 }
+EXPECTED_EXTRACTION_RESOURCES = {
+    "arrow/landmark-frames-table-1.arrow-schema.json",
+    "config/mediapipe-extraction-config-1.default.json",
+    "models/mediapipe-tasks-1.0.1.lock.json",
+    "schemas/landmark-extraction-manifest-1.schema.json",
+    "schemas/landmark-frames-table-1.schema.json",
+    "schemas/mediapipe-extraction-config-1.schema.json",
+}
 FORBIDDEN_REPOSITORY_ROOTS = {
     "artifacts",
     "data",
@@ -130,6 +138,7 @@ FORBIDDEN_SUFFIXES = {
     ".so",
     ".sqlite",
     ".sqlite3",
+    ".task",
     ".tflite",
     ".webm",
     ".whl",
@@ -258,6 +267,17 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             expected_dataset_members
         ):
             errors.append("wheel does not contain the exact dataset resource set")
+        extraction_prefix = "signlab/resources/extraction/"
+        extraction_members = [
+            name.removeprefix(extraction_prefix)
+            for name in names
+            if name.startswith(extraction_prefix) and not name.endswith("/")
+        ]
+        expected_extraction_members = EXPECTED_EXTRACTION_RESOURCES | {"__init__.py"}
+        if set(extraction_members) != expected_extraction_members or len(extraction_members) != len(
+            expected_extraction_members
+        ):
+            errors.append("wheel does not contain the exact extraction resource set")
         if not any(name.endswith(".dist-info/METADATA") for name in names):
             errors.append("wheel is missing distribution metadata")
         entry_point_members = [
@@ -329,6 +349,17 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
             expected_dataset_members
         ):
             errors.append("source distribution does not contain the exact dataset resource set")
+        extraction_prefix = f"{package_prefix}resources/extraction/"
+        extraction_members = [
+            member.name.removeprefix(extraction_prefix)
+            for member in members
+            if member.name.startswith(extraction_prefix)
+        ]
+        expected_extraction_members = EXPECTED_EXTRACTION_RESOURCES | {"__init__.py"}
+        if set(extraction_members) != expected_extraction_members or len(extraction_members) != len(
+            expected_extraction_members
+        ):
+            errors.append("source distribution does not contain the exact extraction resource set")
         if any(member.size > MAX_MEMBER_BYTES for member in members):
             errors.append("source distribution contains a member larger than 1 MiB")
     return tuple(sorted(set(errors)))

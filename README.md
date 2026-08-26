@@ -44,7 +44,7 @@ runtime, so a system Python installation is not required.
 git clone https://github.com/peterbucci/signlab.git
 cd signlab
 uv python install
-uv sync --locked --all-groups
+uv sync --locked --all-groups --all-extras
 uv run signlab --help
 uv run signlab doctor check
 ```
@@ -91,6 +91,12 @@ behavior, reviewed annotation projection, and the atomic `raw-dataset-manifest/1
 handoff. Its executable example is synthetic only; real media remains fail-closed
 without readiness approval, private storage, and authenticated consent verification.
 
+The [version-pinned landmark extraction guide](docs/landmark-extraction.md) defines
+the exact MediaPipe/PyAV runtime and model bytes, source-timestamp preservation,
+two-hand tracking, raw hand/body observation masks, deterministic Parquet evidence,
+and the network-isolated private-data boundary. It deliberately leaves quality
+policy and feature engineering to later stories.
+
 The [versioned pipeline contracts](docs/contracts.md) give datasets, grouped
 splits, preprocessing plans, resolved configurations, terminal runs, and research
 models portable RFC 8785 identities with explicit compatibility checks.
@@ -135,10 +141,13 @@ evidence export, versioned gesture taxonomy, and fail-closed participant-data
 governance baseline are established. A UI-independent capture sidecar and atomic raw
 importer now produce a validated `raw-dataset-manifest/1` handoff from explicitly
 synthetic inputs. The sample-bearing dataset contract retains six normalized,
-lineage-preserving Parquet tables and the published v1 reader. The registered DVC
-graph remains fixture-only until later stories replace its extraction, quality,
-splitting, and feature adapters. No headline model result is considered valid until
-the remaining grouped evaluation foundations are complete.
+lineage-preserving Parquet tables and the published v1 reader. A pinned MediaPipe
+Tasks boundary now produces schema-validated, lineage-bound landmark Parquet with
+separate semantic and exact-byte evidence; public examples remain synthetic. The
+registered DVC graph remains the Story #14 fixture receipt scaffold rather than a
+production extraction runner. No headline model result is considered valid until
+the remaining quality, representation, and grouped-evaluation foundations are
+complete.
 
 ## Data and privacy
 
