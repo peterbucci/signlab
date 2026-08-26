@@ -21,9 +21,10 @@ The root DVC graph is generated from the typed SignLab stage registry. Its curre
 stages produce synthetic receipts only: they prove the intended boundaries and DVC
 wiring, not production ingestion, extraction, quality, splitting, or features. Later
 stage stories replace those adapters with importable services while preserving one
-registered graph. Public Git contains only the synthetic fixture lock; participant-
-data pointers and production lock history live in a separate protected metadata
-repository. See [data versioning](data-versioning.md).
+registered graph. Public Git contains only the synthetic fixture lock. When Story #19
+creates the first approved production version, participant-data pointers and
+production lock history will live in a separate protected metadata repository. See
+[data versioning](data-versioning.md).
 
 ## State model
 

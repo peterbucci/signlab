@@ -66,8 +66,9 @@ See [docs/development.md](docs/development.md) for directory ownership, dependen
 updates, generated-file policy, and the Python-version decision.
 
 The [DVC data-versioning guide](docs/data-versioning.md) defines the fixture-only
-stage scaffold, local clean-room transport proof, protected private-data gate, and
-tracker-neutral reproduction metadata that a later experiment-tracking story records.
+stage scaffold, local clean-room transport proof, the future Story #19 protected
+private-data gate, and tracker-neutral reproduction metadata that a later
+experiment-tracking story records.
 
 The [gesture taxonomy and claim boundary](docs/gesture-taxonomy.md) define the
 versioned six-output classifier vocabulary and the evidence required before making

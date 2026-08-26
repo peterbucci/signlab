@@ -46,7 +46,7 @@ class DvcStageIdentityV1(StrictContractModel):
 
 
 class DvcSnapshotV1(StrictContractModel):
-    """Minimal lineage record suitable for later logging by MLflow."""
+    """Minimal lineage record suitable for later experiment tracking."""
 
     schema_version: Literal["dvc-snapshot/1"]
     metadata_repository_role: DvcMetadataRepositoryRole

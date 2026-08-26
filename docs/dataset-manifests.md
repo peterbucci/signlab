@@ -110,8 +110,8 @@ locator. The verifier requires a sorted, unique set of portable paths beneath th
 explicit workspace root and rejects missing files, final symlinks, path escapes,
 non-files, size drift, and SHA-256 drift. Logical `signlab://` locators still require
 an explicit storage adapter. This byte check remains separate from authenticated
-current consent. See
-[data versioning](data-versioning.md) for the protected pull workflow.
+current consent. See [data versioning](data-versioning.md) for the future protected
+pull workflow owned by Story #19.
 
 ## Public fixtures and private data
 

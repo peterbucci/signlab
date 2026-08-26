@@ -3,7 +3,9 @@
 SignLab uses DVC 3.67.1 for content-addressed data transport and stage caching.
 Story #14 establishes the DVC wiring with a small public synthetic fixture. It does
 not implement the production data transforms, provision private infrastructure,
-authorize participant-data use, or log a real experiment.
+authorize participant-data use, or log a real experiment. Story #19 owns the
+production dataset version and the authorized private-data gate described below;
+that gate is intentionally not an acceptance check for Story #14.
 
 ## Scope and ownership
 
@@ -14,6 +16,9 @@ authorize participant-data use, or log a real experiment.
 | Private DVC remote | Approved raw and derived bytes in content-addressed storage | Dataset validity, experiment validity, or permission to use the bytes |
 | Experiment tracker | Later records run parameters, metrics, artifacts, and tracker-neutral Git/DVC metadata | Private media, credentials, or consent decisions |
 | Identity vault | Names, contacts, signatures, and identity-to-pseudonym mappings | Research artifacts or model outputs |
+
+The protected metadata Git and private DVC remote rows describe future Story #19
+production systems, not infrastructure deployed or verified by Story #14.
 
 The protected metadata repository must be a separate access-controlled repository,
 not a branch of this public repository. Remote locations, private pointers, private
@@ -89,6 +94,9 @@ Private storage is an operator-managed prerequisite. The current adapter support
 and S3-compatible storage and writes remote metadata only to ignored
 `.dvc/config.local`.
 
+Story #14 unit-tests this adapter without contacting a live remote. Story #19 owns
+storage provisioning, policy review, and the first live private configuration.
+
 | Variable | Purpose |
 | --- | --- |
 | `SIGNLAB_DVC_REMOTE_URL` | Required credential-free `s3://` bucket/prefix |
@@ -109,11 +117,13 @@ verify encryption, audit logging, versioning, retention, deletion, or backup pol
 Those controls must be established and reviewed in the storage environment before
 participant data is uploaded.
 
-## Authorized private-data gate
+## Future authorized private-data gate (Story #19)
 
-The public clean-room proof and the authorized private-data gate are different
-acceptance checks. The latter must run on an approved machine with access to the
-protected metadata repository and private remote:
+The public clean-room proof completes the transport requirement for Story #14. The
+authorized private-data gate is a separate Story #19 acceptance check that can run
+only after the approved production dataset, protected metadata repository, private
+remote, storage controls, and authenticated consent integration exist. Its downstream
+contract is:
 
 1. Check out the reviewed protected-metadata revision containing the approved DVC
    pointers and production lock.
@@ -138,8 +148,10 @@ protected metadata repository and private remote:
    ```
 
 If the protected repository, approved version, remote, role, storage controls, or
-consent evidence is unavailable, the private-data criterion remains unverified. Do
-not substitute the public fixture or a successful DVC pull for that evidence.
+consent evidence is unavailable, Story #19's private-data criterion remains
+unverified. Do not provision infrastructure or upload participant data merely to
+satisfy Story #14, and do not substitute the public fixture or a successful DVC pull
+for the later production evidence.
 
 ## Tracker-neutral reproduction metadata
 

@@ -68,7 +68,7 @@ group, not dependencies of the published wheel. PyYAML is a runtime dependency o
 because the installed SignLab snapshot reader extracts registered stage entries from
 `dvc.lock`. After changing the typed stage registry, regenerate `dvc.yaml`, run
 `dvc repro --force --no-run-cache`, and review the resulting lock change. The fixture
-scope and separate authorized private-data gate are in
+scope and separate Story #19 authorized private-data gate are in
 [data-versioning.md](data-versioning.md).
 
 ## Generated and private state
