@@ -8,3 +8,9 @@
 *.mp4 binary
 *.onnx binary
 *.parquet binary
+*.npy binary
+*.npz binary
+*.pt binary
+*.pth binary
+*.keras binary
+*.h5 binary

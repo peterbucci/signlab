@@ -1,0 +1,59 @@
+minimum_pre_commit_version: 4.6.2
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-illegal-windows-names
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: forbid-submodules
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 856f55170f70dc7523c45a215ecdedc44709e2a6 # 0.12.6
+    hooks:
+      - id: uv-lock
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 65dbdb59d2f2d9c3bdc343c566821ad3319ddaa3 # v0.16.3
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: repository-hygiene
+        name: repository hygiene
+        entry: uv run --locked python scripts/check_repository_hygiene.py
+        language: system
+        always_run: true
+        pass_filenames: false
+      - id: mypy
+        name: mypy
+        entry: uv run --locked mypy
+        language: system
+        stages: [pre-push]
+        always_run: true
+        pass_filenames: false
+      - id: pytest
+        name: pytest
+        entry: uv run --locked pytest
+        language: system
+        stages: [pre-push]
+        always_run: true
+        pass_filenames: false

@@ -32,6 +32,36 @@ The public demo is intentionally independent of the optional training platform.
 FastAPI, Prefect, PostgreSQL, object storage, and a custom experiment Studio are
 deferred until a concrete workflow requires them.
 
+## Developer quickstart
+
+Prerequisites are Git and `uv` 0.12.6; `uv` installs the pinned CPython 3.12.14
+runtime, so a system Python installation is not required.
+
+```shell
+git clone https://github.com/peterbucci/signlab.git
+cd signlab
+uv python install
+uv sync --locked --all-groups
+uv run signlab --help
+uv run signlab doctor check
+```
+
+The locked environment contains every development tool. Run the same gates as CI:
+
+```shell
+uv lock --check
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy
+uv run pytest
+uv run python scripts/check_repository_hygiene.py
+uv build
+uv run python scripts/verify_distribution.py dist
+```
+
+See [docs/development.md](docs/development.md) for directory ownership, dependency
+updates, generated-file policy, and the Python-version decision.
+
 ## Research questions
 
 1. Does body-relative context improve signer-held-out generalization?
@@ -57,9 +87,9 @@ implementation backlog.
 
 ## Repository status
 
-This repository is in project-initialization. The first milestone is a reproducible
-legacy audit and a frozen dataset/experiment contract; no headline model result is
-considered valid until those foundations are complete.
+The immutable legacy audit and reproducible developer foundation are established.
+Dataset, experiment, and bundle contracts are still under construction; no headline
+model result is considered valid until the grouped evaluation foundations are complete.
 
 ## Data and privacy
 

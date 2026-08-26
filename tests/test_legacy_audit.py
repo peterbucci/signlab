@@ -5,7 +5,7 @@ import math
 import re
 from collections.abc import Iterator, Sequence
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import Any, cast
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 LEGACY_AUDIT_PATH = REPOSITORY_ROOT / "docs" / "legacy-audit.md"
@@ -84,7 +84,10 @@ EXPECTED_RUN_EVIDENCE = {
 
 
 def _load_state() -> dict[str, Any]:
-    return json.loads(LEGACY_STATE_PATH.read_text(encoding="utf-8"))
+    return cast(
+        dict[str, Any],
+        json.loads(LEGACY_STATE_PATH.read_text(encoding="utf-8")),
+    )
 
 
 def _macro_f1(matrix: Sequence[Sequence[int]]) -> float:
