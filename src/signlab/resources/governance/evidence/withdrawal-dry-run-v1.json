@@ -1,0 +1,204 @@
+{
+  "affected_asset_count": 12,
+  "direct_asset_count": 1,
+  "downstream_asset_count": 11,
+  "generated_at": "2026-08-26T14:00:00Z",
+  "impacts": [
+    {
+      "asset_id": "asset_00000000000000000000000000000001",
+      "asset_kind": "raw_recording",
+      "asset_sha256": "sha256:e636119fc3c0cc93b233a24aa8adc197360415424a049016e0c4544894807807",
+      "impact_id": "impact_d76ae89535664c1db2e36db5522cb880",
+      "impact_sha256": "sha256:a2bd86e97e943e506248d8399d9770c1578a02a395e074f6fddda4300df7a9d9",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/raw_recording/asset_00000000000000000000000000000001",
+      "planned_actions": [
+        "delete_primary",
+        "invalidate",
+        "revoke_access"
+      ],
+      "relationship": "direct",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000003",
+      "asset_kind": "derived_features",
+      "asset_sha256": "sha256:6c558304ecdf9b6cdcfef823c7c486242a2eea2cdfebbf8d30f74896e8005bc3",
+      "impact_id": "impact_7454335943556d00ffad38299b2b25c0",
+      "impact_sha256": "sha256:8fa18a37b71d1e7cc5ca4fc877133865ad0903125e70d3054f8fdfb8d80703f8",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/derived_features/asset_00000000000000000000000000000003",
+      "planned_actions": [
+        "delete_primary",
+        "invalidate",
+        "rebuild"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000005",
+      "asset_kind": "annotation",
+      "asset_sha256": "sha256:bbdbfcaea0d07ce080ff1353d0b944a67dd6be7a212dcf59fc98f3ba84ff54c3",
+      "impact_id": "impact_ebd1fee37e0a72e9314250624943070b",
+      "impact_sha256": "sha256:03f776688d3dfa0281a3878c22292933d9c8390fbfa7eedfb214479d2f322350",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/annotation/asset_00000000000000000000000000000005",
+      "planned_actions": [
+        "delete_primary",
+        "invalidate",
+        "rebuild"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000006",
+      "asset_kind": "dataset_version",
+      "asset_sha256": "sha256:ca46cf22ef2a749a1f136be29187f5612ea25b478c14175f9bdfb5925550599f",
+      "impact_id": "impact_0c5ad5f488ccb62bb594e49c2b092e32",
+      "impact_sha256": "sha256:81099da388228aabc930cb4209cd7b050578f85f194263717288c01668f9e6ca",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/dataset_version/asset_00000000000000000000000000000006",
+      "planned_actions": [
+        "invalidate",
+        "rebuild"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000008",
+      "asset_kind": "split_version",
+      "asset_sha256": "sha256:bb673a7134e9110502889ec9aa3a7e11c93e19a89babbd0c7984900b21eeac20",
+      "impact_id": "impact_526cd1d49fdcab3810663b019e1d8f61",
+      "impact_sha256": "sha256:a0f82afa0f1f1fc938fd48b65cb9e5ce7aecbd2d3e2bca81577a6915db392800",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/split_version/asset_00000000000000000000000000000008",
+      "planned_actions": [
+        "invalidate",
+        "rebuild"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000009",
+      "asset_kind": "experiment_run",
+      "asset_sha256": "sha256:0b8397f8524ee5b98cda35915a394b528e3b9391458172f2b587ca0ce42ab919",
+      "impact_id": "impact_a75945bd222072c7cfa6959d18061fb4",
+      "impact_sha256": "sha256:ea571031eb072e542e28e9d8c3e9854cd38d17353bd7b1efadd82604f6063c76",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/experiment_run/asset_00000000000000000000000000000009",
+      "planned_actions": [
+        "invalidate",
+        "rerun"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000a",
+      "asset_kind": "model_artifact",
+      "asset_sha256": "sha256:5909023bb5e317349f370c4e42e6b0b60a385ed72d58a66ea5854407e12bcf91",
+      "impact_id": "impact_a9a1b80719b934ba4a36267e97c2c949",
+      "impact_sha256": "sha256:f72ddaf39c1248cb772872f344d48ec2e66c4aaf6a205793014adcded1dda0a4",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/model_artifact/asset_0000000000000000000000000000000a",
+      "planned_actions": [
+        "invalidate",
+        "retire",
+        "retrain"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000b",
+      "asset_kind": "evaluation_report",
+      "asset_sha256": "sha256:e36a385e6fab04a142936cc588ebd3d201a982cb4bb84bedd596943343ec6ef5",
+      "impact_id": "impact_fdabe25c944bfe2a8d5bcb6754dbe132",
+      "impact_sha256": "sha256:2156ae2cb1c850888567bf8649c357707b052e215d7e9799cec90d11a88984b7",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/evaluation_report/asset_0000000000000000000000000000000b",
+      "planned_actions": [
+        "invalidate",
+        "reevaluate",
+        "republish",
+        "retract"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000c",
+      "asset_kind": "public_demo",
+      "asset_sha256": "sha256:b9dce0434246d5afeb450fa99f4fa31074a1d72cc9a41a3576dff91e16c2a2ac",
+      "impact_id": "impact_1aa9769beaaf75db4000110658d66d76",
+      "impact_sha256": "sha256:ab0375dfe5476633789483a0c2750e9fd6a9c49ff57cd148c7960c361c71de3f",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/public_demo/asset_0000000000000000000000000000000c",
+      "planned_actions": [
+        "invalidate",
+        "republish",
+        "retract"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000f",
+      "asset_kind": "cache",
+      "asset_sha256": "sha256:3a58a4c845a160b6da52397c2552f92120dd9de25ca9c5453f0467d2f0ce750a",
+      "impact_id": "impact_fa19f31e8949ce7aca46b25aca347279",
+      "impact_sha256": "sha256:3ae1bbaec7cf687489c090a9fbd377ecfff14ce123c13c2bcc841148c2cc3cac",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/cache/asset_0000000000000000000000000000000f",
+      "planned_actions": [
+        "delete_primary",
+        "invalidate",
+        "rebuild"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000010",
+      "asset_kind": "backup_copy",
+      "asset_sha256": "sha256:9f111dea7059e200271c249922001e7301f2425372c69ef2c3ca41e580e84e53",
+      "impact_id": "impact_9884b8f0ae8cde4c24183291d6ed25eb",
+      "impact_sha256": "sha256:b1c0151eaa555c9c09e79f897348c12460ec1ce845a40ba3ad534cbbdf51619e",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/backup_copy/asset_00000000000000000000000000000010",
+      "planned_actions": [
+        "invalidate",
+        "purge_backup"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000011",
+      "asset_kind": "withdrawal_tombstone",
+      "asset_sha256": "sha256:f2cba828677added8c6a88882a780cf25c5e4b334cca07cb5e55d2925c20f87e",
+      "impact_id": "impact_0d7cb3dffe6a75afb3b8f3ce4d7d15b3",
+      "impact_sha256": "sha256:4367cf04a18e94dd0c9549b1a8f5aafe0cbcea8ac18e9c206a9e91b0068868be",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/withdrawal_tombstone/asset_00000000000000000000000000000011",
+      "planned_actions": [
+        "retain"
+      ],
+      "relationship": "downstream",
+      "schema_version": "withdrawal-impact/1"
+    }
+  ],
+  "inventory_id": "inventory_00000000000000000000000000000001",
+  "inventory_sha256": "sha256:191d80752fff985682bf93cb2dea960e5a38f9a4c3a90be071c36d4a311ee4a7",
+  "mode": "dry_run",
+  "report_id": "report_b28078bf0b5695a3c2d0bd7bbd05cf8c",
+  "report_sha256": "sha256:01867a1334469a1fe44d21dfe850e14c38a8b2af68fff6dbb6c887d99f771df3",
+  "request": {
+    "effective_at": "2026-08-26T13:05:00Z",
+    "identity_verification_attestation_sha256": "sha256:804d3da1f389d02bbfefb39768579bb8022a90accdfddf1fcaff821da4ef2f94",
+    "participant_id": "participant_00000000000000000000000000000001",
+    "receipt_ids": [
+      "receipt_00000000000000000000000000000011"
+    ],
+    "request_id": "withdrawal_00000000000000000000000000000001",
+    "request_sha256": "sha256:fa5788aeae3ebbde8b5e95f376128696fbf8fb8d6c85e534d74fd2851c3a02b5",
+    "requested_at": "2026-08-26T13:00:00Z",
+    "schema_version": "withdrawal-request/1",
+    "target": "all_participant_data"
+  },
+  "schema_version": "withdrawal-report/1",
+  "status": "complete",
+  "unresolved_asset_ids": []
+}

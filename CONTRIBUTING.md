@@ -16,6 +16,10 @@ CLI modules parse inputs and delegate to importable services. They must not cont
 training, extraction, evaluation, or export implementations. Examples and tests may
 use only synthetic, explicitly consented, or separately licensed data.
 
+Governance fixtures must remain synthetic. Completed consent forms, names, contact
+details, signatures, identity mappings, raw participant media, and participant-
+derived values must not enter issues, pull requests, logs, test output, or Git.
+
 ## Definition of done
 
 A story is complete when its acceptance criteria pass, evidence is attached, relevant

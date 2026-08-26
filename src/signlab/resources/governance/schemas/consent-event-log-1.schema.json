@@ -1,0 +1,286 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and expressible local invariants. SignLab Pydantic and application validation remains authoritative for canonical digests, timestamp ordering, DAG closure, cross-record bindings, event-log completeness, cross-field locator equality, and withdrawal closure.",
+  "$defs": {
+    "ConsentEventV1": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "event_type": {
+                "const": "granted"
+              }
+            },
+            "required": [
+              "event_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "const": null
+              },
+              "replacement_receipt_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "event_type": {
+                "const": "withdrawn"
+              }
+            },
+            "required": [
+              "event_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "const": "participant_request"
+              },
+              "replacement_receipt_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "event_type": {
+                "const": "expired"
+              }
+            },
+            "required": [
+              "event_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "const": "consent_expired"
+              },
+              "replacement_receipt_id": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "event_type": {
+                "const": "superseded"
+              }
+            },
+            "required": [
+              "event_type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "enum": [
+                  "policy_replaced",
+                  "scope_replaced"
+                ]
+              },
+              "replacement_receipt_id": {
+                "pattern": "^receipt_[0-9a-f]{32}$",
+                "type": "string"
+              }
+            }
+          }
+        }
+      ],
+      "description": "Append-only consent lifecycle event without identity or free-text fields.",
+      "properties": {
+        "event_id": {
+          "pattern": "^event_[0-9a-f]{32}$",
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_type": {
+          "enum": [
+            "granted",
+            "withdrawn",
+            "expired",
+            "superseded"
+          ],
+          "title": "Event Type",
+          "type": "string"
+        },
+        "occurred_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "enum": [
+                "participant_request",
+                "consent_expired",
+                "scope_replaced",
+                "policy_replaced"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason Code"
+        },
+        "receipt_id": {
+          "pattern": "^receipt_[0-9a-f]{32}$",
+          "title": "Receipt Id",
+          "type": "string"
+        },
+        "replacement_receipt_id": {
+          "anyOf": [
+            {
+              "pattern": "^receipt_[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Replacement Receipt Id"
+        },
+        "schema_version": {
+          "const": "consent-event/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scope_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Scope Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "event_id",
+        "receipt_id",
+        "participant_id",
+        "event_type",
+        "occurred_at",
+        "scope_sha256",
+        "reason_code",
+        "replacement_receipt_id"
+      ],
+      "title": "ConsentEventV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/consent-event-log-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Attested complete consent-event history through an explicit UTC boundary.",
+  "properties": {
+    "complete_through": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Complete Through",
+      "type": "string"
+    },
+    "completeness_attested": {
+      "const": true,
+      "title": "Completeness Attested",
+      "type": "boolean"
+    },
+    "event_log_id": {
+      "pattern": "^event_log_[0-9a-f]{32}$",
+      "title": "Event Log Id",
+      "type": "string"
+    },
+    "event_log_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Event Log Sha256",
+      "type": "string"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/ConsentEventV1"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "title": "Events",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "generated_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "identity_vault_attestation_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Identity Vault Attestation Sha256",
+      "type": "string"
+    },
+    "participant_id": {
+      "pattern": "^participant_[0-9a-f]{32}$",
+      "title": "Participant Id",
+      "type": "string"
+    },
+    "purpose_id": {
+      "pattern": "^purpose_[0-9a-f]{32}$",
+      "title": "Purpose Id",
+      "type": "string"
+    },
+    "receipt_id": {
+      "pattern": "^receipt_[0-9a-f]{32}$",
+      "title": "Receipt Id",
+      "type": "string"
+    },
+    "receipt_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Receipt Sha256",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "consent-event-log/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scope_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Scope Sha256",
+      "type": "string"
+    },
+    "study_id": {
+      "pattern": "^study_[0-9a-f]{32}$",
+      "title": "Study Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_log_id",
+    "receipt_id",
+    "receipt_sha256",
+    "participant_id",
+    "purpose_id",
+    "study_id",
+    "scope_sha256",
+    "generated_at",
+    "complete_through",
+    "completeness_attested",
+    "identity_vault_attestation_sha256",
+    "events",
+    "event_log_sha256"
+  ],
+  "title": "ConsentEventLogV1",
+  "type": "object"
+}

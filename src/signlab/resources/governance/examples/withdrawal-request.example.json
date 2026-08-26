@@ -1,0 +1,13 @@
+{
+  "effective_at": "2026-08-26T13:05:00Z",
+  "identity_verification_attestation_sha256": "sha256:804d3da1f389d02bbfefb39768579bb8022a90accdfddf1fcaff821da4ef2f94",
+  "participant_id": "participant_00000000000000000000000000000001",
+  "receipt_ids": [
+    "receipt_00000000000000000000000000000011"
+  ],
+  "request_id": "withdrawal_00000000000000000000000000000001",
+  "request_sha256": "sha256:fa5788aeae3ebbde8b5e95f376128696fbf8fb8d6c85e534d74fd2851c3a02b5",
+  "requested_at": "2026-08-26T13:00:00Z",
+  "schema_version": "withdrawal-request/1",
+  "target": "all_participant_data"
+}

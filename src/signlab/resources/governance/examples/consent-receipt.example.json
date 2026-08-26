@@ -1,0 +1,66 @@
+{
+  "adult_attested": true,
+  "completed_form_sha256": "sha256:1768d47c32005ff219cfcbd5bb5c8367c581b195af018e741cdfec2b1d374a2f",
+  "consent_form": {
+    "document_id": "document_00000000000000000000000000000001",
+    "document_type": "consent_form",
+    "effective_at": "2026-08-26T00:00:00Z",
+    "schema_version": "document-reference/1",
+    "sha256": "sha256:5ec3cad0f28d407f90278f61dc9f56457ce65ec7ae732c9afa7a26770ef05417",
+    "uri": "signlab://governance/consent-form/1.0.0",
+    "version": "1.0.0"
+  },
+  "governance_policy": {
+    "document_id": "document_00000000000000000000000000000003",
+    "document_type": "governance_policy",
+    "effective_at": "2026-08-26T00:00:00Z",
+    "schema_version": "document-reference/1",
+    "sha256": "sha256:5a29272296198c03f4c118d27ee19955174f4b26141284380a653eb874d4dfa9",
+    "uri": "signlab://governance/data-governance-policy/1.0.0",
+    "version": "1.0.0"
+  },
+  "granted_at": "2026-08-26T12:00:00Z",
+  "identity_vault_attestation_sha256": "sha256:33d1179ae217aea59c76b897bb9c68ad1f7d13770c74aedbb92083851ec77fad",
+  "participant_id": "participant_00000000000000000000000000000001",
+  "privacy_notice": {
+    "document_id": "document_00000000000000000000000000000002",
+    "document_type": "privacy_notice",
+    "effective_at": "2026-08-26T00:00:00Z",
+    "schema_version": "document-reference/1",
+    "sha256": "sha256:1b6e4d6ed9ddb7d67bb819e4c66ecc3325c4a3eaeee82a01b17180e50baf8762",
+    "uri": "signlab://governance/privacy-notice/1.0.0",
+    "version": "1.0.0"
+  },
+  "purpose_id": "purpose_00000000000000000000000000000051",
+  "receipt_id": "receipt_00000000000000000000000000000011",
+  "schema_version": "consent-receipt/1",
+  "scope": {
+    "audio_collection": false,
+    "commercial_sale": false,
+    "derived_features": true,
+    "derived_features_redistribution": false,
+    "evaluation_results_redistribution": true,
+    "identity_inference": false,
+    "minor_participation": false,
+    "model_evaluation": true,
+    "model_training": true,
+    "model_weights_redistribution": true,
+    "public_demonstration": false,
+    "raw_media_capture": true,
+    "raw_media_redistribution": false,
+    "raw_media_retention": true,
+    "research_use": true,
+    "same_purpose_future_research": false,
+    "schema_version": "consent-scope/1",
+    "withdrawal_supported": true
+  },
+  "scope_sha256": "sha256:813ca9bd11b41d5e4310239e6d0a42469e46fbfed5b1b68a963ac21907b47795",
+  "study_id": "study_00000000000000000000000000000061",
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "valid_until": "2028-08-25T12:00:00Z"
+}

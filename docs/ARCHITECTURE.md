@@ -38,6 +38,30 @@ The sample manifest will include stable identifiers for clips, signers, sessions
 source recordings, devices, capture conditions, handedness, mirroring, consent,
 and checksums. Derived samples inherit the source recording and split.
 
+## Participant-data boundary
+
+The identity vault is a separate encrypted administrative system. It alone holds
+names, contacts, signatures, completed consent forms, and the mapping to random
+pseudonymous signer IDs. Git, DVC, MLflow, manifests, logs, datasets, runs, and
+artifacts must never contain that identity data.
+
+Restricted research records snapshot both a validated consent receipt and a
+recording-level grant, including opaque purpose and study IDs. Missing, expired,
+withdrawn, incompatible, or broader-later consent fails closed. Reuse under a new
+study ID also requires the explicit same-purpose-future-research choice, and a
+different purpose ID is never authorized by the original receipt. A positive
+authorization decision additionally requires an authenticated verifier for the
+complete receipt, recording grant, and consent-event-log tuple; hashes and caller
+assertions alone do not establish authenticity. The legacy export remains
+`consent_status: unknown` and is quarantined from training, evaluation,
+demonstrations, and publication.
+
+Every participant-derived asset uses a `signlab://` logical locator and participates
+in a complete lineage graph. A deterministic withdrawal planner computes direct
+roots and every downstream descendant, including shared datasets, runs, models,
+reports, demos, caches, and backups. It emits a dry-run plan only; external deletion
+requires future authorized store adapters and attestations.
+
 The model bundle will eventually contain:
 
 ```text

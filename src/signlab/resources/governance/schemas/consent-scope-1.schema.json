@@ -1,0 +1,559 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and expressible local invariants. SignLab Pydantic and application validation remains authoritative for canonical digests, timestamp ordering, DAG closure, cross-record bindings, event-log completeness, cross-field locator equality, and withdrawal closure.",
+  "$id": "https://signlab.dev/schemas/consent-scope-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "raw_media_capture": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_capture"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "raw_media_retention": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_retention"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "raw_media_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derived_features": {
+            "const": true
+          }
+        },
+        "required": [
+          "derived_features"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_training": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_training"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_evaluation": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_evaluation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "public_demonstration": {
+            "const": true
+          }
+        },
+        "required": [
+          "public_demonstration"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_weights_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_weights_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derived_features_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "derived_features_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "evaluation_results_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "evaluation_results_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "same_purpose_future_research": {
+            "const": true
+          }
+        },
+        "required": [
+          "same_purpose_future_research"
+        ]
+      },
+      "then": {
+        "properties": {
+          "research_use": {
+            "const": true
+          }
+        },
+        "required": [
+          "research_use"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "raw_media_retention": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_retention"
+        ]
+      },
+      "then": {
+        "properties": {
+          "raw_media_capture": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_capture"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "raw_media_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "raw_media_capture": {
+            "const": true
+          },
+          "raw_media_retention": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_capture",
+          "raw_media_retention"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derived_features": {
+            "const": true
+          }
+        },
+        "required": [
+          "derived_features"
+        ]
+      },
+      "then": {
+        "properties": {
+          "raw_media_capture": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_capture"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_training": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_training"
+        ]
+      },
+      "then": {
+        "properties": {
+          "derived_features": {
+            "const": true
+          }
+        },
+        "required": [
+          "derived_features"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_evaluation": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_evaluation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "derived_features": {
+            "const": true
+          }
+        },
+        "required": [
+          "derived_features"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "public_demonstration": {
+            "const": true
+          }
+        },
+        "required": [
+          "public_demonstration"
+        ]
+      },
+      "then": {
+        "properties": {
+          "raw_media_capture": {
+            "const": true
+          },
+          "raw_media_retention": {
+            "const": true
+          }
+        },
+        "required": [
+          "raw_media_capture",
+          "raw_media_retention"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "model_weights_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_weights_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "model_training": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_training"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "derived_features_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "derived_features_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "derived_features": {
+            "const": true
+          }
+        },
+        "required": [
+          "derived_features"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "evaluation_results_redistribution": {
+            "const": true
+          }
+        },
+        "required": [
+          "evaluation_results_redistribution"
+        ]
+      },
+      "then": {
+        "properties": {
+          "model_evaluation": {
+            "const": true
+          }
+        },
+        "required": [
+          "model_evaluation"
+        ]
+      }
+    }
+  ],
+  "description": "An explicit permission ceiling; every permission is required on the wire.",
+  "properties": {
+    "audio_collection": {
+      "const": false,
+      "title": "Audio Collection",
+      "type": "boolean"
+    },
+    "commercial_sale": {
+      "const": false,
+      "title": "Commercial Sale",
+      "type": "boolean"
+    },
+    "derived_features": {
+      "title": "Derived Features",
+      "type": "boolean"
+    },
+    "derived_features_redistribution": {
+      "title": "Derived Features Redistribution",
+      "type": "boolean"
+    },
+    "evaluation_results_redistribution": {
+      "title": "Evaluation Results Redistribution",
+      "type": "boolean"
+    },
+    "identity_inference": {
+      "const": false,
+      "title": "Identity Inference",
+      "type": "boolean"
+    },
+    "minor_participation": {
+      "const": false,
+      "title": "Minor Participation",
+      "type": "boolean"
+    },
+    "model_evaluation": {
+      "title": "Model Evaluation",
+      "type": "boolean"
+    },
+    "model_training": {
+      "title": "Model Training",
+      "type": "boolean"
+    },
+    "model_weights_redistribution": {
+      "title": "Model Weights Redistribution",
+      "type": "boolean"
+    },
+    "public_demonstration": {
+      "title": "Public Demonstration",
+      "type": "boolean"
+    },
+    "raw_media_capture": {
+      "title": "Raw Media Capture",
+      "type": "boolean"
+    },
+    "raw_media_redistribution": {
+      "title": "Raw Media Redistribution",
+      "type": "boolean"
+    },
+    "raw_media_retention": {
+      "title": "Raw Media Retention",
+      "type": "boolean"
+    },
+    "research_use": {
+      "title": "Research Use",
+      "type": "boolean"
+    },
+    "same_purpose_future_research": {
+      "title": "Same Purpose Future Research",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "consent-scope/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "withdrawal_supported": {
+      "const": true,
+      "title": "Withdrawal Supported",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "research_use",
+    "raw_media_capture",
+    "model_training",
+    "model_evaluation",
+    "public_demonstration",
+    "model_weights_redistribution",
+    "raw_media_retention",
+    "raw_media_redistribution",
+    "derived_features",
+    "derived_features_redistribution",
+    "evaluation_results_redistribution",
+    "same_purpose_future_research",
+    "withdrawal_supported",
+    "audio_collection",
+    "minor_participation",
+    "identity_inference",
+    "commercial_sale"
+  ],
+  "title": "ConsentScopeV1",
+  "type": "object"
+}

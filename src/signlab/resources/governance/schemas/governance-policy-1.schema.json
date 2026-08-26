@@ -1,0 +1,435 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and expressible local invariants. SignLab Pydantic and application validation remains authoritative for canonical digests, timestamp ordering, DAG closure, cross-record bindings, event-log completeness, cross-field locator equality, and withdrawal closure.",
+  "$defs": {
+    "DocumentRef": {
+      "additionalProperties": false,
+      "description": "Immutable reference to a reviewed governance document, never its signatures.",
+      "oneOf": [
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000001"
+            },
+            "document_type": {
+              "const": "consent_form"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:5ec3cad0f28d407f90278f61dc9f56457ce65ec7ae732c9afa7a26770ef05417"
+            },
+            "uri": {
+              "const": "signlab://governance/consent-form/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        },
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000002"
+            },
+            "document_type": {
+              "const": "privacy_notice"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:1b6e4d6ed9ddb7d67bb819e4c66ecc3325c4a3eaeee82a01b17180e50baf8762"
+            },
+            "uri": {
+              "const": "signlab://governance/privacy-notice/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        },
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000003"
+            },
+            "document_type": {
+              "const": "governance_policy"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:5a29272296198c03f4c118d27ee19955174f4b26141284380a653eb874d4dfa9"
+            },
+            "uri": {
+              "const": "signlab://governance/data-governance-policy/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        },
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000004"
+            },
+            "document_type": {
+              "const": "withdrawal_procedure"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:d583a387d2debfcb1c49746cfa51a32f694e39410c6bd900c3a292a090cb8075"
+            },
+            "uri": {
+              "const": "signlab://governance/withdrawal-runbook/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        }
+      ],
+      "properties": {
+        "document_id": {
+          "pattern": "^document_[0-9a-f]{32}$",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "document_type": {
+          "enum": [
+            "consent_form",
+            "privacy_notice",
+            "governance_policy",
+            "withdrawal_procedure"
+          ],
+          "title": "Document Type",
+          "type": "string"
+        },
+        "effective_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "document-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 512,
+          "minLength": 12,
+          "title": "Uri",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "document_id",
+        "document_type",
+        "version",
+        "effective_at",
+        "uri",
+        "sha256"
+      ],
+      "title": "DocumentRef",
+      "type": "object"
+    },
+    "TaxonomyRef": {
+      "additionalProperties": false,
+      "description": "Portable identity embedded in downstream manifests and bundles.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "taxonomy-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "sha256"
+      ],
+      "title": "TaxonomyRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/governance-policy-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "properties": {
+          "backup_retention_days": {
+            "const": 0
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "backups_include_raw_media": {
+            "const": true
+          }
+        },
+        "required": [
+          "backups_include_raw_media"
+        ]
+      },
+      "then": {
+        "properties": {
+          "backup_retention_days": {
+            "minimum": 1
+          }
+        }
+      }
+    }
+  ],
+  "description": "Reviewed access, retention, backup, deletion, and withdrawal rules.",
+  "properties": {
+    "access_audit_logged": {
+      "const": true,
+      "title": "Access Audit Logged",
+      "type": "boolean"
+    },
+    "access_least_privilege": {
+      "const": true,
+      "title": "Access Least Privilege",
+      "type": "boolean"
+    },
+    "backup_retention_days": {
+      "maximum": 30,
+      "minimum": 0,
+      "title": "Backup Retention Days",
+      "type": "integer"
+    },
+    "backups_encrypted": {
+      "const": true,
+      "title": "Backups Encrypted",
+      "type": "boolean"
+    },
+    "backups_include_raw_media": {
+      "title": "Backups Include Raw Media",
+      "type": "boolean"
+    },
+    "deletion_includes_backups": {
+      "const": true,
+      "title": "Deletion Includes Backups",
+      "type": "boolean"
+    },
+    "derived_feature_retention_days": {
+      "exclusiveMinimum": 0,
+      "maximum": 730,
+      "title": "Derived Feature Retention Days",
+      "type": "integer"
+    },
+    "effective_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Effective At",
+      "type": "string"
+    },
+    "evaluation_result_retention_days": {
+      "exclusiveMinimum": 0,
+      "maximum": 730,
+      "title": "Evaluation Result Retention Days",
+      "type": "integer"
+    },
+    "permitted_roles": {
+      "items": {
+        "enum": [
+          "data_steward",
+          "model_operator",
+          "release_reviewer",
+          "researcher"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Permitted Roles",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "policy_document": {
+      "$ref": "#/$defs/DocumentRef"
+    },
+    "policy_id": {
+      "pattern": "^policy_[0-9a-f]{32}$",
+      "title": "Policy Id",
+      "type": "string"
+    },
+    "prohibited_uses": {
+      "const": [
+        "audio_collection",
+        "commercial_sale",
+        "identity_inference",
+        "minor_participation",
+        "participant_level_public_ranking",
+        "surveillance"
+      ],
+      "items": {
+        "enum": [
+          "audio_collection",
+          "commercial_sale",
+          "identity_inference",
+          "minor_participation",
+          "participant_level_public_ranking",
+          "surveillance"
+        ],
+        "type": "string"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "title": "Prohibited Uses",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "raw_media_retention_days": {
+      "exclusiveMinimum": 0,
+      "maximum": 730,
+      "title": "Raw Media Retention Days",
+      "type": "integer"
+    },
+    "raw_media_roles": {
+      "items": {
+        "enum": [
+          "data_steward",
+          "model_operator",
+          "release_reviewer",
+          "researcher"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Raw Media Roles",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "governance-policy/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "storage_encrypted": {
+      "const": true,
+      "title": "Storage Encrypted",
+      "type": "boolean"
+    },
+    "taxonomy": {
+      "$ref": "#/$defs/TaxonomyRef"
+    },
+    "version": {
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    },
+    "withdrawal_impact_inventory_days": {
+      "exclusiveMinimum": 0,
+      "maximum": 5,
+      "title": "Withdrawal Impact Inventory Days",
+      "type": "integer"
+    },
+    "withdrawal_invalidates_downstream": {
+      "const": true,
+      "title": "Withdrawal Invalidates Downstream",
+      "type": "boolean"
+    },
+    "withdrawal_procedure": {
+      "$ref": "#/$defs/DocumentRef"
+    },
+    "withdrawal_response_days": {
+      "exclusiveMinimum": 0,
+      "maximum": 30,
+      "title": "Withdrawal Response Days",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "policy_id",
+    "version",
+    "taxonomy",
+    "policy_document",
+    "withdrawal_procedure",
+    "effective_at",
+    "permitted_roles",
+    "raw_media_roles",
+    "raw_media_retention_days",
+    "derived_feature_retention_days",
+    "evaluation_result_retention_days",
+    "backup_retention_days",
+    "withdrawal_impact_inventory_days",
+    "withdrawal_response_days",
+    "storage_encrypted",
+    "backups_encrypted",
+    "backups_include_raw_media",
+    "access_least_privilege",
+    "access_audit_logged",
+    "deletion_includes_backups",
+    "withdrawal_invalidates_downstream",
+    "prohibited_uses"
+  ],
+  "title": "GovernancePolicyV1",
+  "type": "object"
+}

@@ -69,6 +69,12 @@ The [gesture taxonomy and claim boundary](docs/gesture-taxonomy.md) define the
 versioned six-output classifier vocabulary and the evidence required before making
 any named-language claim.
 
+The [participant-data governance baseline](docs/governance/README.md) provides the
+blank consent form, machine-readable policy, collection-readiness gate, and an
+executable withdrawal dry run. Real participant collection remains blocked until
+the documented human, institutional, legal, storage, and contact checks are
+resolved outside this public repository.
+
 The [legacy audit](docs/legacy-audit.md) and
 [portable evidence export](docs/legacy-export.md) document what was retained from
 the school project, why it is development-only, and how to validate it without any
@@ -100,16 +106,19 @@ implementation backlog.
 ## Repository status
 
 The immutable legacy audit, reproducible developer foundation, sanitized legacy
-evidence export, and versioned gesture taxonomy are established. The remaining core
-contracts are still under construction; no headline model result is considered
-valid until the grouped evaluation foundations are complete.
+evidence export, versioned gesture taxonomy, and fail-closed participant-data
+governance baseline are established. The remaining core pipeline contracts are
+still under construction; no headline model result is considered valid until the
+grouped evaluation foundations are complete.
 
 ## Data and privacy
 
-Raw participant video and contributed feedback are not committed to Git. The legacy
-quarantine is currently local-only and explicitly not a durable backup; a later
-private-DVC story will place approved data behind a controlled remote. Public fixtures
-must be synthetic, explicitly consented, or separately licensed.
+Raw participant video and contributed feedback are not committed to Git. Names,
+contacts, signatures, and the identity-to-pseudonym mapping belong only in a
+separate encrypted identity vault; research systems use random pseudonymous IDs.
+The legacy quarantine is currently local-only and explicitly not a durable backup;
+a later private-DVC story will place approved data behind a controlled remote.
+Public fixtures must be synthetic, explicitly consented, or separately licensed.
 
 ## License
 

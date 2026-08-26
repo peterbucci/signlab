@@ -1,0 +1,61 @@
+{
+  "access_audit_logged": true,
+  "access_least_privilege": true,
+  "backup_retention_days": 30,
+  "backups_encrypted": true,
+  "backups_include_raw_media": true,
+  "deletion_includes_backups": true,
+  "derived_feature_retention_days": 730,
+  "effective_at": "2026-08-26T00:00:00Z",
+  "evaluation_result_retention_days": 730,
+  "permitted_roles": [
+    "data_steward",
+    "model_operator",
+    "release_reviewer",
+    "researcher"
+  ],
+  "policy_document": {
+    "document_id": "document_00000000000000000000000000000003",
+    "document_type": "governance_policy",
+    "effective_at": "2026-08-26T00:00:00Z",
+    "schema_version": "document-reference/1",
+    "sha256": "sha256:5a29272296198c03f4c118d27ee19955174f4b26141284380a653eb874d4dfa9",
+    "uri": "signlab://governance/data-governance-policy/1.0.0",
+    "version": "1.0.0"
+  },
+  "policy_id": "policy_00000000000000000000000000000001",
+  "prohibited_uses": [
+    "audio_collection",
+    "commercial_sale",
+    "identity_inference",
+    "minor_participation",
+    "participant_level_public_ranking",
+    "surveillance"
+  ],
+  "raw_media_retention_days": 730,
+  "raw_media_roles": [
+    "data_steward",
+    "researcher"
+  ],
+  "schema_version": "governance-policy/1",
+  "storage_encrypted": true,
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "version": "1.0.0",
+  "withdrawal_impact_inventory_days": 5,
+  "withdrawal_invalidates_downstream": true,
+  "withdrawal_procedure": {
+    "document_id": "document_00000000000000000000000000000004",
+    "document_type": "withdrawal_procedure",
+    "effective_at": "2026-08-26T00:00:00Z",
+    "schema_version": "document-reference/1",
+    "sha256": "sha256:d583a387d2debfcb1c49746cfa51a32f694e39410c6bd900c3a292a090cb8075",
+    "uri": "signlab://governance/withdrawal-runbook/1.0.0",
+    "version": "1.0.0"
+  },
+  "withdrawal_response_days": 30
+}
