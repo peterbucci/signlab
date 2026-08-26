@@ -19,11 +19,22 @@ def test_top_level_help_exposes_thin_command_groups(runner: CliRunner) -> None:
     result = runner.invoke(cli.app, ["--help"])
 
     assert result.exit_code == 0
-    for command in ("data", "train", "evaluate", "export", "doctor", "taxonomy"):
+    for command in (
+        "data",
+        "train",
+        "evaluate",
+        "export",
+        "doctor",
+        "taxonomy",
+        "governance",
+    ):
         assert command in result.output
 
 
-@pytest.mark.parametrize("command", ["data", "train", "evaluate", "export", "doctor", "taxonomy"])
+@pytest.mark.parametrize(
+    "command",
+    ["data", "train", "evaluate", "export", "doctor", "taxonomy", "governance"],
+)
 def test_command_group_help_has_no_pipeline_prerequisites(
     runner: CliRunner,
     command: str,
@@ -55,7 +66,36 @@ def test_invalid_command_has_a_stable_usage_error(runner: CliRunner) -> None:
     result = runner.invoke(cli.app, ["does-not-exist"])
 
     assert result.exit_code == 2
-    assert "No such command" in result.output
+    assert result.output.strip() == (
+        "Error: invalid command usage; run --help for accepted arguments."
+    )
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        ["governance", "validate-consent", "receipt.json", "participant_" + "f" * 32],
+        [
+            "governance",
+            "readiness-check",
+            f"{chr(67)}:{chr(92)}private{chr(92)}participant-name.json",
+            "extra",
+        ],
+        ["governance", "not-a-command-private-sentinel"],
+    ],
+)
+def test_usage_errors_do_not_echo_untrusted_tokens(
+    runner: CliRunner,
+    arguments: list[str],
+) -> None:
+    result = runner.invoke(cli.app, arguments)
+
+    assert result.exit_code == 2
+    assert result.output.strip() == (
+        "Error: invalid command usage; run --help for accepted arguments."
+    )
+    assert "participant_" not in result.output
+    assert "private" not in result.output.casefold()
 
 
 def test_doctor_checks_are_deterministic_and_redacted() -> None:

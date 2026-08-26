@@ -1,0 +1,28 @@
+{
+  "complete_through": "2026-08-26T12:20:00Z",
+  "completeness_attested": true,
+  "event_log_id": "event_log_00000000000000000000000000000041",
+  "event_log_sha256": "sha256:51ff7c8a118a8e12f64900826726cb5e1e4c093bb66d55bd49eed05db07ae5d2",
+  "events": [
+    {
+      "event_id": "event_00000000000000000000000000000041",
+      "event_type": "granted",
+      "occurred_at": "2026-08-26T12:00:00Z",
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "receipt_id": "receipt_00000000000000000000000000000011",
+      "replacement_receipt_id": null,
+      "schema_version": "consent-event/1",
+      "scope_sha256": "sha256:813ca9bd11b41d5e4310239e6d0a42469e46fbfed5b1b68a963ac21907b47795"
+    }
+  ],
+  "generated_at": "2026-08-26T12:30:00Z",
+  "identity_vault_attestation_sha256": "sha256:e015f0591deff6565c19221a0978c7adfc53608176c996dbbde0276165d211ec",
+  "participant_id": "participant_00000000000000000000000000000001",
+  "purpose_id": "purpose_00000000000000000000000000000051",
+  "receipt_id": "receipt_00000000000000000000000000000011",
+  "receipt_sha256": "sha256:e615b26164f1f279af3c9efc682b1706bad45f2aa0236508da67f7efeacf20ed",
+  "schema_version": "consent-event-log/1",
+  "scope_sha256": "sha256:813ca9bd11b41d5e4310239e6d0a42469e46fbfed5b1b68a963ac21907b47795",
+  "study_id": "study_00000000000000000000000000000061"
+}

@@ -1,0 +1,39 @@
+{
+  "access_controls_ready": false,
+  "adult_jurisdictions_ready": false,
+  "affiliation_sponsorship_ready": false,
+  "assessed_at": "2026-08-26T14:00:00Z",
+  "backup_deletion_ready": false,
+  "blockers": [
+    "access_controls",
+    "adult_jurisdictions",
+    "affiliation_sponsorship",
+    "backup_deletion",
+    "consent_documents",
+    "encrypted_storage",
+    "ethics_legal_institutional",
+    "identity_vault_operations",
+    "participant_contact_process",
+    "retention_publication_scope"
+  ],
+  "consent_documents_ready": false,
+  "encrypted_storage_ready": false,
+  "ethics_legal_institutional_ready": false,
+  "identity_vault_operations_ready": false,
+  "legacy_media_quarantined": true,
+  "lineage_tracking_ready": true,
+  "participant_contact_process_ready": false,
+  "policy_id": "policy_00000000000000000000000000000001",
+  "pseudonymous_ids_ready": true,
+  "readiness_id": "readiness_00000000000000000000000000000001",
+  "retention_publication_scope_ready": false,
+  "schema_version": "collection-readiness/1",
+  "status": "blocked",
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "withdrawal_dry_run_ready": true
+}

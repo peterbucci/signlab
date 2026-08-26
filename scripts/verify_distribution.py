@@ -1,4 +1,4 @@
-"""Inspect built archives and smoke-test the wheel in an isolated environment."""
+"""Inspect built archives and smoke-test each distribution in isolation."""
 
 from __future__ import annotations
 
@@ -23,6 +23,34 @@ EXPECTED_TAXONOMY_SCHEMAS = {
     "public-copy-taxonomy-binding-1.schema.json",
     "taxonomy-reference-1.schema.json",
     "training-taxonomy-binding-1.schema.json",
+}
+EXPECTED_GOVERNANCE_RESOURCES = {
+    "collection-readiness.template.json",
+    "consent-form-1.0.0.md",
+    "data-governance-policy-1.0.0.md",
+    "evidence/withdrawal-dry-run-v1.json",
+    "evidence/withdrawal-dry-run-v1.md",
+    "examples/consent-event-log.example.json",
+    "examples/consent-receipt.example.json",
+    "examples/lineage-inventory.example.json",
+    "examples/recording-consent-grant.example.json",
+    "examples/withdrawal-request.example.json",
+    "governance-policy-1.0.0.json",
+    "privacy-notice-1.0.0.md",
+    "schemas/collection-readiness-1.schema.json",
+    "schemas/consent-event-log-1.schema.json",
+    "schemas/consent-event-1.schema.json",
+    "schemas/consent-receipt-1.schema.json",
+    "schemas/consent-scope-1.schema.json",
+    "schemas/governance-asset-1.schema.json",
+    "schemas/governance-document-reference-1.schema.json",
+    "schemas/governance-policy-1.schema.json",
+    "schemas/lineage-inventory-1.schema.json",
+    "schemas/recording-consent-grant-1.schema.json",
+    "schemas/withdrawal-impact-1.schema.json",
+    "schemas/withdrawal-report-1.schema.json",
+    "schemas/withdrawal-request-1.schema.json",
+    "withdrawal-runbook-1.0.0.md",
 }
 FORBIDDEN_REPOSITORY_ROOTS = {
     "artifacts",
@@ -116,6 +144,18 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
         }
         if schema_members != EXPECTED_TAXONOMY_SCHEMAS:
             errors.append("wheel does not contain the exact generated taxonomy schema set")
+        governance_prefix = "signlab/resources/governance/"
+        governance_members = [
+            name.removeprefix(governance_prefix)
+            for name in names
+            if name.startswith(governance_prefix)
+            and name != f"{governance_prefix}__init__.py"
+            and not name.endswith("/")
+        ]
+        if set(governance_members) != EXPECTED_GOVERNANCE_RESOURCES or len(
+            governance_members
+        ) != len(EXPECTED_GOVERNANCE_RESOURCES):
+            errors.append("wheel does not contain the exact participant-governance resource set")
         if not any(name.endswith(".dist-info/METADATA") for name in names):
             errors.append("wheel is missing distribution metadata")
         entry_point_members = [
@@ -143,8 +183,23 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
     with tarfile.open(sdist, mode="r:gz") as archive:
         members = [member for member in archive.getmembers() if member.isfile()]
         errors.extend(validate_member_names(member.name for member in members))
-        if not any(member.name.endswith("/src/signlab/py.typed") for member in members):
+        archive_root = sdist.name.removesuffix(".tar.gz")
+        package_prefix = f"{archive_root}/src/signlab/"
+        if not any(member.name == f"{package_prefix}py.typed" for member in members):
             errors.append("source distribution is missing the typed-package marker")
+        governance_prefix = f"{package_prefix}resources/governance/"
+        governance_members = [
+            member.name.removeprefix(governance_prefix)
+            for member in members
+            if member.name.startswith(governance_prefix)
+            and member.name != f"{governance_prefix}__init__.py"
+        ]
+        if set(governance_members) != EXPECTED_GOVERNANCE_RESOURCES or len(
+            governance_members
+        ) != len(EXPECTED_GOVERNANCE_RESOURCES):
+            errors.append(
+                "source distribution does not contain the exact participant-governance resource set"
+            )
         if any(member.size > MAX_MEMBER_BYTES for member in members):
             errors.append("source distribution contains a member larger than 1 MiB")
     return tuple(sorted(set(errors)))
@@ -171,11 +226,11 @@ def _run(
     )
 
 
-def _install_and_smoke_test(wheel: Path) -> None:
+def _install_and_smoke_test(distribution: Path) -> None:
     environment = os.environ.copy()
     environment["NO_COLOR"] = "1"
     environment["PYTHONUTF8"] = "1"
-    with tempfile.TemporaryDirectory(prefix="signlab-wheel-") as temporary_directory:
+    with tempfile.TemporaryDirectory(prefix="signlab-distribution-") as temporary_directory:
         virtual_environment = Path(temporary_directory) / "venv"
         _run(
             ["uv", "venv", "--python", sys.executable, str(virtual_environment)],
@@ -183,7 +238,7 @@ def _install_and_smoke_test(wheel: Path) -> None:
         )
         python = _venv_executable(virtual_environment, "python")
         _run(
-            ["uv", "pip", "install", "--python", str(python), str(wheel)],
+            ["uv", "pip", "install", "--python", str(python), str(distribution)],
             environment=environment,
         )
         version = _run(
@@ -191,10 +246,18 @@ def _install_and_smoke_test(wheel: Path) -> None:
             environment=environment,
         )
         if not version.stdout.strip():
-            raise RuntimeError("isolated wheel did not expose a version")
+            raise RuntimeError("isolated distribution did not expose a version")
         console_script = _venv_executable(virtual_environment, "signlab")
         _run([str(console_script), "--version"], environment=environment)
-        for command in ("data", "train", "evaluate", "export", "doctor", "taxonomy"):
+        for command in (
+            "data",
+            "train",
+            "evaluate",
+            "export",
+            "doctor",
+            "taxonomy",
+            "governance",
+        ):
             _run(
                 [str(console_script), command, "--help"],
                 environment=environment,
@@ -211,10 +274,14 @@ def _install_and_smoke_test(wheel: Path) -> None:
             [str(console_script), "taxonomy", "validate-resources"],
             environment=environment,
         )
+        _run(
+            [str(console_script), "governance", "evidence-check"],
+            environment=environment,
+        )
 
 
 def verify_distribution(directory: Path) -> tuple[str, ...]:
-    """Inspect exactly one wheel and source archive, then install the wheel cleanly."""
+    """Inspect exactly one wheel and source archive, then install each cleanly."""
     wheels = sorted(directory.glob("signlab-*.whl"))
     source_archives = sorted(directory.glob("signlab-*.tar.gz"))
     if len(wheels) != 1 or len(source_archives) != 1:
@@ -223,6 +290,7 @@ def verify_distribution(directory: Path) -> tuple[str, ...]:
     if errors:
         return tuple(sorted(set(errors)))
     _install_and_smoke_test(wheels[0])
+    _install_and_smoke_test(source_archives[0])
     return ()
 
 
@@ -250,7 +318,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print("Distribution archives and isolated wheel install verified.")
+    print("Distribution archives and isolated installs verified.")
     return 0
 
 

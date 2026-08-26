@@ -1,0 +1,871 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and expressible local invariants. SignLab Pydantic and application validation remains authoritative for canonical digests, timestamp ordering, DAG closure, cross-record bindings, event-log completeness, cross-field locator equality, and withdrawal closure.",
+  "$defs": {
+    "ConsentScopeV1": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "raw_media_capture": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_capture"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "raw_media_retention": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_retention"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "raw_media_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "derived_features": {
+                "const": true
+              }
+            },
+            "required": [
+              "derived_features"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "model_training": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_training"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "model_evaluation": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_evaluation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "public_demonstration": {
+                "const": true
+              }
+            },
+            "required": [
+              "public_demonstration"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "model_weights_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_weights_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "derived_features_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "derived_features_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "evaluation_results_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "evaluation_results_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "same_purpose_future_research": {
+                "const": true
+              }
+            },
+            "required": [
+              "same_purpose_future_research"
+            ]
+          },
+          "then": {
+            "properties": {
+              "research_use": {
+                "const": true
+              }
+            },
+            "required": [
+              "research_use"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "raw_media_retention": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_retention"
+            ]
+          },
+          "then": {
+            "properties": {
+              "raw_media_capture": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_capture"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "raw_media_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "raw_media_capture": {
+                "const": true
+              },
+              "raw_media_retention": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_capture",
+              "raw_media_retention"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "derived_features": {
+                "const": true
+              }
+            },
+            "required": [
+              "derived_features"
+            ]
+          },
+          "then": {
+            "properties": {
+              "raw_media_capture": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_capture"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "model_training": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_training"
+            ]
+          },
+          "then": {
+            "properties": {
+              "derived_features": {
+                "const": true
+              }
+            },
+            "required": [
+              "derived_features"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "model_evaluation": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_evaluation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "derived_features": {
+                "const": true
+              }
+            },
+            "required": [
+              "derived_features"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "public_demonstration": {
+                "const": true
+              }
+            },
+            "required": [
+              "public_demonstration"
+            ]
+          },
+          "then": {
+            "properties": {
+              "raw_media_capture": {
+                "const": true
+              },
+              "raw_media_retention": {
+                "const": true
+              }
+            },
+            "required": [
+              "raw_media_capture",
+              "raw_media_retention"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "model_weights_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_weights_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_training": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_training"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "derived_features_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "derived_features_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "derived_features": {
+                "const": true
+              }
+            },
+            "required": [
+              "derived_features"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "evaluation_results_redistribution": {
+                "const": true
+              }
+            },
+            "required": [
+              "evaluation_results_redistribution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "model_evaluation": {
+                "const": true
+              }
+            },
+            "required": [
+              "model_evaluation"
+            ]
+          }
+        }
+      ],
+      "description": "An explicit permission ceiling; every permission is required on the wire.",
+      "properties": {
+        "audio_collection": {
+          "const": false,
+          "title": "Audio Collection",
+          "type": "boolean"
+        },
+        "commercial_sale": {
+          "const": false,
+          "title": "Commercial Sale",
+          "type": "boolean"
+        },
+        "derived_features": {
+          "title": "Derived Features",
+          "type": "boolean"
+        },
+        "derived_features_redistribution": {
+          "title": "Derived Features Redistribution",
+          "type": "boolean"
+        },
+        "evaluation_results_redistribution": {
+          "title": "Evaluation Results Redistribution",
+          "type": "boolean"
+        },
+        "identity_inference": {
+          "const": false,
+          "title": "Identity Inference",
+          "type": "boolean"
+        },
+        "minor_participation": {
+          "const": false,
+          "title": "Minor Participation",
+          "type": "boolean"
+        },
+        "model_evaluation": {
+          "title": "Model Evaluation",
+          "type": "boolean"
+        },
+        "model_training": {
+          "title": "Model Training",
+          "type": "boolean"
+        },
+        "model_weights_redistribution": {
+          "title": "Model Weights Redistribution",
+          "type": "boolean"
+        },
+        "public_demonstration": {
+          "title": "Public Demonstration",
+          "type": "boolean"
+        },
+        "raw_media_capture": {
+          "title": "Raw Media Capture",
+          "type": "boolean"
+        },
+        "raw_media_redistribution": {
+          "title": "Raw Media Redistribution",
+          "type": "boolean"
+        },
+        "raw_media_retention": {
+          "title": "Raw Media Retention",
+          "type": "boolean"
+        },
+        "research_use": {
+          "title": "Research Use",
+          "type": "boolean"
+        },
+        "same_purpose_future_research": {
+          "title": "Same Purpose Future Research",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "consent-scope/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "withdrawal_supported": {
+          "const": true,
+          "title": "Withdrawal Supported",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_version",
+        "research_use",
+        "raw_media_capture",
+        "model_training",
+        "model_evaluation",
+        "public_demonstration",
+        "model_weights_redistribution",
+        "raw_media_retention",
+        "raw_media_redistribution",
+        "derived_features",
+        "derived_features_redistribution",
+        "evaluation_results_redistribution",
+        "same_purpose_future_research",
+        "withdrawal_supported",
+        "audio_collection",
+        "minor_participation",
+        "identity_inference",
+        "commercial_sale"
+      ],
+      "title": "ConsentScopeV1",
+      "type": "object"
+    },
+    "DocumentRef": {
+      "additionalProperties": false,
+      "description": "Immutable reference to a reviewed governance document, never its signatures.",
+      "oneOf": [
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000001"
+            },
+            "document_type": {
+              "const": "consent_form"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:5ec3cad0f28d407f90278f61dc9f56457ce65ec7ae732c9afa7a26770ef05417"
+            },
+            "uri": {
+              "const": "signlab://governance/consent-form/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        },
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000002"
+            },
+            "document_type": {
+              "const": "privacy_notice"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:1b6e4d6ed9ddb7d67bb819e4c66ecc3325c4a3eaeee82a01b17180e50baf8762"
+            },
+            "uri": {
+              "const": "signlab://governance/privacy-notice/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        },
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000003"
+            },
+            "document_type": {
+              "const": "governance_policy"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:5a29272296198c03f4c118d27ee19955174f4b26141284380a653eb874d4dfa9"
+            },
+            "uri": {
+              "const": "signlab://governance/data-governance-policy/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        },
+        {
+          "properties": {
+            "document_id": {
+              "const": "document_00000000000000000000000000000004"
+            },
+            "document_type": {
+              "const": "withdrawal_procedure"
+            },
+            "effective_at": {
+              "const": "2026-08-26T00:00:00Z"
+            },
+            "sha256": {
+              "const": "sha256:d583a387d2debfcb1c49746cfa51a32f694e39410c6bd900c3a292a090cb8075"
+            },
+            "uri": {
+              "const": "signlab://governance/withdrawal-runbook/1.0.0"
+            },
+            "version": {
+              "const": "1.0.0"
+            }
+          },
+          "required": [
+            "document_type",
+            "document_id",
+            "version",
+            "effective_at",
+            "uri",
+            "sha256"
+          ]
+        }
+      ],
+      "properties": {
+        "document_id": {
+          "pattern": "^document_[0-9a-f]{32}$",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "document_type": {
+          "enum": [
+            "consent_form",
+            "privacy_notice",
+            "governance_policy",
+            "withdrawal_procedure"
+          ],
+          "title": "Document Type",
+          "type": "string"
+        },
+        "effective_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Effective At",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "document-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 512,
+          "minLength": 12,
+          "title": "Uri",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "document_id",
+        "document_type",
+        "version",
+        "effective_at",
+        "uri",
+        "sha256"
+      ],
+      "title": "DocumentRef",
+      "type": "object"
+    },
+    "TaxonomyRef": {
+      "additionalProperties": false,
+      "description": "Portable identity embedded in downstream manifests and bundles.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "taxonomy-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "sha256"
+      ],
+      "title": "TaxonomyRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/consent-receipt-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Pseudonymous evidence of an explicit participant consent decision.",
+  "properties": {
+    "adult_attested": {
+      "const": true,
+      "title": "Adult Attested",
+      "type": "boolean"
+    },
+    "completed_form_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Completed Form Sha256",
+      "type": "string"
+    },
+    "consent_form": {
+      "$ref": "#/$defs/DocumentRef"
+    },
+    "governance_policy": {
+      "$ref": "#/$defs/DocumentRef"
+    },
+    "granted_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Granted At",
+      "type": "string"
+    },
+    "identity_vault_attestation_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Identity Vault Attestation Sha256",
+      "type": "string"
+    },
+    "participant_id": {
+      "pattern": "^participant_[0-9a-f]{32}$",
+      "title": "Participant Id",
+      "type": "string"
+    },
+    "privacy_notice": {
+      "$ref": "#/$defs/DocumentRef"
+    },
+    "purpose_id": {
+      "pattern": "^purpose_[0-9a-f]{32}$",
+      "title": "Purpose Id",
+      "type": "string"
+    },
+    "receipt_id": {
+      "pattern": "^receipt_[0-9a-f]{32}$",
+      "title": "Receipt Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "consent-receipt/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/ConsentScopeV1"
+    },
+    "scope_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Scope Sha256",
+      "type": "string"
+    },
+    "study_id": {
+      "pattern": "^study_[0-9a-f]{32}$",
+      "title": "Study Id",
+      "type": "string"
+    },
+    "taxonomy": {
+      "$ref": "#/$defs/TaxonomyRef"
+    },
+    "valid_until": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Valid Until",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "participant_id",
+    "purpose_id",
+    "study_id",
+    "consent_form",
+    "privacy_notice",
+    "governance_policy",
+    "taxonomy",
+    "scope",
+    "scope_sha256",
+    "granted_at",
+    "valid_until",
+    "completed_form_sha256",
+    "identity_vault_attestation_sha256",
+    "adult_attested"
+  ],
+  "title": "ConsentReceiptV1",
+  "type": "object"
+}

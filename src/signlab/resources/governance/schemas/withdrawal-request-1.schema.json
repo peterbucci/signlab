@@ -1,0 +1,72 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and expressible local invariants. SignLab Pydantic and application validation remains authoritative for canonical digests, timestamp ordering, DAG closure, cross-record bindings, event-log completeness, cross-field locator equality, and withdrawal closure.",
+  "$id": "https://signlab.dev/schemas/withdrawal-request-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A pseudonymous, whole-participant withdrawal request.",
+  "properties": {
+    "effective_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Effective At",
+      "type": "string"
+    },
+    "identity_verification_attestation_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Identity Verification Attestation Sha256",
+      "type": "string"
+    },
+    "participant_id": {
+      "pattern": "^participant_[0-9a-f]{32}$",
+      "title": "Participant Id",
+      "type": "string"
+    },
+    "receipt_ids": {
+      "items": {
+        "pattern": "^receipt_[0-9a-f]{32}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Receipt Ids",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "request_id": {
+      "pattern": "^withdrawal_[0-9a-f]{32}$",
+      "title": "Request Id",
+      "type": "string"
+    },
+    "request_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Request Sha256",
+      "type": "string"
+    },
+    "requested_at": {
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "title": "Requested At",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "withdrawal-request/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "target": {
+      "const": "all_participant_data",
+      "title": "Target",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "request_id",
+    "participant_id",
+    "receipt_ids",
+    "requested_at",
+    "effective_at",
+    "target",
+    "identity_verification_attestation_sha256",
+    "request_sha256"
+  ],
+  "title": "WithdrawalRequestV1",
+  "type": "object"
+}

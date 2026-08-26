@@ -1,0 +1,39 @@
+{
+  "captured_at": "2026-08-26T12:10:00Z",
+  "grant_id": "grant_00000000000000000000000000000021",
+  "issued_at": "2026-08-26T12:05:00Z",
+  "participant_id": "participant_00000000000000000000000000000001",
+  "purpose_id": "purpose_00000000000000000000000000000051",
+  "receipt_id": "receipt_00000000000000000000000000000011",
+  "receipt_scope_sha256": "sha256:813ca9bd11b41d5e4310239e6d0a42469e46fbfed5b1b68a963ac21907b47795",
+  "recording_id": "recording_00000000000000000000000000000031",
+  "schema_version": "recording-consent-grant/1",
+  "scope": {
+    "audio_collection": false,
+    "commercial_sale": false,
+    "derived_features": true,
+    "derived_features_redistribution": false,
+    "evaluation_results_redistribution": true,
+    "identity_inference": false,
+    "minor_participation": false,
+    "model_evaluation": true,
+    "model_training": true,
+    "model_weights_redistribution": false,
+    "public_demonstration": false,
+    "raw_media_capture": true,
+    "raw_media_redistribution": false,
+    "raw_media_retention": true,
+    "research_use": true,
+    "same_purpose_future_research": false,
+    "schema_version": "consent-scope/1",
+    "withdrawal_supported": true
+  },
+  "scope_sha256": "sha256:e5b3677424b3d5d3c6771b7a2342899fe0e33acfd879d968077f41dedbe7220d",
+  "study_id": "study_00000000000000000000000000000061",
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  }
+}

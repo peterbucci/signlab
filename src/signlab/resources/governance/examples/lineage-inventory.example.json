@@ -1,0 +1,565 @@
+{
+  "assets": [
+    {
+      "asset_id": "asset_00000000000000000000000000000001",
+      "asset_kind": "raw_recording",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/raw_recording/asset_00000000000000000000000000000001",
+      "parent_asset_ids": [],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:e636119fc3c0cc93b233a24aa8adc197360415424a049016e0c4544894807807",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000002",
+      "asset_kind": "raw_recording",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/raw_recording/asset_00000000000000000000000000000002",
+      "parent_asset_ids": [],
+      "participant_ids": [
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:3d93c63746ebc6137f3329d099980ee1b02620884d08aff9464be9ea969a81d1",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000003",
+      "asset_kind": "derived_features",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/derived_features/asset_00000000000000000000000000000003",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000001"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:6c558304ecdf9b6cdcfef823c7c486242a2eea2cdfebbf8d30f74896e8005bc3",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000004",
+      "asset_kind": "derived_features",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/derived_features/asset_00000000000000000000000000000004",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000002"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:7094fad29928fa6aaab68c947e9514b83b3264b1766972438b8b9573af325af0",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000005",
+      "asset_kind": "annotation",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/annotation/asset_00000000000000000000000000000005",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000001"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:bbdbfcaea0d07ce080ff1353d0b944a67dd6be7a212dcf59fc98f3ba84ff54c3",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000006",
+      "asset_kind": "dataset_version",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021",
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/dataset_version/asset_00000000000000000000000000000006",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000003",
+        "asset_00000000000000000000000000000004",
+        "asset_00000000000000000000000000000005"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001",
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011",
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031",
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:ca46cf22ef2a749a1f136be29187f5612ea25b478c14175f9bdfb5925550599f",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000007",
+      "asset_kind": "dataset_version",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/dataset_version/asset_00000000000000000000000000000007",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000004"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:4b7dcb1dac8bb642ad29c8323073974d4f1f68ccbecac6ddfb5ed08fb32c3e34",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000008",
+      "asset_kind": "split_version",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021",
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/split_version/asset_00000000000000000000000000000008",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000006"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001",
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011",
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031",
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:bb673a7134e9110502889ec9aa3a7e11c93e19a89babbd0c7984900b21eeac20",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000009",
+      "asset_kind": "experiment_run",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021",
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/experiment_run/asset_00000000000000000000000000000009",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000008"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001",
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011",
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031",
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:0b8397f8524ee5b98cda35915a394b528e3b9391458172f2b587ca0ce42ab919",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000a",
+      "asset_kind": "model_artifact",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021",
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/model_artifact/asset_0000000000000000000000000000000a",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000009"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001",
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011",
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031",
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:5909023bb5e317349f370c4e42e6b0b60a385ed72d58a66ea5854407e12bcf91",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000b",
+      "asset_kind": "evaluation_report",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021",
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/evaluation_report/asset_0000000000000000000000000000000b",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000008",
+        "asset_0000000000000000000000000000000a"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001",
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011",
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031",
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:e36a385e6fab04a142936cc588ebd3d201a982cb4bb84bedd596943343ec6ef5",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000c",
+      "asset_kind": "public_demo",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021",
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/public_demo/asset_0000000000000000000000000000000c",
+      "parent_asset_ids": [
+        "asset_0000000000000000000000000000000a",
+        "asset_0000000000000000000000000000000b"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001",
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011",
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031",
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:b9dce0434246d5afeb450fa99f4fa31074a1d72cc9a41a3576dff91e16c2a2ac",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000d",
+      "asset_kind": "experiment_run",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/experiment_run/asset_0000000000000000000000000000000d",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000007"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:3356f212e004f6d6a2a47f039a289ce8df013d410ea9b724d8a4edf8fe9e7e61",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000e",
+      "asset_kind": "model_artifact",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000022"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/model_artifact/asset_0000000000000000000000000000000e",
+      "parent_asset_ids": [
+        "asset_0000000000000000000000000000000d"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000002"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000012"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000032"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:9f19519c1246095165cb8f597ce010979346688338213f248295f5ea15e5f691",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_0000000000000000000000000000000f",
+      "asset_kind": "cache",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/cache/asset_0000000000000000000000000000000f",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000003"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:3a58a4c845a160b6da52397c2552f92120dd9de25ca9c5453f0467d2f0ce750a",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000010",
+      "asset_kind": "backup_copy",
+      "created_at": "2026-08-26T12:00:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/backup_copy/asset_00000000000000000000000000000010",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000001"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:9f111dea7059e200271c249922001e7301f2425372c69ef2c3ca41e580e84e53",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "asset_id": "asset_00000000000000000000000000000011",
+      "asset_kind": "withdrawal_tombstone",
+      "created_at": "2026-08-26T13:10:00Z",
+      "grant_ids": [
+        "grant_00000000000000000000000000000021"
+      ],
+      "invalidated_at": null,
+      "lifecycle_state": "active",
+      "logical_uri": "signlab://store-00000000000000000000000000000001/withdrawal_tombstone/asset_00000000000000000000000000000011",
+      "parent_asset_ids": [
+        "asset_00000000000000000000000000000001"
+      ],
+      "participant_ids": [
+        "participant_00000000000000000000000000000001"
+      ],
+      "receipt_ids": [
+        "receipt_00000000000000000000000000000011"
+      ],
+      "recording_ids": [
+        "recording_00000000000000000000000000000031"
+      ],
+      "schema_version": "governance-asset/1",
+      "sha256": "sha256:f2cba828677added8c6a88882a780cf25c5e4b334cca07cb5e55d2925c20f87e",
+      "taxonomy": {
+        "id": "signlab-five",
+        "schema_version": "taxonomy-reference/1",
+        "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "generated_at": "2026-08-26T13:30:00Z",
+  "inventory_id": "inventory_00000000000000000000000000000001",
+  "inventory_sha256": "sha256:191d80752fff985682bf93cb2dea960e5a38f9a4c3a90be071c36d4a311ee4a7",
+  "schema_version": "lineage-inventory/1",
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  }
+}
