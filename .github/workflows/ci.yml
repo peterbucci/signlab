@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+  UV_NO_PROGRESS: "1"
+
+jobs:
+  quality:
+    name: Linux quality, test, and package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          version: 0.12.6
+
+      - name: Install pinned Python
+        run: uv python install
+
+      - name: Validate lockfile
+        run: uv lock --check
+
+      - name: Install locked environment
+        run: uv sync --locked --all-groups
+
+      - name: Enforce public-repository boundary
+        run: uv run --locked python scripts/check_repository_hygiene.py
+
+      - name: Lint
+        run: uv run --locked ruff check .
+
+      - name: Check formatting
+        run: uv run --locked ruff format --check .
+
+      - name: Type check
+        run: uv run --locked mypy
+
+      - name: Test
+        run: uv run --locked pytest
+
+      - name: Build distributions
+        run: uv build --no-build-isolation
+
+      - name: Verify and install wheel
+        run: uv run --locked python scripts/verify_distribution.py dist
+
+      - name: Smoke test CLI
+        run: uv run --locked signlab doctor check
+
+      - name: Prove checkout stayed clean
+        run: uv run --locked python scripts/check_repository_hygiene.py --require-clean
+
+  windows:
+    name: Windows locked-install and package smoke
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          version: 0.12.6
+
+      - name: Install pinned Python
+        run: uv python install
+
+      - name: Validate lockfile
+        run: uv lock --check
+
+      - name: Install locked environment
+        run: uv sync --locked --all-groups
+
+      - name: Enforce public-repository boundary
+        run: uv run --locked python scripts/check_repository_hygiene.py
+
+      - name: Test Windows paths and behavior
+        run: uv run --locked pytest
+
+      - name: Build distributions
+        run: uv build --no-build-isolation
+
+      - name: Verify and install wheel
+        run: uv run --locked python scripts/verify_distribution.py dist
+
+      - name: Smoke test CLI
+        run: uv run --locked signlab doctor check
+
+      - name: Prove checkout stayed clean
+        run: uv run --locked python scripts/check_repository_hygiene.py --require-clean
+
+  secrets:
+    name: Full-history secret scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

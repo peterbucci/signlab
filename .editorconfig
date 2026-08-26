@@ -10,6 +10,13 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
 
-[{*.md,*.json,*.yml,*.yaml,*.ts,*.tsx}]
+[{*.css,*.html,*.js,*.json,*.jsx,*.md,*.toml,*.ts,*.tsx,*.yml,*.yaml}]
 indent_style = space
 indent_size = 2
+
+[{*.ps1,*.sh}]
+indent_style = space
+indent_size = 2
+
+[Makefile]
+indent_style = tab

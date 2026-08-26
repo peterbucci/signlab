@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-
 from scripts import verify_legacy_audit as verifier
 
 

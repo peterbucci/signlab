@@ -1,10 +1,16 @@
+from importlib.metadata import metadata, version
+
 from signlab import __version__
-from signlab.cli import build_parser
 
 
-def test_package_version_is_exposed() -> None:
+def test_package_version_has_one_runtime_source() -> None:
     assert __version__ == "0.1.0"
+    assert version("signlab") == __version__
 
 
-def test_cli_parser_has_expected_program_name() -> None:
-    assert build_parser().prog == "signlab"
+def test_distribution_metadata_is_complete() -> None:
+    package_metadata = metadata("signlab")
+
+    assert package_metadata["Name"] == "signlab"
+    assert package_metadata["License-Expression"] == "MIT"
+    assert package_metadata["Requires-Python"] == "<3.13,>=3.12"

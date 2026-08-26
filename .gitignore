@@ -5,10 +5,16 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
+.coverage.*
+.hypothesis/
+.nox/
 .venv/
 dist/
 build/
 *.egg-info/
+coverage.xml
+htmlcov/
 
 # JavaScript
 node_modules/
@@ -27,28 +33,53 @@ Thumbs.db
 !.env.example
 *.pem
 *.key
+*.log
 
 # Private data and generated ML artifacts
 data/raw/
 data/interim/
 data/processed/
+data/private/
 artifacts/
 models/
 runs/
 mlruns/
+*.a
+*.avi
 *.onnx
 *.keras
 *.h5
+*.hdf5
+*.joblib
+*.dll
+*.dylib
+*.exe
+*.lib
+*.mov
+*.mp4
+*.npy
+*.npz
+*.o
+*.parquet
+*.pickle
+*.pkl
 *.pt
 *.pth
+*.safetensors
+*.so
+*.tflite
+*.webm
 
 # Local databases and caches
 *.db
 *.sqlite
 *.sqlite3
 .dvc/cache/
+.dvc/tmp/
 
 # Keep lightweight contracts, manifests, fixtures, reports, and DVC pointers.
 !data/manifests/
 !data/splits/
 !tests/fixtures/
+!tests/fixtures/public/
+!tests/fixtures/public/**
