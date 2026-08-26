@@ -61,8 +61,8 @@ Use three distinct record layers:
 2. The collection sidecar holds protocol version, visit, prompt seed and realized
    order, repetition, condition codes, checklists, technical retries, and deviations.
    The fixture in `tests/fixtures/public/collection/mock-session-plan.json` is an
-   evidence format, not yet a production interchange contract. Story #17 owns that
-   tool-facing contract.
+   explanatory rehearsal format. The strict `collection-sidecar/1` interchange
+   contract and importer are defined in [capture and raw dataset import](capture-import.md).
 3. Authenticated consent and identity records stay behind the identity-vault boundary;
    only the approved pseudonymous grant snapshot reaches restricted research data.
 
@@ -312,9 +312,9 @@ The initial reason-code allowlist is:
 - `consent_exclusion`, `camera_setup`, `third_party_presence`,
   `unresolved_conflict`, or `unusable_occlusion` for ignored regions.
 
-Story #17 must publish the controlled sidecar/reason-code contract before production
-import. Free-text explanations belong only in an approved restricted review system,
-not in dataset identifiers.
+`collection-sidecar/1` publishes the controlled sidecar and reason-code boundary.
+Free-text explanations belong only in an approved restricted review system, not in
+dataset identifiers.
 
 ## Review and adjudication
 
@@ -422,9 +422,10 @@ training, institutional approval, private storage, or production readiness.
 
 The mock plan supplies synthetic independent-review/adjudication outcomes so a new
 collector can derive the final `review_status`. It does not preserve real reviewer
-identities, first-pass drafts, comments, or disagreement history. Story #17 owns
-that auditable production sidecar; the normalized annotation table remains the final
-reviewed projection.
+identities, first-pass drafts, comments, or disagreement history. The strict
+`collection-sidecar/1` contract preserves opaque reviewer identities and immutable
+decision history; the normalized annotation table remains the final reviewed
+projection.
 
 ## Versioning and deviations
 

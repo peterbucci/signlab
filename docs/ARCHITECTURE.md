@@ -3,12 +3,13 @@
 ## Core release
 
 ```text
-Raw private videos
-  -> versioned sample manifest and frozen split manifest
+Authorized source media (future) or synthetic fixture + collection-sidecar/1
+  -> raw-dataset-manifest/1
   -> MediaPipe Tasks extraction
      - image-space and world hand landmarks
      - selected body anchors
      - timestamps, validity masks, handedness, confidence
+  -> quality policy -> dataset-manifest/2 + frozen split manifest
   -> versioned feature representations
   -> train -> calibrate -> evaluate -> continuous replay benchmark
   -> immutable ONNX model bundle
@@ -55,15 +56,24 @@ the canonical SHA-256. The [taxonomy](gesture-taxonomy.md) is authoritative for
 label order, event boundaries, negative examples, legacy aliases, and the public
 claim. Downstream contracts may add fields but cannot reinterpret its identifiers.
 
-The [dataset manifest](dataset-manifests.md) includes stable identifiers for clips,
-participants, sessions, source recordings, devices, camera facts, handedness,
-mirroring, consent, and checksums. Prompt order and condition assignments live in a
-separate collection sidecar whose production contract belongs to Story #17; they
-must not be smuggled into dataset IDs. Derived samples inherit the source recording
-and split. Six normalized tables use explicit Arrow schemas and Parquet storage
-while retaining storage-independent semantic hashes. V2 row artifacts use
-hash-derived logical paths whose only filename is the opaque artifact ID; dataset
-locators therefore cannot carry hostnames, participant names, or free-text labels.
+The [capture/import boundary](capture-import.md) separates a UI-independent
+`collection-sidecar/1` from the immutable `raw-dataset-manifest/1` handed to
+extraction. The sidecar owns prompt order, condition assignments, stable opaque
+workflow IDs, attempts, and review decisions; source paths live only in an ephemeral
+operator map. The raw manifest reuses the normalized participant, session,
+recording, clip, annotation, and derived-artifact tables, with the two derived-media
+types—clips and derived artifacts—empty before extraction. It binds the finalized
+sidecar, governance policy, lineage inventory, and taxonomy without pretending that
+raw recordings are trainable samples.
+
+The sample-bearing [dataset manifest](dataset-manifests.md) includes stable
+identifiers for clips, participants, sessions, source recordings, devices, camera
+facts, handedness, mirroring, consent, and checksums. Derived samples inherit the
+source recording and split. Six normalized tables use explicit Arrow schemas and
+Parquet storage while retaining storage-independent semantic hashes. V2 row
+artifacts use hash-derived logical paths whose only filename is the opaque artifact
+ID; dataset locators therefore cannot carry hostnames, participant names, or
+free-text labels.
 
 ## Participant-data boundary
 
@@ -83,11 +93,20 @@ assertions alone do not establish authenticity. The legacy export remains
 `consent_status: unknown` and is quarantined from training, evaluation,
 demonstrations, and publication.
 
-Every participant-derived asset uses a `signlab://` logical locator and participates
-in a complete lineage graph. A deterministic withdrawal planner computes direct
-roots and every downstream descendant, including shared datasets, runs, models,
-reports, demos, caches, and backups. It emits a dry-run plan only; external deletion
-requires future authorized store adapters and attestations.
+The raw importer enforces that same boundary. Its public fixture is explicitly
+synthetic; structurally valid sidecar data is not evidence that a real collection is
+authorized. Real media cannot cross the boundary until readiness, private storage,
+and authenticated consent verification are supplied by their external owners.
+
+Every consent-bound participant asset uses a `signlab://` logical locator and
+participates in the governance lineage graph. Captured retry or quarantine bytes
+without consent evidence cannot truthfully use that contract; a separate strict
+quarantine inventory retains their content-addressed locations, pseudonymous
+participant/recording identities, coded reasons, and explicit absent-consent status
+for withdrawal discovery. A deterministic withdrawal planner computes direct roots
+and every downstream descendant of consent-bound assets, including shared datasets,
+runs, models, reports, demos, caches, and backups. It emits a dry-run plan only;
+external deletion requires future authorized store adapters and attestations.
 
 The model bundle will eventually contain:
 

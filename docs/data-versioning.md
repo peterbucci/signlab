@@ -59,6 +59,16 @@ can be fitted on the training partition only. Later implementations should keep 
 registered boundaries and delegate work to importable services instead of creating a
 second pipeline graph.
 
+The #17 importable service implements the ingest/validate boundary independently of
+the DVC fixture adapter. Its current public entry point accepts only an explicitly
+synthetic `collection-sidecar/1`, resolves an ephemeral opaque source map beneath an
+explicit source root, and atomically publishes `raw-dataset-manifest/1`. That raw
+manifest is the handoff to extraction; it is not a sample-bearing
+`dataset-manifest/2`, and it does not add another DVC graph. The registered `ingest`
+and `validate` stages remain fixture receipts until their graph adapters are replaced
+deliberately alongside the downstream production stages. An authorized real-data
+adapter remains blocked on the governance and storage gates described below.
+
 Install the reproducibility dependencies and check the public scaffold with:
 
 ```shell

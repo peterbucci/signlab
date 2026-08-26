@@ -1,0 +1,133 @@
+{
+  "$comment": "This JSON Schema enforces portable structure. SignLab's strict ingest validators remain authoritative for canonical hashes, ordering, state transitions, consent bindings, review projection, table relationships, and artifact-byte verification.",
+  "$id": "https://signlab.dev/schemas/capture-identifier-set-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One preallocated, pseudonymous identifier set for an import fixture or visit.",
+  "properties": {
+    "adjudicator_actor_id": {
+      "pattern": "^actor_[0-9a-f]{32}$",
+      "title": "Adjudicator Actor Id",
+      "type": "string"
+    },
+    "adjudicator_decision_id": {
+      "pattern": "^decision_[0-9a-f]{32}$",
+      "title": "Adjudicator Decision Id",
+      "type": "string"
+    },
+    "annotation_id": {
+      "pattern": "^annotation_[0-9a-f]{32}$",
+      "title": "Annotation Id",
+      "type": "string"
+    },
+    "annotator_actor_id": {
+      "pattern": "^actor_[0-9a-f]{32}$",
+      "title": "Annotator Actor Id",
+      "type": "string"
+    },
+    "annotator_decision_id": {
+      "pattern": "^decision_[0-9a-f]{32}$",
+      "title": "Annotator Decision Id",
+      "type": "string"
+    },
+    "attempt_id": {
+      "pattern": "^attempt_[0-9a-f]{32}$",
+      "title": "Attempt Id",
+      "type": "string"
+    },
+    "collection_id": {
+      "pattern": "^collection_[0-9a-f]{32}$",
+      "title": "Collection Id",
+      "type": "string"
+    },
+    "dataset_id": {
+      "pattern": "^dataset_[0-9a-f]{32}$",
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "device_id": {
+      "pattern": "^device_[0-9a-f]{32}$",
+      "title": "Device Id",
+      "type": "string"
+    },
+    "inventory_id": {
+      "pattern": "^inventory_[0-9a-f]{32}$",
+      "title": "Inventory Id",
+      "type": "string"
+    },
+    "participant_id": {
+      "pattern": "^participant_[0-9a-f]{32}$",
+      "title": "Participant Id",
+      "type": "string"
+    },
+    "prompt_occurrence_id": {
+      "pattern": "^occurrence_[0-9a-f]{32}$",
+      "title": "Prompt Occurrence Id",
+      "type": "string"
+    },
+    "recording_id": {
+      "pattern": "^recording_[0-9a-f]{32}$",
+      "title": "Recording Id",
+      "type": "string"
+    },
+    "reviewer_actor_id": {
+      "pattern": "^actor_[0-9a-f]{32}$",
+      "title": "Reviewer Actor Id",
+      "type": "string"
+    },
+    "reviewer_decision_id": {
+      "pattern": "^decision_[0-9a-f]{32}$",
+      "title": "Reviewer Decision Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "capture-identifier-set/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "pattern": "^session_[0-9a-f]{32}$",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "source_key": {
+      "pattern": "^source_[0-9a-f]{32}$",
+      "title": "Source Key",
+      "type": "string"
+    },
+    "store_id": {
+      "pattern": "^store-[0-9a-f]{32}$",
+      "title": "Store Id",
+      "type": "string"
+    },
+    "visit_id": {
+      "pattern": "^visit_[0-9a-f]{32}$",
+      "title": "Visit Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "collection_id",
+    "participant_id",
+    "visit_id",
+    "session_id",
+    "device_id",
+    "recording_id",
+    "attempt_id",
+    "source_key",
+    "prompt_occurrence_id",
+    "annotation_id",
+    "annotator_actor_id",
+    "reviewer_actor_id",
+    "adjudicator_actor_id",
+    "annotator_decision_id",
+    "reviewer_decision_id",
+    "adjudicator_decision_id",
+    "dataset_id",
+    "store_id",
+    "inventory_id"
+  ],
+  "title": "CaptureIdentifierSetV1",
+  "type": "object"
+}

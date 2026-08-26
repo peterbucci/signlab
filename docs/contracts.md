@@ -29,6 +29,19 @@ dataset manifest
 | `run-record/1` | An immutable terminal result with clean code/lock identities, sanitized runtime facts, finite aggregate metrics, and content-addressed outputs |
 | `model-manifest/1` | A research-model artifact bound to its successful run, configuration, dataset, split, preprocessing plan, taxonomy, label order, and input/output schemas |
 
+Three ingest-stage contracts sit before that sample-bearing chain:
+
+| Contract | Identity and responsibility |
+| --- | --- |
+| `capture-identifier-set/1` | Durable preallocation of opaque collection, attempt, recording, source, annotation, and review workflow IDs |
+| `collection-sidecar/1` | Resumable collection state, authoritative prompt order, coded checklists, attempt history, exact consent grants, and immutable annotation decisions |
+| `raw-dataset-manifest/1` | Storage-independent raw table identity and exact sidecar, governance, taxonomy, lineage, Parquet, and accepted-media bindings before sample extraction |
+
+These are stage-handoff contracts, not new members of the downstream
+`ContractRefV1` provenance chain. In particular, the raw manifest does not weaken
+or replace the sample-bearing `dataset-manifest/2` contract. See
+[capture and raw dataset import](capture-import.md).
+
 `assert_model_compatible(...)` validates the complete chain. The narrower
 `assert_split_compatible(...)`, `assert_resolved_configuration_compatible(...)`,
 and `assert_run_compatible(...)` checks are available at earlier pipeline stages.
@@ -85,6 +98,12 @@ Splits, configurations, runs, and models carry both where needed. Substituting a
 new manifest under an old dataset ID or pointing a split at different data fails
 the compatibility checks.
 
+The raw handoff follows the same two-level principle. `raw_data_sha256` hashes the
+six logical table identities and required taxonomy, governance, lineage, and
+finalized-sidecar bindings while excluding source paths, workspace locators, and
+Parquet encoding. The complete raw-manifest document remains sensitive to its exact
+artifact references.
+
 ## Portable locations
 
 Physical machine paths never cross a contract boundary. Every artifact uses one
@@ -125,6 +144,9 @@ before Pydantic validation.
 | Contract family | Current writer | Retained readers | Automatic migration |
 | --- | --- | --- | --- |
 | Dataset manifest | `dataset-manifest/2` | `/1`, `/2` | Never |
+| Capture identifier set | `capture-identifier-set/1` | `/1` | Never |
+| Collection sidecar | `collection-sidecar/1` | `/1` | Never |
+| Raw dataset manifest | `raw-dataset-manifest/1` | `/1` | Never |
 | Split manifest | `split-manifest/1` | `/1` | Never |
 | Preprocessing plan | `preprocessing-plan/1` | `/1` | Never |
 | Resolved configuration | `resolved-configuration/1` | `/1` | Never |

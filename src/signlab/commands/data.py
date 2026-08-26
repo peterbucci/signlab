@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Literal, cast
 
 import typer
 
@@ -14,6 +14,251 @@ from signlab.legacy.validator import validate_legacy_export
 app = create_group(
     help_text="Capture, import, validate, version, and split consent-approved datasets."
 )
+
+
+def _read_capture_source_map(path: Path) -> dict[str, str]:
+    """Read the private path map without returning untrusted values in errors."""
+
+    from signlab.contracts.canonical import parse_json_object
+
+    try:
+        payload = parse_json_object(path.read_bytes())
+        pairs_are_strings = all(
+            isinstance(key, str) and isinstance(value, str) for key, value in payload.items()
+        )
+        if not pairs_are_strings:
+            raise ValueError("source map must contain only string pairs")
+        return cast(dict[str, str], payload)
+    except (OSError, TypeError, ValueError) as error:
+        raise ValueError("capture source map is invalid") from error
+
+
+@app.command("allocate-capture-ids")
+def allocate_capture_ids_command(
+    output: Annotated[
+        Path,
+        typer.Argument(help="New private JSON file that durably stores opaque workflow IDs."),
+    ],
+    retry_of: Annotated[
+        Path | None,
+        typer.Option(
+            "--retry-of",
+            help="Existing identifier file whose workflow IDs a new retry must retain.",
+        ),
+    ] = None,
+) -> None:
+    """Allocate opaque IDs once, or allocate a distinct recording/attempt retry."""
+
+    from signlab.datasets.capture import CaptureAllocationError, allocate_capture_identifiers
+
+    try:
+        result = allocate_capture_identifiers(output, retry_of=retry_of)
+    except (CaptureAllocationError, OSError, TypeError, ValueError) as error:
+        typer.echo("Capture identifier allocation failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"Capture identifiers: {result.status}.")
+    typer.echo(f"Identifier-set SHA-256: {result.identifiers_sha256}")
+
+
+@app.command("validate-capture")
+def validate_capture_command(
+    sidecar: Annotated[
+        Path,
+        typer.Argument(help="Collection-sidecar/1 JSON document to validate."),
+    ],
+) -> None:
+    """Validate capture state, attempt history, consent bindings, and review history."""
+
+    from signlab.contracts.ingest import (
+        collection_sidecar_digest,
+        validate_collection_sidecar,
+    )
+
+    try:
+        checked = validate_collection_sidecar(sidecar.read_bytes())
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Collection sidecar validation failed.", err=True)
+        raise typer.Exit(code=1) from error
+    attempts = tuple(
+        attempt for occurrence in checked.occurrences for attempt in occurrence.attempts
+    )
+    typer.echo(f"Collection sidecar SHA-256: {collection_sidecar_digest(checked)}")
+    typer.echo(f"Collection state: {checked.state}")
+    typer.echo(
+        "Capture outcomes: "
+        f"{sum(attempt.outcome == 'accepted' for attempt in attempts)} accepted, "
+        f"{sum(attempt.outcome == 'retry' for attempt in attempts)} retry, "
+        f"{sum(attempt.outcome == 'quarantined' for attempt in attempts)} quarantined, "
+        f"{sum(occurrence.state == 'skipped' for occurrence in checked.occurrences)} skipped."
+    )
+    typer.echo(f"Annotation histories: {len(checked.annotations)}")
+
+
+@app.command("append-capture-attempt")
+def append_capture_attempt_command(
+    sidecar: Annotated[
+        Path,
+        typer.Argument(help="Active or paused collection-sidecar/1 JSON document to update."),
+    ],
+    identifiers: Annotated[
+        Path,
+        typer.Option(
+            "--identifiers",
+            help="Existing capture-identifier-set/1 JSON for this attempt.",
+        ),
+    ],
+    media: Annotated[
+        Path,
+        typer.Option("--media", help="Private captured file to hash without persisting its path."),
+    ],
+    outcome: Annotated[
+        Literal["accepted", "retry", "quarantined"],
+        typer.Option("--outcome", help="Coded outcome for this immutable attempt."),
+    ],
+    recorded_at: Annotated[
+        str,
+        typer.Option("--recorded-at", help="UTC capture timestamp in YYYY-MM-DDTHH:MM:SSZ form."),
+    ],
+    media_type: Annotated[
+        Literal["video/mp4", "video/quicktime", "video/webm"],
+        typer.Option("--media-type", help="Trusted declared media type."),
+    ],
+    duration_us: Annotated[
+        int,
+        typer.Option(
+            "--duration-us",
+            min=1,
+            help="Trusted positive media duration in microseconds.",
+        ),
+    ],
+    handedness: Annotated[
+        Literal["left", "right", "unknown"],
+        typer.Option("--handedness", help="Observed signing hand for this attempt."),
+    ],
+    mirror_state: Annotated[
+        Literal["not_mirrored", "mirrored"],
+        typer.Option("--mirror-state", help="Trusted capture mirror state."),
+    ],
+    rotation_degrees: Annotated[
+        int,
+        typer.Option("--rotation-degrees", help="Trusted rotation: 0, 90, 180, or 270."),
+    ],
+    reason_code: Annotated[
+        str | None,
+        typer.Option(
+            "--reason-code",
+            help="Required controlled reason for retry or quarantine; forbidden for accepted.",
+        ),
+    ] = None,
+    consent_grant: Annotated[
+        Path | None,
+        typer.Option(
+            "--consent-grant",
+            help="Prevalidated recording-consent-grant/1 JSON required for accepted.",
+        ),
+    ] = None,
+) -> None:
+    """Hash media and atomically append one preallocated capture attempt."""
+
+    from signlab.datasets.ledger import CaptureLedgerError, append_capture_attempt
+
+    try:
+        result = append_capture_attempt(
+            sidecar,
+            identifiers.read_bytes(),
+            media_path=media,
+            outcome=outcome,
+            reason_code=reason_code,
+            recorded_at=recorded_at,
+            media_type=media_type,
+            duration_us=duration_us,
+            handedness=handedness,
+            mirror_state=mirror_state,
+            rotation_degrees=rotation_degrees,
+            consent_grant=(consent_grant.read_bytes() if consent_grant is not None else None),
+        )
+    except (CaptureLedgerError, OSError, TypeError, ValueError) as error:
+        typer.echo("Capture attempt update failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"Capture attempt: {result.status}.")
+    typer.echo(f"Capture outcome: {result.attempt.outcome}.")
+    typer.echo(f"Collection sidecar SHA-256: {result.collection_sidecar_sha256}")
+
+
+@app.command("import-capture")
+def import_capture_command(
+    sidecar: Annotated[
+        Path,
+        typer.Argument(help="Finalized fixture-only collection-sidecar/1 JSON document."),
+    ],
+    source_map: Annotated[
+        Path,
+        typer.Option("--source-map", help="Private JSON map of opaque source keys to paths."),
+    ],
+    source_root: Annotated[
+        Path,
+        typer.Option("--source-root", help="Explicit root for private source-map paths."),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New or byte-identical raw dataset bundle directory."),
+    ],
+) -> None:
+    """Atomically import a complete synthetic sidecar into a validated raw bundle."""
+
+    from signlab.datasets.importer import DatasetImportError, import_collection_sidecar
+
+    try:
+        result = import_collection_sidecar(
+            sidecar.read_bytes(),
+            source_root=source_root,
+            source_map=_read_capture_source_map(source_map),
+            destination=output,
+        )
+    except (DatasetImportError, OSError, TypeError, ValueError) as error:
+        typer.echo("Capture import failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"Capture import: {result.status}.")
+    typer.echo(
+        "Imported outcomes: "
+        f"{result.accepted_recordings} accepted, "
+        f"{result.retry_attempts} retry, "
+        f"{result.quarantined_attempts} quarantined, "
+        f"{result.skipped_occurrences} skipped."
+    )
+    typer.echo(f"Raw data SHA-256: {result.manifest.raw_data_sha256}")
+    typer.echo("Raw bundle integrity: verified.")
+
+
+@app.command("validate-raw-dataset")
+def validate_raw_dataset_command(
+    manifest: Annotated[
+        Path,
+        typer.Argument(help="Raw-dataset-manifest/1 JSON document."),
+    ],
+    workspace_root: Annotated[
+        Path,
+        typer.Option("--workspace-root", help="Explicit raw bundle root."),
+    ],
+) -> None:
+    """Verify raw metadata, normalized tables, and every referenced media byte."""
+
+    from signlab.datasets.raw_bundle import RawDatasetBundleError, validate_raw_dataset_bundle
+
+    try:
+        result = validate_raw_dataset_bundle(manifest.read_bytes(), workspace_root)
+    except (RawDatasetBundleError, OSError, TypeError, ValueError) as error:
+        typer.echo("Raw dataset validation failed.", err=True)
+        raise typer.Exit(code=1) from error
+    checked = result.validation
+    typer.echo(f"Raw data SHA-256: {checked.raw_data_sha256}")
+    typer.echo(f"Parquet table bytes: {checked.parquet_table_bytes}")
+    typer.echo(f"Raw dataset semantics: {checked.semantic_integrity}")
+    typer.echo(f"Referenced artifact bytes: {checked.artifact_byte_integrity}")
+    typer.echo(f"Collection sidecar: {checked.collection_sidecar_integrity}")
+    typer.echo(f"Lineage inventory: {checked.lineage_inventory_integrity}")
+    typer.echo(f"Quarantine inventory: {checked.quarantine_inventory_integrity}")
+    typer.echo(f"Current consent authorization: {checked.consent_authorization.replace('_', ' ')}")
 
 
 @app.command("configure-private-remote")
@@ -100,16 +345,18 @@ def run_reproduction_stage_command(
 
 @app.command("validate-resources")
 def validate_dataset_resources() -> None:
-    """Validate packaged table schemas, Arrow snapshots, and synthetic examples."""
+    """Validate packaged dataset, capture, and raw-handoff schemas and examples."""
 
+    from signlab.datasets.ingest_resources import validate_packaged_ingest_resources
     from signlab.datasets.resources import validate_packaged_dataset_resources
 
     try:
         validate_packaged_dataset_resources()
+        validate_packaged_ingest_resources()
     except (OSError, TypeError, ValueError) as error:
         typer.echo("Packaged dataset resource validation failed.", err=True)
         raise typer.Exit(code=1) from error
-    typer.echo("Packaged dataset schemas and examples are valid.")
+    typer.echo("Packaged dataset and ingest schemas and examples are valid.")
 
 
 @app.command("write-example-dataset")
