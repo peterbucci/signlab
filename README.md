@@ -41,17 +41,19 @@ deferred until a concrete workflow requires them.
 
 ## Roadmap
 
-The delivery plan is organized into six phases:
+The delivery plan is organized into seven phases:
 
 0. Preserve and audit the legacy school project.
 1. Build the reproducible, consent-aware data foundation.
 2. Establish trustworthy baselines and continuous evaluation.
 3. Export and validate a portable inference bundle.
-4. Ship the static browser demo and portfolio release.
-5. Add an interactive research platform only if justified.
+4. Build and validate the static browser demo.
+5. Publish the portfolio release, evidence, and tutorials.
+6. Add an interactive research platform only if justified.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md),
-and the linked GitHub Project for the implementation backlog.
+and the [SignLab Roadmap](https://github.com/users/peterbucci/projects/5) for the
+implementation backlog.
 
 ## Repository status
 

@@ -23,13 +23,18 @@ and report signer/session-level uncertainty and runtime metrics through MLflow.
 Define the model-bundle schema, export ONNX, and validate Python-to-ONNX,
 Python-to-TypeScript feature, decision-policy, and continuous-replay parity.
 
-## Phase 4 — Browser and portfolio release
+## Phase 4 — Browser demo
 
 Build a static React application with worker-based camera/replay inference, local
-feedback, curated results, model/data cards, accessibility guidance, performance
-budgets, CI, deployment, and a short demonstration video.
+feedback, accessibility guidance, performance budgets, deterministic replay, and
+cross-browser validation.
 
-## Phase 5 — Optional research platform
+## Phase 5 — Portfolio release
+
+Publish curated results, model/data cards, limitations, reproducibility tutorials,
+CI-backed deployment, rollback guidance, and a short captioned demonstration video.
+
+## Phase 6 — Optional research platform
 
 If a real interactive workflow justifies it, add FastAPI, Prefect, SSE progress,
 DuckDB error analysis, PostgreSQL/object storage, and custom Studio features that

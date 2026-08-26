@@ -1,7 +1,8 @@
 # Project board
 
-The GitHub Project is the delivery source of truth. Work is organized by phase,
-priority, status, and effort; repository labels identify technical areas.
+The [SignLab Roadmap](https://github.com/users/peterbucci/projects/5) is the delivery
+source of truth. Work is organized by phase, priority, status, and effort;
+repository labels identify technical areas.
 
 ## Workflow
 
