@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "components": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "path": {
+            "pattern": "^[a-z0-9][a-z0-9_.-]*(/[a-z0-9_.-]+)*$",
+            "type": "string"
+          },
+          "records": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "bytes",
+          "sha256"
+        ],
+        "title": "Portable component",
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "counts": {
+      "additionalProperties": false,
+      "properties": {
+        "annotated_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "annotations": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "attempts": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "detections": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "orphan_segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "preprocessing_plans": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "promoted_models": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "referenced_segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "runs": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "runs_failed": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "runs_running": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "runs_succeeded": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "segments": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sessions": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "unannotated_attempts": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "runs",
+        "runs_succeeded",
+        "runs_failed",
+        "runs_running",
+        "preprocessing_plans",
+        "promoted_models",
+        "attempts",
+        "annotations",
+        "annotated_attempts",
+        "unannotated_attempts",
+        "sessions",
+        "detections",
+        "segments",
+        "referenced_segments",
+        "orphan_segments"
+      ],
+      "title": "Public export counts",
+      "type": "object"
+    },
+    "kind": {
+      "const": "signlab.legacy-public-export"
+    },
+    "policy": {
+      "additionalProperties": false,
+      "properties": {
+        "contains_private_artifacts": {
+          "const": false
+        },
+        "data_role": {
+          "const": "development-only"
+        },
+        "durability": {
+          "const": "local-only-pending-private-remote"
+        },
+        "eligible_for_locked_test": {
+          "const": false
+        }
+      },
+      "required": [
+        "data_role",
+        "eligible_for_locked_test",
+        "contains_private_artifacts",
+        "durability"
+      ],
+      "title": "Legacy evidence policy",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "source": {
+      "additionalProperties": false,
+      "properties": {
+        "audit_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "head_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "tree_object": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "head_commit",
+        "tree_object",
+        "audit_sha256"
+      ],
+      "title": "Legacy source anchor",
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "source",
+    "policy",
+    "counts",
+    "components"
+  ],
+  "title": "SignLab public legacy export manifest",
+  "type": "object"
+}

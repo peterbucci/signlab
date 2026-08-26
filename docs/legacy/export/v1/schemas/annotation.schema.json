@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attempt_ref": {
+      "pattern": "^attempt-[0-9]{6}$",
+      "type": "string"
+    },
+    "corrected_label": {
+      "anyOf": [
+        {
+          "enum": [
+            "hello",
+            "no",
+            "please",
+            "thank you",
+            "yes"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "data_role": {
+      "const": "development-only"
+    },
+    "feedback_type": {
+      "enum": [
+        "confirm",
+        "missed",
+        "wrong"
+      ]
+    },
+    "freeform_note_present": {
+      "type": "boolean"
+    },
+    "offset_ms": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "record_id": {
+      "pattern": "^annotation-[0-9]{6}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_id",
+    "attempt_ref",
+    "data_role",
+    "offset_ms",
+    "feedback_type",
+    "corrected_label",
+    "freeform_note_present"
+  ],
+  "title": "Sanitized feedback annotation",
+  "type": "object"
+}

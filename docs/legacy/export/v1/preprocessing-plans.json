@@ -1,0 +1,143 @@
+{
+  "kind": "signlab.legacy-preprocessing-plans",
+  "plans": {
+    "baseline_pos_handscale_30f": {
+      "created_at": "2025-11-29T17:10:00",
+      "description": "Baseline: centered wrist positions, scaled by hand length, resampled to 30 frames. Good simple starting point for position-only models.",
+      "name": "baseline_pos_handscale_30f",
+      "steps": [
+        {
+          "key": "drop_short_sequences",
+          "params": {}
+        },
+        {
+          "key": "center_wrist",
+          "params": {}
+        },
+        {
+          "key": "scale_by_hand_length",
+          "params": {
+            "ref_landmark": 9
+          }
+        },
+        {
+          "key": "resample_sequence",
+          "params": {
+            "mode": "uniform_pad_zeros",
+            "seq_len": 30
+          }
+        },
+        {
+          "key": "zscore_per_sequence",
+          "params": {}
+        }
+      ],
+      "updated_at": "2025-11-29T17:10:00"
+    },
+    "pos_vel_handscale_smooth_30f": {
+      "created_at": "2025-11-29T17:10:00",
+      "description": "Positions + central velocity with light smoothing, hand-length scale, and 30-frame resampling. Good for signs where motion matters (e.g., yes/no/thank you).",
+      "name": "pos_vel_handscale_smooth_30f",
+      "steps": [
+        {
+          "key": "drop_short_sequences",
+          "params": {}
+        },
+        {
+          "key": "center_wrist",
+          "params": {}
+        },
+        {
+          "key": "scale_by_hand_length",
+          "params": {
+            "ref_landmark": 9
+          }
+        },
+        {
+          "key": "smooth_moving_average",
+          "params": {
+            "window": 3
+          }
+        },
+        {
+          "key": "resample_sequence",
+          "params": {
+            "mode": "uniform_or_tile_if_T1",
+            "seq_len": 30
+          }
+        },
+        {
+          "key": "add_central_velocity",
+          "params": {}
+        },
+        {
+          "key": "zscore_per_sequence",
+          "params": {}
+        }
+      ],
+      "updated_at": "2025-11-29T17:10:00"
+    },
+    "shape_motion_angles_robust_30f": {
+      "created_at": "2025-11-29T17:10:00",
+      "description": "Rotation-normalized positions + motion + shape descriptors (pairwise distances, finger angles), with smoothing and clipping. Designed to be robust to orientation/scale and small jitters for subtle sign distinctions.",
+      "name": "shape_motion_angles_robust_30f",
+      "steps": [
+        {
+          "key": "drop_short_sequences",
+          "params": {}
+        },
+        {
+          "key": "center_wrist",
+          "params": {}
+        },
+        {
+          "key": "canonical_rotate_wrist_middle",
+          "params": {
+            "ref_landmark": 9
+          }
+        },
+        {
+          "key": "scale_global_max_abs",
+          "params": {}
+        },
+        {
+          "key": "smooth_moving_average",
+          "params": {
+            "window": 3
+          }
+        },
+        {
+          "key": "resample_sequence",
+          "params": {
+            "mode": "uniform_pad_zeros",
+            "seq_len": 30
+          }
+        },
+        {
+          "key": "add_central_velocity",
+          "params": {}
+        },
+        {
+          "key": "add_pairwise_distances",
+          "params": {}
+        },
+        {
+          "key": "add_finger_angles",
+          "params": {}
+        },
+        {
+          "key": "clip_max_abs",
+          "params": {}
+        },
+        {
+          "key": "zscore_per_sequence",
+          "params": {}
+        }
+      ],
+      "updated_at": "2025-11-29T17:10:00"
+    }
+  },
+  "quarantine_uri": "quarantine://sha256/5a727cc6218dcc2f82cb72cdec00bd7348f1f9d924677011548e2200d32cea0d.json",
+  "schema_version": 1,
+  "source_sha256": "5a727cc6218dcc2f82cb72cdec00bd7348f1f9d924677011548e2200d32cea0d"
+}

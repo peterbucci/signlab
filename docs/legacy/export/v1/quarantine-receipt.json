@@ -1,0 +1,55 @@
+{
+  "components": [
+    {
+      "bytes": 208692,
+      "path": "manifest.json",
+      "sha256": "afb191e2602df4af78c7a9b6c56f0bf9c296abd5bf7a9d8d1527db7a93e191aa"
+    },
+    {
+      "bytes": 356220,
+      "path": "records/attempts.jsonl",
+      "records": 532,
+      "sha256": "c15dbc64e5f7186f101d58ed9a8ed75be7f2ac6871b8793e1b031b57ef5f40c4"
+    },
+    {
+      "bytes": 79681,
+      "path": "records/annotations.jsonl",
+      "records": 408,
+      "sha256": "5f8af684f83cfeacedcff2c6ea57596883c7b616dc7ec627b2ef84445c6981fb"
+    },
+    {
+      "bytes": 787,
+      "path": "records/sessions.jsonl",
+      "records": 5,
+      "sha256": "5aa1ea9984fd8aeb6edf8328fe0e50ca78dd5082f5f285f2afb6c7ea0ada4606"
+    },
+    {
+      "bytes": 9238,
+      "path": "records/detections.jsonl",
+      "records": 45,
+      "sha256": "8fc9136d9eaaff058680f010b77c9f3dd1dafa84b2990999727d5a08747ce252"
+    }
+  ],
+  "counts": {
+    "annotated_attempts": 401,
+    "annotations": 408,
+    "attempts": 532,
+    "detections": 45,
+    "orphan_segments": 4,
+    "promoted_models": 4,
+    "quarantine_objects": 535,
+    "referenced_segments": 525,
+    "segments": 529,
+    "sessions": 5,
+    "unannotated_attempts": 131
+  },
+  "kind": "signlab.legacy-quarantine-receipt",
+  "policy": {
+    "contains_individual_object_hashes": false,
+    "data_role": "development-only",
+    "durability": "local-only-pending-private-remote",
+    "eligible_for_locked_test": false,
+    "publishable": false
+  },
+  "schema_version": 1
+}

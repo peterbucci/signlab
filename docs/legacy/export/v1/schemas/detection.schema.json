@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actual_label": {
+      "anyOf": [
+        {
+          "enum": [
+            "hello",
+            "no",
+            "please",
+            "thank you",
+            "yes"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "correct": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "data_role": {
+      "const": "development-only"
+    },
+    "offset_ms": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "predicted_label": {
+      "anyOf": [
+        {
+          "enum": [
+            "hello",
+            "no",
+            "please",
+            "thank you",
+            "yes"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "record_id": {
+      "pattern": "^detection-[0-9]{6}$",
+      "type": "string"
+    },
+    "session_ref": {
+      "pattern": "^session-[0-9]{4}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "record_id",
+    "session_ref",
+    "data_role",
+    "offset_ms",
+    "predicted_label",
+    "actual_label",
+    "confidence",
+    "correct"
+  ],
+  "title": "Sanitized legacy detection",
+  "type": "object"
+}

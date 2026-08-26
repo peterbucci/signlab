@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifacts": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "label_map": {
+            "additionalProperties": false,
+            "properties": {
+              "bytes": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "labels": {
+                "additionalProperties": {
+                  "enum": [
+                    "hello",
+                    "no",
+                    "please",
+                    "thank you",
+                    "yes"
+                  ]
+                },
+                "propertyNames": {
+                  "pattern": "^[0-9]+$"
+                },
+                "type": "object"
+              },
+              "quarantine_uri": {
+                "pattern": "^quarantine://sha256/[0-9a-f]{64}\\.(json|keras|npz)$",
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              }
+            },
+            "required": [
+              "bytes",
+              "sha256",
+              "quarantine_uri",
+              "labels"
+            ],
+            "title": "Promoted label-map identity",
+            "type": "object"
+          },
+          "model": {
+            "additionalProperties": false,
+            "properties": {
+              "bytes": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "quarantine_uri": {
+                "pattern": "^quarantine://sha256/[0-9a-f]{64}\\.(json|keras|npz)$",
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "storage_status": {
+                "const": "local-quarantine"
+              }
+            },
+            "required": [
+              "bytes",
+              "sha256",
+              "quarantine_uri",
+              "storage_status"
+            ],
+            "title": "Promoted model identity",
+            "type": "object"
+          },
+          "model_key": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "preprocessing_plan": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "run_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          },
+          "validity": {
+            "additionalProperties": false,
+            "properties": {
+              "data_role": {
+                "const": "development-only"
+              },
+              "eligible_for_locked_test": {
+                "const": false
+              },
+              "notes": {
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              }
+            },
+            "required": [
+              "data_role",
+              "eligible_for_locked_test",
+              "notes"
+            ],
+            "title": "Promoted artifact validity",
+            "type": "object"
+          }
+        },
+        "required": [
+          "run_id",
+          "model_key",
+          "preprocessing_plan",
+          "model",
+          "label_map",
+          "validity"
+        ],
+        "title": "Promoted legacy artifact",
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "kind": {
+      "const": "signlab.legacy-promoted-artifacts"
+    },
+    "schema_version": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "artifacts"
+  ],
+  "title": "Promoted legacy artifacts",
+  "type": "object"
+}

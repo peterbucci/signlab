@@ -83,3 +83,5 @@ mlruns/
 !tests/fixtures/
 !tests/fixtures/public/
 !tests/fixtures/public/**
+!docs/legacy/export/v1/runs/
+!docs/legacy/export/v1/runs/*.json

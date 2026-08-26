@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidence": {
+      "maximum": 1,
+      "minimum": 0,
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "correct": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "data_role": {
+      "const": "development-only"
+    },
+    "detected": {
+      "type": "boolean"
+    },
+    "duration_ms": {
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "intended_label": {
+      "anyOf": [
+        {
+          "enum": [
+            "hello",
+            "no",
+            "please",
+            "thank you",
+            "yes"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "latency_ms": {
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "model_run_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "predicted_label": {
+      "enum": [
+        "NONE",
+        "hello",
+        "no",
+        "nothing",
+        "please",
+        "thank you",
+        "yes"
+      ]
+    },
+    "record_id": {
+      "pattern": "^attempt-[0-9]{6}$",
+      "type": "string"
+    },
+    "segment_frames": {
+      "minimum": 0,
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "segment_uri": {
+      "anyOf": [
+        {
+          "pattern": "^quarantine://sha256/[0-9a-f]{64}\\.(json|keras|npz)$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "segmentation": {
+      "type": "object"
+    },
+    "start_offset_ms": {
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "record_id",
+    "data_role",
+    "start_offset_ms",
+    "duration_ms",
+    "detected",
+    "intended_label",
+    "predicted_label",
+    "correct",
+    "confidence",
+    "latency_ms",
+    "segment_frames",
+    "model_run_id",
+    "segmentation",
+    "segment_uri"
+  ],
+  "title": "Sanitized live attempt",
+  "type": "object"
+}

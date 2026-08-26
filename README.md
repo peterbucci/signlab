@@ -62,6 +62,11 @@ uv run python scripts/verify_distribution.py dist
 See [docs/development.md](docs/development.md) for directory ownership, dependency
 updates, generated-file policy, and the Python-version decision.
 
+The [legacy audit](docs/legacy-audit.md) and
+[portable evidence export](docs/legacy-export.md) document what was retained from
+the school project, why it is development-only, and how to validate it without any
+legacy application dependencies.
+
 ## Research questions
 
 1. Does body-relative context improve signer-held-out generalization?
@@ -87,15 +92,17 @@ implementation backlog.
 
 ## Repository status
 
-The immutable legacy audit and reproducible developer foundation are established.
-Dataset, experiment, and bundle contracts are still under construction; no headline
-model result is considered valid until the grouped evaluation foundations are complete.
+The immutable legacy audit, reproducible developer foundation, and sanitized legacy
+evidence export are established. Taxonomy and core contracts are still under
+construction; no headline model result is considered valid until the grouped
+evaluation foundations are complete.
 
 ## Data and privacy
 
-Raw participant video and contributed feedback are not committed to Git. Private
-data is tracked through DVC pointers and a controlled remote. Public fixtures must
-be synthetic, explicitly consented, or separately licensed.
+Raw participant video and contributed feedback are not committed to Git. The legacy
+quarantine is currently local-only and explicitly not a durable backup; a later
+private-DVC story will place approved data behind a controlled remote. Public fixtures
+must be synthetic, explicitly consented, or separately licensed.
 
 ## License
 

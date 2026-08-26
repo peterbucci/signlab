@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "const": "signlab.legacy-preprocessing-plans"
+    },
+    "plans": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "key": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "key",
+                "params"
+              ],
+              "title": "Historical preprocessing step",
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "updated_at": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "created_at",
+          "updated_at",
+          "steps"
+        ],
+        "title": "Historical preprocessing plan",
+        "type": "object"
+      },
+      "minProperties": 1,
+      "type": "object"
+    },
+    "quarantine_uri": {
+      "pattern": "^quarantine://sha256/[0-9a-f]{64}\\.(json|keras|npz)$",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "source_sha256",
+    "quarantine_uri",
+    "plans"
+  ],
+  "title": "Historical preprocessing plans",
+  "type": "object"
+}
