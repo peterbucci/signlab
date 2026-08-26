@@ -1,0 +1,41 @@
+name: User story
+description: Plan a testable unit of product or research work
+title: "[Story]: "
+labels: ["type: story"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: Describe the user, research, or operational outcome.
+      placeholder: As a ..., I want ..., so that ...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this work is needed and which decision it supports.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use a checklist of independently verifiable conditions.
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Link prerequisite issues or write None.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Tests, reports, screenshots, metrics, or artifacts that prove completion.
