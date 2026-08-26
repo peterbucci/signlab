@@ -10,3 +10,10 @@ participant media, extracted features, and trained weights remain outside Git.
 session plan is evidence for the protocol, not a production sidecar contract, and
 its annotation table uses only invented observations and identifiers. The fixture
 does not represent consent, collection approval, or participant data.
+
+`ingest/` contains one project-authored 73-byte payload whose contents explicitly
+state that it is not video and was not produced by a person or camera, plus an
+opaque relative source map. The `.webm` suffix exercises media-path handling only;
+the importer does not claim to probe its codec. These MIT-licensed synthetic bytes
+drive the cross-platform raw-import golden test and do not represent consent,
+collection approval, or usable media.

@@ -85,6 +85,12 @@ draft pilot design, randomized prompt procedure, capture checklists, temporal
 boundary rules, review workflow, and a no-camera synthetic rehearsal. It does not
 authorize real collection; the governance readiness gate remains authoritative.
 
+The [capture and raw dataset import guide](docs/capture-import.md) defines the
+UI-independent collection sidecar, stable opaque workflow IDs, retry and quarantine
+behavior, reviewed annotation projection, and the atomic `raw-dataset-manifest/1`
+handoff. Its executable example is synthetic only; real media remains fail-closed
+without readiness approval, private storage, and authenticated consent verification.
+
 The [versioned pipeline contracts](docs/contracts.md) give datasets, grouped
 splits, preprocessing plans, resolved configurations, terminal runs, and research
 models portable RFC 8785 identities with explicit compatibility checks.
@@ -126,11 +132,12 @@ implementation backlog.
 
 The immutable legacy audit, reproducible developer foundation, sanitized legacy
 evidence export, versioned gesture taxonomy, and fail-closed participant-data
-governance baseline are established. The current dataset contract adds six
-normalized, lineage-preserving Parquet tables while retaining the published v1
-reader. A six-stage DVC fixture graph exercises dependency and transport wiring
-without claiming that production ingestion, extraction, quality, splitting, or
-feature engineering is complete. No headline model result is considered valid until
+governance baseline are established. A UI-independent capture sidecar and atomic raw
+importer now produce a validated `raw-dataset-manifest/1` handoff from explicitly
+synthetic inputs. The sample-bearing dataset contract retains six normalized,
+lineage-preserving Parquet tables and the published v1 reader. The registered DVC
+graph remains fixture-only until later stories replace its extraction, quality,
+splitting, and feature adapters. No headline model result is considered valid until
 the remaining grouped evaluation foundations are complete.
 
 ## Data and privacy

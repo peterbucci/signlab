@@ -95,7 +95,7 @@ class DatasetContractError(ValueError):
     """Raised when dataset-table content is invalid or incompatible."""
 
 
-def _content_addressed_row_locations(artifact: ArtifactRefV1) -> tuple[str, str]:
+def content_addressed_row_locations(artifact: ArtifactRefV1) -> tuple[str, str]:
     """Return the only privacy-safe row locations for immutable artifact bytes."""
 
     digest = artifact.sha256.removeprefix("sha256:")
@@ -104,7 +104,7 @@ def _content_addressed_row_locations(artifact: ArtifactRefV1) -> tuple[str, str]
 
 
 def _require_content_addressed_row_locator(artifact: ArtifactRefV1) -> None:
-    workspace_path, artifact_uri = _content_addressed_row_locations(artifact)
+    workspace_path, artifact_uri = content_addressed_row_locations(artifact)
     locator = artifact.locator
     if isinstance(locator, WorkspaceRelativeLocatorV1):
         valid = locator.path == workspace_path
@@ -755,6 +755,7 @@ __all__ = [
     "SessionsTableV1",
     "TableName",
     "TableSchemaVersion",
+    "content_addressed_row_locations",
     "dataset_content_digest",
     "dataset_table_digest",
     "validate_dataset_table",

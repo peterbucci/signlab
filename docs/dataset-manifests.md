@@ -6,6 +6,13 @@ participants, sessions, recordings, clips, annotations, and derived artifacts. T
 published `dataset-manifest/1` reader and fixture remain unchanged so historical
 pipeline records continue to validate.
 
+Before extraction, `raw-dataset-manifest/1` provides a separate immutable handoff
+over the same six table types. Participants, sessions, accepted recordings, and
+projected annotations are populated; clips and derived artifacts are empty. The raw
+manifest has no trainable sample projection, so it neither weakens
+`dataset-manifest/2` nor requires a `dataset-manifest/3`. See
+[capture and raw dataset import](capture-import.md).
+
 ## Identity boundary
 
 Each table has two deliberately separate identities:
@@ -38,13 +45,13 @@ non-identifying device and capture facts. Every recording embeds its exact
 recording-level consent grant. Names, contact details, signatures, device serials,
 hostnames, and identity-vault mappings never belong in these tables.
 
-Prompt IDs, randomized order and seed, repetition numbers, protocol version,
+Prompt IDs, randomized order and seed digest, repetition numbers, protocol version,
 condition assignments, checklists, technical retries, deviations, and reviewer
-workflow identities are collection-sidecar concerns. They are deliberately not
-fields in the current normalized tables and must not be encoded in filenames,
-device IDs, or reason codes. The draft
-[collection protocol](collection-protocol.md) defines their meaning; Story #17 owns
-the future machine-readable sidecar and capture/import tooling.
+workflow identities are `collection-sidecar/1` concerns. They are deliberately not
+fields in the normalized tables and must not be encoded in filenames, device IDs,
+or reason codes. The [collection protocol](collection-protocol.md) defines their
+meaning, and the [capture/import guide](capture-import.md) defines the executable
+sidecar and raw handoff.
 
 Every v2 row artifact uses an enforceable content-addressed location with no
 user-selected path segments:
@@ -99,12 +106,31 @@ authorization result additionally requires an authenticated consent receipt,
 complete event log, and the governance verifier supplied by the identity-vault
 boundary.
 
+The raw manifest has its own semantic `raw_data_sha256`. It commits to the six
+logical table identities plus the required taxonomy, governance, lineage, and
+finalized-sidecar bindings, while excluding source locations, output locations, and
+Parquet encoding details. Its enclosing contract digest remains sensitive to exact
+artifact references. The importer stages media, sidecar, lineage inventory, tables,
+and raw manifest together, verifies referenced bytes, and publishes atomically with
+the manifest written last. An identical rerun validates and returns the existing
+bundle; a conflicting rerun fails rather than mutating it.
+
 Validate the packaged review resources and create a temporary synthetic bundle:
 
 ```shell
 uv run signlab data validate-resources
 uv run signlab data write-example-dataset ../signlab-example-dataset
 uv run signlab data validate-dataset ../signlab-example-dataset/dataset-manifest.json --workspace-root ../signlab-example-dataset
+```
+
+Validate and import a capture sidecar, then verify its raw handoff:
+
+```shell
+uv run --locked signlab data validate-capture collection-sidecar.json
+uv run --locked signlab data import-capture collection-sidecar.json \
+  --source-map source-map.json --source-root synthetic-source --output raw-dataset
+uv run --locked signlab data validate-raw-dataset \
+  raw-dataset/raw-dataset-manifest.json --workspace-root raw-dataset
 ```
 
 The validator reports Parquet table-byte integrity, semantic integrity, referenced
@@ -137,6 +163,14 @@ its JSON Schema belongs to the shared pipeline-contract resource set:
 ```shell
 uv run python scripts/generate_contract_resources.py
 uv run python scripts/generate_dataset_resources.py
+```
+
+Capture identifiers, collection sidecars, and raw manifests have their own frozen
+public JSON Schemas. Regenerate those review artifacts after an authoritative
+ingest-contract change:
+
+```shell
+uv run python scripts/generate_ingest_resources.py
 ```
 
 Real participant collection remains blocked by the governance readiness gate. The
