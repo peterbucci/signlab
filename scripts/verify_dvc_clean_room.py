@@ -332,7 +332,7 @@ def validate_report(document: Mapping[str, object]) -> JsonObject:
         or tuple(cast(list[object], stage_names)) != STAGE_NAMES
         or any(
             type(values) is not dict
-            or tuple(cast(dict[object, object], values)) != STAGE_NAMES
+            or set(cast(dict[object, object], values)) != set(STAGE_NAMES)
             or any(
                 type(value) is not str or _DIGEST_PATTERN.fullmatch(value) is None
                 for value in cast(dict[object, object], values).values()

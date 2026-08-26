@@ -207,6 +207,7 @@ def test_success_report_is_canonical_and_requires_matching_outputs() -> None:
 
     assert payload.endswith(b"\n")
     assert json.loads(payload) == report
+    assert clean_room.validate_report(json.loads(payload)) == report
     changed = dict(report)
     changed["pulled_output_sha256"] = {
         **_digest_map(),
