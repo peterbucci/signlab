@@ -1,0 +1,765 @@
+{
+  "checklist_policy": {
+    "capture_quality": [
+      "camera_and_lens_ready",
+      "framing_and_lighting_usable",
+      "no_third_party_present",
+      "orientation_and_mirror_recorded",
+      "timing_and_playback_checked"
+    ],
+    "consent_verification": [
+      "collection_readiness_is_ready",
+      "authenticated_receipt_is_current",
+      "purpose_is_authorized_before_capture"
+    ]
+  },
+  "evidence": {
+    "annotation_source": "synthetic_timeline",
+    "camera_used": false,
+    "contains_person_data": false,
+    "media_created": false,
+    "purpose": "protocol_dry_run_only"
+  },
+  "fixture_only": true,
+  "governance": {
+    "authorization_claimed": false,
+    "collection_readiness_status": "blocked",
+    "real_collection_authorized": false
+  },
+  "mock_observations": [
+    {
+      "annotation_id": "annotation_00000000000000000000000000000001",
+      "interval": {
+        "end_us": 2000000,
+        "schema_version": "media-interval/1",
+        "start_us": 1000000
+      },
+      "observation_id": "mock_observation_01",
+      "review_path": "independent_review_agreed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "An open hand near the temple makes a short outward wave."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000002",
+      "interval": {
+        "end_us": 4000000,
+        "schema_version": "media-interval/1",
+        "start_us": 3000000
+      },
+      "observation_id": "mock_observation_02",
+      "review_path": "independent_review_agreed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "The thumb closes toward the extended index and middle fingertips."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000003",
+      "interval": {
+        "end_us": 6000000,
+        "schema_version": "media-interval/1",
+        "start_us": 5000000
+      },
+      "observation_id": "mock_observation_03",
+      "review_path": "conflict_resolved_by_adjudication",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "A flat palm at the upper chest makes one small circular stroke."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000004",
+      "interval": {
+        "end_us": 8000000,
+        "schema_version": "media-interval/1",
+        "start_us": 7000000
+      },
+      "observation_id": "mock_observation_04",
+      "review_path": "independent_review_agreed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "A flat hand begins at the chin and moves outward in one stroke."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000005",
+      "interval": {
+        "end_us": 10000000,
+        "schema_version": "media-interval/1",
+        "start_us": 9000000
+      },
+      "observation_id": "mock_observation_05",
+      "review_path": "independent_review_agreed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "A closed fist near the upper torso makes a wrist-driven vertical nod."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000006",
+      "interval": {
+        "end_us": 12000000,
+        "schema_version": "media-interval/1",
+        "start_us": 11000000
+      },
+      "observation_id": "mock_observation_06",
+      "review_path": "conflict_resolved_by_adjudication",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "A prompted target attempt begins but stops before its defining movement."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000007",
+      "interval": {
+        "end_us": 14000000,
+        "schema_version": "media-interval/1",
+        "start_us": 13000000
+      },
+      "observation_id": "mock_observation_07",
+      "review_path": "independent_review_agreed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "A complete intentional gesture is visible but matches none of the five targets."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000008",
+      "interval": {
+        "end_us": 16000000,
+        "schema_version": "media-interval/1",
+        "start_us": 15000000
+      },
+      "observation_id": "mock_observation_08",
+      "review_path": "independent_review_agreed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "Unrelated intentional hand activity occurs between prompted performances."
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000009",
+      "interval": {
+        "end_us": 18000000,
+        "schema_version": "media-interval/1",
+        "start_us": 17000000
+      },
+      "observation_id": "mock_observation_09",
+      "review_path": "conflict_resolved_by_adjudication",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "Coordinated two-hand activity changes the visible hand form."
+    },
+    {
+      "annotation_id": "annotation_0000000000000000000000000000000a",
+      "interval": {
+        "end_us": 20000000,
+        "schema_version": "media-interval/1",
+        "start_us": 19000000
+      },
+      "observation_id": "mock_observation_0a",
+      "review_path": "conflict_resolved_by_adjudication",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "The active hand is occluded, so its defining shape and motion cannot be seen."
+    },
+    {
+      "annotation_id": "annotation_0000000000000000000000000000000b",
+      "interval": {
+        "end_us": 22000000,
+        "schema_version": "media-interval/1",
+        "start_us": 21000000
+      },
+      "observation_id": "mock_observation_0b",
+      "review_path": "independent_review_agreed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001",
+      "visible_evidence": "An unrelated third party enters the frame during this region."
+    }
+  ],
+  "participant": {
+    "handedness": "right",
+    "participant_id": "participant_00000000000000000000000000000001",
+    "synthetic": true
+  },
+  "protocol": {
+    "id": "signlab-collection-protocol",
+    "status": "draft",
+    "version": "0.1.0"
+  },
+  "schema_version": "collection-mock-session-plan/1",
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "visits": [
+    {
+      "checklists": {
+        "capture_quality": {
+          "camera_opened": false,
+          "media_reviewed": false,
+          "reason_code": "synthetic_no_person_no_camera",
+          "result": "not_applicable"
+        },
+        "consent_verification": {
+          "authenticated_receipt_present": false,
+          "authorization_granted": false,
+          "reason_code": "synthetic_no_person_no_camera",
+          "result": "not_applicable"
+        }
+      },
+      "condition_profile": {
+        "allowed_variation": [
+          "natural_speed",
+          "natural_retraction"
+        ],
+        "camera_orientation": "landscape",
+        "clothing": "plain_high_contrast_top",
+        "distance": "near",
+        "distance_m": 0.8,
+        "framing": "upper_torso_face_and_hands_visible",
+        "handedness": "right",
+        "lighting": "soft_front",
+        "profile_id": "near_soft_front_landscape",
+        "scope": "entire_visit"
+      },
+      "continuous_activities": [
+        {
+          "activity": "inactivity",
+          "duration_seconds": 20,
+          "position": "before"
+        },
+        {
+          "activity": "target",
+          "label_id": "hello"
+        },
+        {
+          "activity": "target",
+          "label_id": "no"
+        },
+        {
+          "activity": "target",
+          "label_id": "please"
+        },
+        {
+          "activity": "inactivity",
+          "duration_seconds": 20,
+          "position": "between"
+        },
+        {
+          "activity": "target",
+          "label_id": "thank_you"
+        },
+        {
+          "activity": "target",
+          "label_id": "yes"
+        },
+        {
+          "activity": "direct_transition",
+          "retention": "context_only"
+        },
+        {
+          "activity": "natural_mistake",
+          "retention": "preserve"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "partial_target"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "oov_gesture"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "incidental_activity"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "two_hand_non_target"
+        },
+        {
+          "activity": "inactivity",
+          "duration_seconds": 20,
+          "position": "after"
+        }
+      ],
+      "prompt_randomization": {
+        "algorithm_id": "balanced_constrained_shuffle",
+        "algorithm_version": "mock-1",
+        "mock_seed": "signlab-mock-visit-01",
+        "realized_order_authoritative": true,
+        "rerolled_for_performance": false
+      },
+      "isolated_prompt_sequence": [
+        {
+          "label_id": "hello",
+          "ordinal": 1,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_01_prompt_01"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 2,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_01_prompt_02"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 3,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_01_prompt_03"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 4,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_01_prompt_04"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 5,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_01_prompt_05"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 6,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_01_prompt_06"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 7,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_01_prompt_07"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 8,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_01_prompt_08"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 9,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_01_prompt_09"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 10,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_01_prompt_10"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 11,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_01_prompt_11"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 12,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_01_prompt_12"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 13,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_01_prompt_13"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 14,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_01_prompt_14"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 15,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_01_prompt_15"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 16,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_01_prompt_16"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 17,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_01_prompt_17"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 18,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_01_prompt_18"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 19,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_01_prompt_19"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 20,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_01_prompt_20"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 21,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_01_prompt_21"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 22,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_01_prompt_22"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 23,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_01_prompt_23"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 24,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_01_prompt_24"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 25,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_01_prompt_25"
+        }
+      ],
+      "sessions": [
+        {
+          "camera_facing": "front",
+          "capture_mode": "isolated",
+          "capture_software_version": "0.1.0",
+          "device_id": "device_00000000000000000000000000000001",
+          "finished_at": "2026-09-01T14:20:00Z",
+          "frame_height_px": 720,
+          "frame_rate_denominator": 1,
+          "frame_rate_numerator": 30,
+          "frame_width_px": 1280,
+          "mirror_state": "not_mirrored",
+          "participant_id": "participant_00000000000000000000000000000001",
+          "rotation_degrees": 0,
+          "session_id": "session_00000000000000000000000000000001",
+          "started_at": "2026-09-01T14:00:00Z"
+        },
+        {
+          "camera_facing": "front",
+          "capture_mode": "continuous",
+          "capture_software_version": "0.1.0",
+          "device_id": "device_00000000000000000000000000000001",
+          "finished_at": "2026-09-01T14:35:00Z",
+          "frame_height_px": 720,
+          "frame_rate_denominator": 1,
+          "frame_rate_numerator": 30,
+          "frame_width_px": 1280,
+          "mirror_state": "not_mirrored",
+          "participant_id": "participant_00000000000000000000000000000001",
+          "rotation_degrees": 0,
+          "session_id": "session_00000000000000000000000000000002",
+          "started_at": "2026-09-01T14:25:00Z"
+        }
+      ],
+      "visit_id": "mock_visit_01"
+    },
+    {
+      "checklists": {
+        "capture_quality": {
+          "camera_opened": false,
+          "media_reviewed": false,
+          "reason_code": "synthetic_no_person_no_camera",
+          "result": "not_applicable"
+        },
+        "consent_verification": {
+          "authenticated_receipt_present": false,
+          "authorization_granted": false,
+          "reason_code": "synthetic_no_person_no_camera",
+          "result": "not_applicable"
+        }
+      },
+      "condition_profile": {
+        "allowed_variation": [
+          "natural_speed",
+          "natural_retraction"
+        ],
+        "camera_orientation": "portrait",
+        "clothing": "plain_medium_contrast_top",
+        "distance": "medium",
+        "distance_m": 1.2,
+        "framing": "upper_torso_face_and_hands_visible",
+        "handedness": "right",
+        "lighting": "diffuse_side",
+        "profile_id": "medium_diffuse_side_portrait",
+        "scope": "entire_visit"
+      },
+      "continuous_activities": [
+        {
+          "activity": "inactivity",
+          "duration_seconds": 20,
+          "position": "before"
+        },
+        {
+          "activity": "target",
+          "label_id": "yes"
+        },
+        {
+          "activity": "target",
+          "label_id": "thank_you"
+        },
+        {
+          "activity": "target",
+          "label_id": "please"
+        },
+        {
+          "activity": "inactivity",
+          "duration_seconds": 20,
+          "position": "between"
+        },
+        {
+          "activity": "target",
+          "label_id": "no"
+        },
+        {
+          "activity": "target",
+          "label_id": "hello"
+        },
+        {
+          "activity": "direct_transition",
+          "retention": "context_only"
+        },
+        {
+          "activity": "natural_mistake",
+          "retention": "preserve"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "partial_target"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "oov_gesture"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "incidental_activity"
+        },
+        {
+          "activity": "hard_negative",
+          "other_kind": "two_hand_non_target"
+        },
+        {
+          "activity": "inactivity",
+          "duration_seconds": 20,
+          "position": "after"
+        }
+      ],
+      "prompt_randomization": {
+        "algorithm_id": "balanced_constrained_shuffle",
+        "algorithm_version": "mock-1",
+        "mock_seed": "signlab-mock-visit-02",
+        "realized_order_authoritative": true,
+        "rerolled_for_performance": false
+      },
+      "isolated_prompt_sequence": [
+        {
+          "label_id": "yes",
+          "ordinal": 1,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_02_prompt_01"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 2,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_02_prompt_02"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 3,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_02_prompt_03"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 4,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_02_prompt_04"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 5,
+          "repetition": 1,
+          "prompt_occurrence_id": "mock_visit_02_prompt_05"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 6,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_02_prompt_06"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 7,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_02_prompt_07"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 8,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_02_prompt_08"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 9,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_02_prompt_09"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 10,
+          "repetition": 2,
+          "prompt_occurrence_id": "mock_visit_02_prompt_10"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 11,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_02_prompt_11"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 12,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_02_prompt_12"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 13,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_02_prompt_13"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 14,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_02_prompt_14"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 15,
+          "repetition": 3,
+          "prompt_occurrence_id": "mock_visit_02_prompt_15"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 16,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_02_prompt_16"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 17,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_02_prompt_17"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 18,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_02_prompt_18"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 19,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_02_prompt_19"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 20,
+          "repetition": 4,
+          "prompt_occurrence_id": "mock_visit_02_prompt_20"
+        },
+        {
+          "label_id": "thank_you",
+          "ordinal": 21,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_02_prompt_21"
+        },
+        {
+          "label_id": "hello",
+          "ordinal": 22,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_02_prompt_22"
+        },
+        {
+          "label_id": "yes",
+          "ordinal": 23,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_02_prompt_23"
+        },
+        {
+          "label_id": "please",
+          "ordinal": 24,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_02_prompt_24"
+        },
+        {
+          "label_id": "no",
+          "ordinal": 25,
+          "repetition": 5,
+          "prompt_occurrence_id": "mock_visit_02_prompt_25"
+        }
+      ],
+      "sessions": [
+        {
+          "camera_facing": "rear",
+          "capture_mode": "isolated",
+          "capture_software_version": "0.1.0",
+          "device_id": "device_00000000000000000000000000000002",
+          "finished_at": "2026-09-03T15:20:00Z",
+          "frame_height_px": 720,
+          "frame_rate_denominator": 1,
+          "frame_rate_numerator": 30,
+          "frame_width_px": 1280,
+          "mirror_state": "not_mirrored",
+          "participant_id": "participant_00000000000000000000000000000001",
+          "rotation_degrees": 90,
+          "session_id": "session_00000000000000000000000000000003",
+          "started_at": "2026-09-03T15:00:00Z"
+        },
+        {
+          "camera_facing": "rear",
+          "capture_mode": "continuous",
+          "capture_software_version": "0.1.0",
+          "device_id": "device_00000000000000000000000000000002",
+          "finished_at": "2026-09-03T15:35:00Z",
+          "frame_height_px": 720,
+          "frame_rate_denominator": 1,
+          "frame_rate_numerator": 30,
+          "frame_width_px": 1280,
+          "mirror_state": "not_mirrored",
+          "participant_id": "participant_00000000000000000000000000000001",
+          "rotation_degrees": 90,
+          "session_id": "session_00000000000000000000000000000004",
+          "started_at": "2026-09-03T15:25:00Z"
+        }
+      ],
+      "visit_id": "mock_visit_02"
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+{
+  "rows": [
+    {
+      "annotation_id": "annotation_00000000000000000000000000000001",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 2000000,
+        "schema_version": "media-interval/1",
+        "start_us": 1000000
+      },
+      "label_id": "hello",
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000002",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 4000000,
+        "schema_version": "media-interval/1",
+        "start_us": 3000000
+      },
+      "label_id": "no",
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000003",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 6000000,
+        "schema_version": "media-interval/1",
+        "start_us": 5000000
+      },
+      "label_id": "please",
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "adjudicated",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000004",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 8000000,
+        "schema_version": "media-interval/1",
+        "start_us": 7000000
+      },
+      "label_id": "thank_you",
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000005",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 10000000,
+        "schema_version": "media-interval/1",
+        "start_us": 9000000
+      },
+      "label_id": "yes",
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000006",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 12000000,
+        "schema_version": "media-interval/1",
+        "start_us": 11000000
+      },
+      "label_id": "other",
+      "other_kind": "partial_target",
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "adjudicated",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000007",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 14000000,
+        "schema_version": "media-interval/1",
+        "start_us": 13000000
+      },
+      "label_id": "other",
+      "other_kind": "oov_gesture",
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000008",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 16000000,
+        "schema_version": "media-interval/1",
+        "start_us": 15000000
+      },
+      "label_id": "other",
+      "other_kind": "incidental_activity",
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_00000000000000000000000000000009",
+      "clip_id": null,
+      "disposition": "class_label",
+      "eligible_for_training": true,
+      "interval": {
+        "end_us": 18000000,
+        "schema_version": "media-interval/1",
+        "start_us": 17000000
+      },
+      "label_id": "other",
+      "other_kind": "two_hand_non_target",
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": null,
+      "review_status": "adjudicated",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_0000000000000000000000000000000a",
+      "clip_id": null,
+      "disposition": "ambiguous",
+      "eligible_for_training": false,
+      "interval": {
+        "end_us": 20000000,
+        "schema_version": "media-interval/1",
+        "start_us": 19000000
+      },
+      "label_id": null,
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": "unusable_occlusion",
+      "review_status": "adjudicated",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    },
+    {
+      "annotation_id": "annotation_0000000000000000000000000000000b",
+      "clip_id": null,
+      "disposition": "ignore",
+      "eligible_for_training": false,
+      "interval": {
+        "end_us": 22000000,
+        "schema_version": "media-interval/1",
+        "start_us": 21000000
+      },
+      "label_id": null,
+      "other_kind": null,
+      "participant_id": "participant_00000000000000000000000000000001",
+      "reason_code": "third_party_presence",
+      "review_status": "reviewed",
+      "session_id": "session_00000000000000000000000000000002",
+      "source_recording_id": "recording_00000000000000000000000000000001"
+    }
+  ],
+  "schema_version": "annotations-table/1"
+}
