@@ -63,7 +63,7 @@ include = ["/src", "/LICENSE", "/README.md"]
 packages = ["src/signlab"]
 
 [tool.uv]
-default-groups = ["dev", "reproducibility"]
+default-groups = ["dev"]
 required-version = "==0.12.6"
 
 [tool.ruff]

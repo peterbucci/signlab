@@ -16,12 +16,12 @@ CLI modules parse inputs and delegate to importable services. They must not cont
 training, extraction, evaluation, or export implementations. Examples and tests may
 use only synthetic, explicitly consented, or separately licensed data.
 
-The typed SignLab stage registry is the only data DAG. Regenerate `dvc.yaml` from it;
-do not add nested pipelines, inline business logic, a second parameter system, or a
-parallel orchestrator graph. Public changes may include only synthetic DVC metadata.
-Participant-data pointers and production lock entries belong in the separate
-access-controlled metadata repository described in
-[docs/data-versioning.md](docs/data-versioning.md).
+Keep stage names and dependencies in the typed SignLab registry and regenerate
+`dvc.yaml` from it. The current stages are fixture-only wiring; production logic must
+arrive through the importable services owned by the later stage stories, not as a
+second graph. Public changes may include only synthetic DVC metadata. Participant-
+data pointers and production lock entries belong in the separate access-controlled
+metadata repository described in [docs/data-versioning.md](docs/data-versioning.md).
 
 Governance fixtures must remain synthetic. Completed consent forms, names, contact
 details, signatures, identity mappings, raw participant media, and participant-

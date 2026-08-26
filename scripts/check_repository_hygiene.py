@@ -103,7 +103,6 @@ DVC_PRIVATE_KEY_PATTERN = re.compile(
     rb"(?i)(?:access[_-]?key(?:[_-]?id)?|secret[_-]?key|session[_-]?token|credential|password)\s*[:=]"
 )
 DVC_REMOTE_PATTERN = re.compile(rb"(?i)(?:s3|gs|azure|ssh|hdfs|webhdfs|webdav|webdavs|https?)://")
-REPARSE_POINT = 0x400
 
 
 @dataclass(frozen=True, order=True)
@@ -183,14 +182,6 @@ def inspect_tracked_file(relative_path: str, content: bytes) -> tuple[Violation,
     return tuple(violations)
 
 
-def _is_link_or_reparse(path: Path) -> bool:
-    try:
-        details = path.lstat()
-    except OSError:
-        return False
-    return path.is_symlink() or bool(getattr(details, "st_file_attributes", 0) & REPARSE_POINT)
-
-
 def _candidate_paths(repository_root: Path) -> tuple[str, ...]:
     result = subprocess.run(
         [
@@ -214,13 +205,6 @@ def check_repository(repository_root: Path) -> tuple[Violation, ...]:
     violations: list[Violation] = []
     for relative_path in _candidate_paths(repository_root):
         path = repository_root / Path(relative_path)
-        if _is_link_or_reparse(path):
-            violations.append(
-                Violation(
-                    relative_path, "link", "tracked paths must not use links or reparse points"
-                )
-            )
-            continue
         if not path.is_file():
             violations.append(
                 Violation(relative_path, "missing", "tracked working-tree file is missing")

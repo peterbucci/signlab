@@ -7,6 +7,6 @@ with the contract stories that consume them.
 
 `pipeline/synthetic-dvc.json` is the reviewed, fixture-only input to the public DVC
 clean-room proof. It is not a production extraction, quality, feature, or split
-configuration and must never contain environment-specific values. Private remote
-locations belong only in ignored `.dvc/config.local`; credentials remain in the
-provider credential chain.
+configuration; its values only influence deterministic smoke-test receipts. It must
+never contain environment-specific values. Private remote locations belong only in
+ignored `.dvc/config.local`; credentials remain in the provider credential chain.

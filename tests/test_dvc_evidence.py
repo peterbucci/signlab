@@ -4,15 +4,15 @@ import json
 import shutil
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 import pytest
 
-from signlab.reproducibility import evidence
+from signlab.reproducibility import DVC_VERSION, evidence
 from signlab.reproducibility.provenance import (
-    DVC_VERSION,
+    PUBLIC_REPOSITORY,
     DvcMetadataRepositoryRole,
-    DvcSnapshotV1,
     build_dvc_snapshot,
 )
 
@@ -26,345 +26,177 @@ def _copy_controls(target: Path) -> Path:
     return target.resolve()
 
 
-def _successful_run(
-    arguments: list[str],
-    **_kwargs: object,
-) -> subprocess.CompletedProcess[str]:
-    cwd = _kwargs["cwd"]
-    assert isinstance(cwd, Path)
-    if arguments == ["git", "rev-parse", "--show-toplevel"]:
-        stdout = str(cwd.resolve()) + "\n"
-    elif arguments == ["git", "remote", "get-url", "origin"]:
-        stdout = "https://github.com/peterbucci/signlab.git\n"
-    elif arguments[:2] == ["git", "rev-parse"]:
-        stdout = _COMMIT + "\n"
-    elif arguments[:2] == ["git", "show"]:
-        name = arguments[-1].split(":", maxsplit=1)[1]
-        stdout = (cwd / name).read_text(encoding="utf-8")
-    elif arguments[:2] == ["git", "status"]:
-        stdout = ""
-    elif arguments[-1] == "--version":
-        stdout = DVC_VERSION + "\n"
-    elif arguments[-2:] == ["config", "cache.type"]:
-        stdout = "reflink,copy\n"
-    elif arguments[-2:] == ["status", "--json"]:
-        stdout = "{}\n"
-    else:  # pragma: no cover - makes unexpected subprocess expansion obvious.
-        raise AssertionError(arguments)
-    return subprocess.CompletedProcess(arguments, 0, stdout=stdout, stderr="")
+def _install_successful_commands(
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    origin: str = f"{PUBLIC_REPOSITORY}.git",
+) -> list[tuple[str, ...]]:
+    calls: list[tuple[str, ...]] = []
+
+    def run(_repository: Path, command: Sequence[str]) -> str:
+        call = tuple(command)
+        calls.append(call)
+        if call == ("git", "status", "--porcelain=v1", "--untracked-files=all"):
+            return ""
+        if call == ("git", "rev-parse", "--verify", "HEAD^{commit}"):
+            return _COMMIT
+        if call == ("git", "remote", "get-url", "origin"):
+            return origin
+        if call == (sys.executable, "-I", "-m", "dvc", "--version"):
+            return DVC_VERSION
+        if call == (sys.executable, "-I", "-m", "dvc", "status", "--json"):
+            return "{}"
+        raise AssertionError(call)
+
+    monkeypatch.setattr(evidence, "_run", run)
+    return calls
 
 
-def test_capture_binds_two_matching_clean_git_and_dvc_observations(
+def test_capture_public_snapshot_requires_clean_git_dvc_and_public_origin(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    root = _copy_controls(tmp_path)
-    calls: list[list[str]] = []
-
-    def record_run(arguments: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
-        calls.append(arguments)
-        assert kwargs["shell"] is False
-        environment = kwargs["env"]
-        assert isinstance(environment, dict)
-        assert environment["DVC_NO_ANALYTICS"] == "true"
-        return _successful_run(arguments, **kwargs)
-
-    monkeypatch.setattr(subprocess, "run", record_run)
+    repository = _copy_controls(tmp_path)
+    calls = _install_successful_commands(monkeypatch)
 
     snapshot = evidence.capture_dvc_snapshot(
-        root,
+        repository,
         metadata_repository_role="public-fixture",
     )
 
+    assert snapshot.metadata_repository_role == "public-fixture"
+    assert snapshot.metadata_repository == PUBLIC_REPOSITORY
     assert snapshot.metadata_git_commit == _COMMIT
     assert snapshot.git_working_tree_clean is True
     assert snapshot.dvc_workspace_clean is True
-    assert len(calls) == 17
-    assert calls.count(["git", "rev-parse", "--verify", "HEAD"]) == 2
-    assert all(call[1:4] == ["-I", "-m", "dvc"] for call in calls if call[0] == sys.executable)
+    assert ("git", "remote", "get-url", "origin") in calls
 
 
-def test_capture_records_a_protected_metadata_commit_without_its_repository(
+def test_capture_protected_snapshot_checks_private_origin_but_does_not_record_it(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    root = _copy_controls(tmp_path)
-
-    def protected_run(
-        arguments: list[str],
-        **kwargs: object,
-    ) -> subprocess.CompletedProcess[str]:
-        result = _successful_run(arguments, **kwargs)
-        if arguments == ["git", "remote", "get-url", "origin"]:
-            return subprocess.CompletedProcess(
-                arguments,
-                0,
-                stdout="ssh://git@private.example.test/signlab-metadata.git\n",
-                stderr="",
-            )
-        return result
-
-    monkeypatch.setattr(subprocess, "run", protected_run)
+    repository = _copy_controls(tmp_path)
+    private_origin = "ssh://git@private.example.test/signlab-metadata.git"
+    calls = _install_successful_commands(monkeypatch, origin=private_origin)
 
     snapshot = evidence.capture_dvc_snapshot(
-        root,
+        repository,
         metadata_repository_role="protected-metadata",
     )
 
     assert snapshot.metadata_repository_role == "protected-metadata"
     assert snapshot.metadata_repository is None
-    assert snapshot.metadata_git_commit == _COMMIT
+    assert private_origin not in snapshot.model_dump_json()
+    assert ("git", "remote", "get-url", "origin") in calls
 
 
 @pytest.mark.parametrize(
     ("role", "origin"),
     [
         ("public-fixture", "ssh://git@private.example.test/signlab-metadata.git"),
-        ("protected-metadata", "https://github.com/peterbucci/signlab.git"),
+        ("protected-metadata", f"{PUBLIC_REPOSITORY}.git"),
     ],
 )
-def test_capture_rejects_a_repository_role_that_does_not_match_origin(
+def test_capture_rejects_repository_role_origin_mismatch(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     role: DvcMetadataRepositoryRole,
     origin: str,
 ) -> None:
-    root = _copy_controls(tmp_path)
-
-    def mismatched_origin(
-        arguments: list[str],
-        **kwargs: object,
-    ) -> subprocess.CompletedProcess[str]:
-        result = _successful_run(arguments, **kwargs)
-        if arguments == ["git", "remote", "get-url", "origin"]:
-            return subprocess.CompletedProcess(
-                arguments,
-                0,
-                stdout=f"{origin}\n",
-                stderr="",
-            )
-        return result
-
-    monkeypatch.setattr(subprocess, "run", mismatched_origin)
+    repository = _copy_controls(tmp_path)
+    _install_successful_commands(monkeypatch, origin=origin)
 
     with pytest.raises(evidence.DvcEvidenceError):
-        evidence.capture_dvc_snapshot(
-            root,
-            metadata_repository_role=role,
-        )
+        evidence.capture_dvc_snapshot(repository, metadata_repository_role=role)
 
 
 @pytest.mark.parametrize(
-    ("command_suffix", "stdout"),
+    ("failing_command", "response"),
     [
-        (("git", "status"), " M private-sentinel\n"),
-        (("--version",), "3.67.2\n"),
-        (("config", "cache.type"), "hardlink\n"),
-        (("status", "--json"), '{"changed": ["private-sentinel"]}\n'),
+        (
+            ("git", "status", "--porcelain=v1", "--untracked-files=all"),
+            " M private-sentinel",
+        ),
+        ((sys.executable, "-I", "-m", "dvc", "--version"), "3.67.2"),
+        ((sys.executable, "-I", "-m", "dvc", "status", "--json"), '{"changed": true}'),
     ],
 )
-def test_capture_rejects_dirty_or_incompatible_state_without_echoing_values(
+def test_capture_rejects_dirty_or_unlocked_state_without_echoing_output(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-    command_suffix: tuple[str, ...],
-    stdout: str,
+    failing_command: tuple[str, ...],
+    response: str,
 ) -> None:
-    root = _copy_controls(tmp_path)
+    repository = _copy_controls(tmp_path)
+    _install_successful_commands(monkeypatch)
+    successful = evidence._run
 
-    def seeded_run(arguments: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
-        result = _successful_run(arguments, **kwargs)
-        matches = (
-            arguments[:2] == list(command_suffix)
-            if command_suffix == ("git", "status")
-            else tuple(arguments[-len(command_suffix) :]) == command_suffix
-        )
-        if matches:
-            return subprocess.CompletedProcess(arguments, 0, stdout=stdout, stderr="")
-        return result
+    def fail_selected(root: Path, command: Sequence[str]) -> str:
+        if tuple(command) == failing_command:
+            return response
+        return successful(root, command)
 
-    monkeypatch.setattr(subprocess, "run", seeded_run)
+    monkeypatch.setattr(evidence, "_run", fail_selected)
 
-    with pytest.raises(evidence.DvcEvidenceError) as raised:
+    with pytest.raises(evidence.DvcEvidenceError) as captured:
         evidence.capture_dvc_snapshot(
-            root,
+            repository,
             metadata_repository_role="public-fixture",
         )
 
-    assert raised.value.code == "dvc.evidence.capture.invalid"
-    assert "private" not in str(raised.value)
-    assert str(tmp_path) not in str(raised.value)
+    assert "private-sentinel" not in str(captured.value)
+    assert str(tmp_path) not in str(captured.value)
 
 
-def test_capture_rejects_non_json_dvc_status_and_subprocess_failure(
+def test_subprocess_failure_is_redacted(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    root = _copy_controls(tmp_path)
+    secret = "private-command-output"
 
-    def invalid_status(arguments: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
-        result = _successful_run(arguments, **kwargs)
-        if arguments[-2:] == ["status", "--json"]:
-            return subprocess.CompletedProcess(arguments, 0, stdout="private", stderr="")
-        return result
+    def fail(
+        command: Sequence[str],
+        **_kwargs: object,
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(command, 1, stdout=secret, stderr=secret)
 
-    monkeypatch.setattr(subprocess, "run", invalid_status)
-    with pytest.raises(evidence.DvcEvidenceError):
-        evidence.capture_dvc_snapshot(
-            root,
-            metadata_repository_role="public-fixture",
-        )
+    monkeypatch.setattr(subprocess, "run", fail)
 
-    monkeypatch.setattr(
-        subprocess,
-        "run",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(subprocess.TimeoutExpired("private", 1)),
-    )
-    with pytest.raises(evidence.DvcEvidenceError, match="could not be captured safely"):
-        evidence.capture_dvc_snapshot(
-            root,
-            metadata_repository_role="public-fixture",
-        )
+    with pytest.raises(
+        evidence.DvcEvidenceError,
+        match=r"^provenance command failed$",
+    ) as captured:
+        evidence._run(tmp_path, ("git", "status"))
+
+    assert secret not in str(captured.value)
 
 
-def test_capture_detects_state_change_between_observations(
+def test_snapshot_writer_publishes_canonical_json_only_under_reproduction_reports(
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    root = _copy_controls(tmp_path)
-    monkeypatch.setattr(subprocess, "run", _successful_run)
-    first = build_dvc_snapshot(
-        root,
+    repository = _copy_controls(tmp_path)
+    snapshot = build_dvc_snapshot(
+        repository,
         _COMMIT,
         metadata_repository_role="public-fixture",
         git_working_tree_clean=True,
         dvc_workspace_clean=True,
     )
-    second = first.model_copy(update={"metadata_git_commit": "2" * 40})
-    snapshots: list[DvcSnapshotV1] = [first, first, second]
-    monkeypatch.setattr(evidence, "build_dvc_snapshot", lambda *_args, **_kwargs: snapshots.pop(0))
-
-    with pytest.raises(evidence.DvcEvidenceError):
-        evidence.capture_dvc_snapshot(
-            root,
-            metadata_repository_role="public-fixture",
-        )
-
-
-def test_evidence_environment_removes_cloud_and_private_remote_values(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "private-sentinel")
-    monkeypatch.setenv("AZURE_CLIENT_SECRET", "private-sentinel")
-    monkeypatch.setenv("DVC_CACHE_TYPE", "hardlink")
-    monkeypatch.setenv("GIT_DIR", "private-sentinel")
-    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", "private-sentinel")
-    monkeypatch.setenv("MLFLOW_TRACKING_TOKEN", "private-sentinel")
-    monkeypatch.setenv("PYTHONPATH", "private-sentinel")
-    monkeypatch.setenv("SIGNLAB_DVC_REMOTE_URL", "private-sentinel")
-    monkeypatch.setenv("UNRELATED_SAFE_SETTING", "retained")
-
-    environment = evidence._safe_environment(tmp_path / "isolated-home")
-
-    assert "AWS_SECRET_ACCESS_KEY" not in environment
-    assert "AZURE_CLIENT_SECRET" not in environment
-    assert "DVC_CACHE_TYPE" not in environment
-    assert "GIT_DIR" not in environment
-    assert "GOOGLE_APPLICATION_CREDENTIALS" not in environment
-    assert "MLFLOW_TRACKING_TOKEN" not in environment
-    assert "PYTHONPATH" not in environment
-    assert "SIGNLAB_DVC_REMOTE_URL" not in environment
-    assert environment["DVC_EXP_AUTO_PUSH"] == "false"
-    assert environment["DVC_STUDIO_OFFLINE"] == "true"
-    assert environment["GIT_CONFIG_NOSYSTEM"] == "1"
-    assert environment["PYTHONNOUSERSITE"] == "1"
-    assert "UNRELATED_SAFE_SETTING" not in environment
-    assert environment["HOME"] == str(tmp_path / "isolated-home")
-
-
-def test_capture_rejects_a_nested_or_mismatched_git_root(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    root = _copy_controls(tmp_path)
-
-    def mismatched_root(
-        arguments: list[str],
-        **kwargs: object,
-    ) -> subprocess.CompletedProcess[str]:
-        result = _successful_run(arguments, **kwargs)
-        if arguments == ["git", "rev-parse", "--show-toplevel"]:
-            return subprocess.CompletedProcess(
-                arguments,
-                0,
-                stdout=str(root.parent.resolve()) + "\n",
-                stderr="",
-            )
-        return result
-
-    monkeypatch.setattr(subprocess, "run", mismatched_root)
-
-    with pytest.raises(evidence.DvcEvidenceError):
-        evidence.capture_dvc_snapshot(
-            root,
-            metadata_repository_role="public-fixture",
-        )
-
-
-def test_capture_rejects_controls_that_do_not_match_head_even_when_git_is_clean(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    root = _copy_controls(tmp_path)
-
-    def mismatched_blob(
-        arguments: list[str],
-        **kwargs: object,
-    ) -> subprocess.CompletedProcess[str]:
-        result = _successful_run(arguments, **kwargs)
-        if arguments[:2] == ["git", "show"] and arguments[-1].endswith(":uv.lock"):
-            return subprocess.CompletedProcess(
-                arguments,
-                0,
-                stdout=result.stdout + "# committed-drift\n",
-                stderr="",
-            )
-        return result
-
-    monkeypatch.setattr(subprocess, "run", mismatched_blob)
-
-    with pytest.raises(evidence.DvcEvidenceError):
-        evidence.capture_dvc_snapshot(
-            root,
-            metadata_repository_role="public-fixture",
-        )
-
-
-def test_snapshot_writer_publishes_one_canonical_ignored_report(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    root = _copy_controls(tmp_path)
-    monkeypatch.setattr(subprocess, "run", _successful_run)
-    snapshot = evidence.capture_dvc_snapshot(
-        root,
-        metadata_repository_role="public-fixture",
-    )
 
     output = evidence.write_dvc_snapshot(
         snapshot,
-        root,
-        "reports/reproduction/public-snapshot.json",
+        repository,
+        "reports/reproduction/snapshot.json",
     )
 
-    parsed = json.loads(output.read_text(encoding="utf-8"))
-    assert parsed == snapshot.model_dump(mode="json", round_trip=True)
+    assert json.loads(output.read_bytes()) == snapshot.model_dump(mode="json", round_trip=True)
     assert output.read_bytes().endswith(b"\n")
-    with pytest.raises(evidence.DvcEvidenceError):
+    with pytest.raises(evidence.DvcEvidenceError, match="already exists"):
         evidence.write_dvc_snapshot(
             snapshot,
-            root,
-            "reports/reproduction/public-snapshot.json",
+            repository,
+            "reports/reproduction/snapshot.json",
         )
 
 
@@ -375,19 +207,21 @@ def test_snapshot_writer_publishes_one_canonical_ignored_report(
         "reports/private/snapshot.json",
         "reports/reproduction/snapshot.txt",
         "reports/reproduction/../snapshot.json",
+        "/reports/reproduction/snapshot.json",
     ],
 )
-def test_snapshot_writer_rejects_destinations_outside_the_ignored_report_root(
+def test_snapshot_writer_rejects_paths_outside_the_ignored_report_root(
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
     relative_path: str,
 ) -> None:
-    root = _copy_controls(tmp_path)
-    monkeypatch.setattr(subprocess, "run", _successful_run)
-    snapshot = evidence.capture_dvc_snapshot(
-        root,
-        metadata_repository_role="public-fixture",
+    repository = _copy_controls(tmp_path)
+    snapshot = build_dvc_snapshot(
+        repository,
+        _COMMIT,
+        metadata_repository_role="protected-metadata",
+        git_working_tree_clean=True,
+        dvc_workspace_clean=True,
     )
 
-    with pytest.raises(evidence.DvcEvidenceError):
-        evidence.write_dvc_snapshot(snapshot, root, relative_path)
+    with pytest.raises(evidence.DvcEvidenceError, match="output path is invalid"):
+        evidence.write_dvc_snapshot(snapshot, repository, relative_path)

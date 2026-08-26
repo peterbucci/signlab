@@ -65,10 +65,9 @@ uv run python scripts/verify_distribution.py dist
 See [docs/development.md](docs/development.md) for directory ownership, dependency
 updates, generated-file policy, and the Python-version decision.
 
-The [DVC data-versioning guide](docs/data-versioning.md) defines the public
-synthetic clean-room proof, the separate protected metadata boundary for participant
-data, credential-safe remote setup, post-pull SHA-256 verification, and the
-Git/DVC/MLflow/orchestrator ownership model.
+The [DVC data-versioning guide](docs/data-versioning.md) defines the fixture-only
+stage scaffold, local clean-room transport proof, protected private-data gate, and
+tracker-neutral reproduction metadata that a later experiment-tracking story records.
 
 The [gesture taxonomy and claim boundary](docs/gesture-taxonomy.md) define the
 versioned six-output classifier vocabulary and the evidence required before making
@@ -123,9 +122,9 @@ The immutable legacy audit, reproducible developer foundation, sanitized legacy
 evidence export, versioned gesture taxonomy, and fail-closed participant-data
 governance baseline are established. The current dataset contract adds six
 normalized, lineage-preserving Parquet tables while retaining the published v1
-reader. A six-stage DVC graph and cross-platform clean-room proof establish
-fixture-only reproducibility without claiming that the later production stage
-implementations are complete. No headline model result is considered valid until
+reader. A six-stage DVC fixture graph exercises dependency and transport wiring
+without claiming that production ingestion, extraction, quality, splitting, or
+feature engineering is complete. No headline model result is considered valid until
 the remaining grouped evaluation foundations are complete.
 
 ## Data and privacy

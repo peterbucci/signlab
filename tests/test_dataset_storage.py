@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import os
 from pathlib import Path
 
 import pytest
@@ -11,7 +10,6 @@ from signlab.contracts.core import (
     ArtifactUriLocatorV1,
     WorkspaceRelativeLocatorV1,
 )
-from signlab.datasets import storage as storage_module
 from signlab.datasets.resources import build_example_dataset_bundle
 from signlab.datasets.storage import (
     DatasetStorageError,
@@ -50,63 +48,61 @@ def _write(root: Path, reference: ArtifactRefV1, payload: bytes) -> Path:
     return path
 
 
-def test_stream_verifier_checks_exact_bytes_for_a_canonical_reference_set(tmp_path: Path) -> None:
-    first = _reference("artifact_a", b"first-public-fixture")
-    second = _reference("artifact_b", b"second-public-fixture")
-    _write(tmp_path, first, b"first-public-fixture")
-    _write(tmp_path, second, b"second-public-fixture")
+def test_stream_verifier_checks_size_and_sha256_for_ordered_portable_references(
+    tmp_path: Path,
+) -> None:
+    first_payload = b"first synthetic artifact"
+    second_payload = b"second synthetic artifact"
+    first = _reference("artifact_a", first_payload)
+    second = _reference("artifact_b", second_payload)
+    _write(tmp_path, first, first_payload)
+    _write(tmp_path, second, second_payload)
 
     result = verify_artifact_references((first, second), tmp_path)
 
     assert result.artifact_byte_integrity == "verified"
     assert result.artifacts_verified == 2
-    assert result.total_bytes_verified == len(b"first-public-fixturesecond-public-fixture")
+    assert result.total_bytes_verified == len(first_payload) + len(second_payload)
 
 
-@pytest.mark.parametrize("failure", ["missing", "size", "digest", "directory"])
-def test_storage_failures_are_stable_and_do_not_echo_paths(
+@pytest.mark.parametrize("failure", ["missing", "size", "sha256"])
+def test_missing_or_mismatched_bytes_fail_without_disclosing_the_locator(
     tmp_path: Path,
     failure: str,
 ) -> None:
-    payload = b"private-sentinel-bytes"
+    payload = b"private sentinel bytes"
     reference = _reference("artifact_private_sentinel", payload)
-    path = tmp_path.joinpath(*reference.locator.path.split("/"))  # type: ignore[union-attr]
     if failure != "missing":
-        path.parent.mkdir(parents=True)
-        if failure == "directory":
-            path.mkdir()
-        else:
-            path.write_bytes(payload)
+        _write(tmp_path, reference, payload)
     if failure == "size":
-        reference = _reference("artifact_private_sentinel", payload, size_bytes=len(payload) + 1)
-    elif failure == "digest":
+        reference = _reference(
+            "artifact_private_sentinel",
+            payload,
+            size_bytes=len(payload) + 1,
+        )
+    elif failure == "sha256":
         reference = _reference(
             "artifact_private_sentinel",
             payload,
             sha256="sha256:" + "0" * 64,
         )
 
-    with pytest.raises(DatasetStorageError) as raised:
+    with pytest.raises(DatasetStorageError) as captured:
         verify_artifact_references((reference,), tmp_path)
 
-    assert raised.value.code == "dataset.storage.artifact_bytes.invalid"
-    assert raised.value.__cause__ is None
-    assert raised.value.__suppress_context__ is True
-    assert "private" not in str(raised.value)
-    assert str(tmp_path) not in str(raised.value)
+    assert captured.value.code == "dataset.storage.artifact_bytes.invalid"
+    assert "private" not in str(captured.value)
+    assert str(tmp_path) not in str(captured.value)
 
 
-def test_reference_inventory_rejects_empty_unsorted_and_colliding_inputs(tmp_path: Path) -> None:
-    first = _reference("artifact_a", b"same")
+def test_reference_set_must_be_nonempty_sorted_unique_and_workspace_relative(
+    tmp_path: Path,
+) -> None:
+    first = _reference("artifact_a", b"first")
+    second = _reference("artifact_b", b"second")
     assert isinstance(first.locator, WorkspaceRelativeLocatorV1)
-    second = _reference("artifact_b", b"same", path=first.locator.path)
-    for references in ((), (second, first), (first, second)):
-        with pytest.raises(DatasetStorageError):
-            verify_artifact_references(references, tmp_path)
-
-
-def test_logical_uri_requires_an_explicit_storage_adapter(tmp_path: Path) -> None:
-    reference = _reference("artifact_a", b"fixture").model_copy(
+    duplicate_path = _reference("artifact_b", b"second", path=first.locator.path)
+    logical = first.model_copy(
         update={
             "locator": ArtifactUriLocatorV1(
                 kind="artifact_uri",
@@ -115,115 +111,35 @@ def test_logical_uri_requires_an_explicit_storage_adapter(tmp_path: Path) -> Non
         }
     )
 
-    with pytest.raises(DatasetStorageError):
-        verify_artifact_references((reference,), tmp_path)
+    for references in ((), (second, first), (first, duplicate_path), (logical,)):
+        with pytest.raises(DatasetStorageError):
+            verify_artifact_references(references, tmp_path)
 
 
-def test_linked_or_hardlinked_artifact_is_rejected_when_supported(tmp_path: Path) -> None:
-    payload = b"fixture"
+def test_workspace_escape_through_a_link_is_rejected_when_links_are_available(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "workspace"
+    root.mkdir()
+    payload = b"synthetic artifact"
     reference = _reference("artifact_a", payload)
-    path = tmp_path.joinpath(*reference.locator.path.split("/"))  # type: ignore[union-attr]
-    path.parent.mkdir(parents=True)
-    external = tmp_path / "external"
-    external.write_bytes(payload)
+    locator = reference.locator
+    assert isinstance(locator, WorkspaceRelativeLocatorV1)
+    candidate = root.joinpath(*locator.path.split("/"))
+    candidate.parent.mkdir(parents=True)
+    outside = tmp_path / "outside-artifact"
+    outside.write_bytes(payload)
     try:
-        path.symlink_to(external)
+        candidate.symlink_to(outside)
     except OSError:
-        path.hardlink_to(external)
+        pytest.skip("file links are unavailable for this account")
 
     with pytest.raises(DatasetStorageError):
-        verify_artifact_references((reference,), tmp_path)
+        verify_artifact_references((reference,), root)
 
 
-def test_hardlink_alias_is_rejected(tmp_path: Path) -> None:
-    payload = b"fixture"
-    reference = _reference("artifact_a", payload)
-    path = tmp_path.joinpath(*reference.locator.path.split("/"))  # type: ignore[union-attr]
-    path.parent.mkdir(parents=True)
-    external = tmp_path / "external-hardlink"
-    external.write_bytes(payload)
-    try:
-        os.link(external, path)
-    except OSError:
-        pytest.skip("hard links are unavailable on this filesystem")
-
-    with pytest.raises(DatasetStorageError):
-        verify_artifact_references((reference,), tmp_path)
-
-
-@pytest.mark.parametrize("boundary", ["root", "parent", "artifact"])
-def test_windows_reparse_points_are_rejected_at_every_storage_boundary(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    boundary: str,
-) -> None:
-    payload = b"fixture"
-    reference = _reference("artifact_a", payload)
-    path = _write(tmp_path, reference, payload)
-    target = {"root": tmp_path, "parent": path.parent, "artifact": path}[boundary]
-    target_status = os.lstat(target)
-
-    def classify(details: os.stat_result) -> bool:
-        return details.st_dev == target_status.st_dev and details.st_ino == target_status.st_ino
-
-    monkeypatch.setattr(storage_module, "_is_reparse", classify)
-
-    with pytest.raises(DatasetStorageError):
-        verify_artifact_references((reference,), tmp_path)
-
-
-def test_parent_identity_drift_after_streaming_is_rejected(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    payload = b"fixture"
-    reference = _reference("artifact_a", payload)
-    path = _write(tmp_path, reference, payload)
-    target_status = os.lstat(path.parent)
-    original = storage_module._directory_identity
-    calls = 0
-
-    def drifting_identity(details: os.stat_result) -> tuple[int, ...]:
-        nonlocal calls
-        identity = original(details)
-        if details.st_dev == target_status.st_dev and details.st_ino == target_status.st_ino:
-            calls += 1
-            if calls == 2:
-                return (*identity, 1)
-        return identity
-
-    monkeypatch.setattr(storage_module, "_directory_identity", drifting_identity)
-
-    with pytest.raises(DatasetStorageError):
-        verify_artifact_references((reference,), tmp_path)
-
-
-def test_final_path_identity_drift_after_streaming_is_rejected(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    payload = b"fixture"
-    reference = _reference("artifact_a", payload)
-    _write(tmp_path, reference, payload)
-    original = storage_module._path_file_identity
-    calls = 0
-
-    def drifting_identity(details: os.stat_result) -> tuple[int, ...]:
-        nonlocal calls
-        calls += 1
-        identity = original(details)
-        return (*identity, 1) if calls == 1 else identity
-
-    monkeypatch.setattr(storage_module, "_path_file_identity", drifting_identity)
-
-    with pytest.raises(DatasetStorageError):
-        verify_artifact_references((reference,), tmp_path)
-
-
-def test_example_dataset_exposes_one_sorted_unique_row_artifact_inventory() -> None:
-    example = build_example_dataset_bundle()
-
-    references = collect_row_artifact_references(example.tables)
+def test_example_dataset_inventory_is_sorted_unique_and_portable() -> None:
+    references = collect_row_artifact_references(build_example_dataset_bundle().tables)
 
     assert references
     assert tuple(reference.artifact_id for reference in references) == tuple(

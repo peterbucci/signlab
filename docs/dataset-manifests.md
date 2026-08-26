@@ -106,10 +106,11 @@ as the final completion marker, then atomically publishes the directory.
 The default byte-mismatch gate covers the six manifest-bound Parquet tables.
 After an authorized DVC pull, add `--verify-row-artifacts` to stream every recording,
 materialized clip, and derived/sample file from its content-addressed workspace
-locator. The verifier rejects links, reparse points, hardlink aliases, special files,
-path escapes, size drift, SHA-256 drift, and files that change while open. Logical
-`signlab://` locators still require an explicit storage adapter. This byte check
-remains separate from authenticated current consent. See
+locator. The verifier requires a sorted, unique set of portable paths beneath the
+explicit workspace root and rejects missing files, final symlinks, path escapes,
+non-files, size drift, and SHA-256 drift. Logical `signlab://` locators still require
+an explicit storage adapter. This byte check remains separate from authenticated
+current consent. See
 [data versioning](data-versioning.md) for the protected pull workflow.
 
 ## Public fixtures and private data

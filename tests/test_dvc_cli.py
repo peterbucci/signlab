@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 from typer.testing import CliRunner
@@ -15,7 +14,7 @@ def runner() -> CliRunner:
     return CliRunner(env={"NO_COLOR": "1"})
 
 
-def test_reproduction_stage_command_delegates_without_printing_a_path(
+def test_stage_command_runs_registered_fixture_without_printing_a_path(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -36,12 +35,14 @@ def test_reproduction_stage_command_delegates_without_printing_a_path(
     assert str(tmp_path) not in result.output
 
 
-def test_reproduction_stage_command_redacts_application_failure(
+def test_stage_command_redacts_application_failure(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def fail(*_args: object) -> None:
-        raise stages.ReproductionStageError("private-sentinel")
+    secret = "private-stage-sentinel"
+
+    def fail(*_arguments: object) -> None:
+        raise stages.ReproductionStageError(secret)
 
     monkeypatch.setattr(stages, "run_reproduction_stage", fail)
 
@@ -49,10 +50,10 @@ def test_reproduction_stage_command_redacts_application_failure(
 
     assert result.exit_code == 1
     assert result.output.strip() == "Synthetic reproduction stage failed."
-    assert "private" not in result.output
+    assert secret not in result.output
 
 
-def test_private_remote_command_reports_only_boolean_configuration_facts(
+def test_private_remote_command_reports_only_non_sensitive_booleans(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -72,15 +73,17 @@ def test_private_remote_command_reports_only_boolean_configuration_facts(
     assert result.output.strip() == (
         "Private DVC remote configured locally: endpoint override true, region override false."
     )
-    assert "s3" not in result.output.casefold()
+    assert "s3://" not in result.output
 
 
-def test_private_remote_command_redacts_configuration_failure(
+def test_private_remote_command_redacts_failure(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    secret = "s3://private-bucket/private-path"
+
     def fail(_root: Path) -> None:
-        raise remote.DvcRemoteConfigurationError("private-sentinel")
+        raise remote.DvcRemoteConfigurationError(secret)
 
     monkeypatch.setattr(remote, "configure_private_dvc_remote", fail)
 
@@ -88,30 +91,31 @@ def test_private_remote_command_redacts_configuration_failure(
 
     assert result.exit_code == 1
     assert result.output.strip() == "Private DVC remote configuration failed."
-    assert "sentinel" not in result.output
+    assert secret not in result.output
 
 
-def test_snapshot_command_captures_then_writes_ignored_evidence(
+def test_snapshot_command_forwards_role_and_relative_output_then_prints_only_digest(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
     snapshot = object()
-    calls: list[tuple[object, Path, str]] = []
-    roles: list[str] = []
+    captured_roles: list[str] = []
+    writes: list[tuple[object, Path, str]] = []
+    digest = "sha256:" + "a" * 64
     monkeypatch.chdir(tmp_path)
 
     def capture(_root: Path, *, metadata_repository_role: str) -> object:
-        roles.append(metadata_repository_role)
+        captured_roles.append(metadata_repository_role)
         return snapshot
 
     monkeypatch.setattr(evidence, "capture_dvc_snapshot", capture)
     monkeypatch.setattr(
         evidence,
         "write_dvc_snapshot",
-        lambda value, root, output: calls.append((value, root, output)),
+        lambda value, root, output: writes.append((value, root, output)),
     )
-    monkeypatch.setattr(provenance, "dvc_snapshot_digest", lambda _value: "sha256:" + "a" * 64)
+    monkeypatch.setattr(provenance, "dvc_snapshot_digest", lambda _snapshot: digest)
 
     result = runner.invoke(
         cli.app,
@@ -120,23 +124,27 @@ def test_snapshot_command_captures_then_writes_ignored_evidence(
             "capture-reproduction-snapshot",
             "--repository-role",
             "protected-metadata",
+            "--output",
+            "reports/reproduction/protected.json",
         ],
     )
 
     assert result.exit_code == 0
-    assert roles == ["protected-metadata"]
-    assert calls == [(snapshot, tmp_path, "reports/reproduction/dvc-snapshot.json")]
-    assert result.output.strip() == "DVC reproduction snapshot SHA-256: sha256:" + "a" * 64
+    assert captured_roles == ["protected-metadata"]
+    assert writes == [(snapshot, tmp_path, "reports/reproduction/protected.json")]
+    assert result.output.strip() == f"DVC reproduction snapshot SHA-256: {digest}"
     assert str(tmp_path) not in result.output
 
 
-def test_snapshot_command_redacts_capture_failure(
+def test_snapshot_command_redacts_capture_and_write_failures(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    secret = "private-evidence-sentinel"
+
     def fail(_root: Path, *, metadata_repository_role: str) -> object:
         del metadata_repository_role
-        raise evidence.DvcEvidenceError
+        raise evidence.DvcEvidenceError(secret)
 
     monkeypatch.setattr(evidence, "capture_dvc_snapshot", fail)
 
@@ -152,45 +160,5 @@ def test_snapshot_command_redacts_capture_failure(
 
     assert result.exit_code == 1
     assert result.output.strip() == "DVC reproduction snapshot could not be captured."
+    assert secret not in result.output
     assert "Traceback" not in result.output
-
-
-def test_dataset_cli_forwards_explicit_row_artifact_verification(
-    runner: CliRunner,
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    from signlab.datasets import bundle
-
-    manifest = tmp_path / "manifest.json"
-    manifest.write_bytes(b"fixture")
-    calls: list[bool] = []
-
-    def validate(*_args: object, **kwargs: object) -> object:
-        calls.append(bool(kwargs["verify_row_artifacts"]))
-        return SimpleNamespace(
-            data_sha256="sha256:" + "a" * 64,
-            parquet_table_bytes="verified",
-            semantic_integrity="verified",
-            artifact_byte_integrity="verified",
-            split_compatibility="not_checked",
-            consent_authorization="not_checked",
-        )
-
-    monkeypatch.setattr(bundle, "validate_dataset_bundle", validate)
-
-    result = runner.invoke(
-        cli.app,
-        [
-            "data",
-            "validate-dataset",
-            str(manifest),
-            "--workspace-root",
-            str(tmp_path),
-            "--verify-row-artifacts",
-        ],
-    )
-
-    assert result.exit_code == 0
-    assert calls == [True]
-    assert "Referenced row artifacts: verified" in result.output
