@@ -1,0 +1,154 @@
+{
+  "allowed_schema_metadata": {
+    "signlab:content_sha256": "sha256:<64 lowercase hex characters>",
+    "signlab:schema_sha256": "sha256:e5d795208a61fb5a102f77c3fcf3b0dbf033462f0c99ab4ed21a0f6f7e951f47",
+    "signlab:schema_version": "clips-table/1",
+    "signlab:table_kind": "clips"
+  },
+  "fields": [
+    {
+      "field_id": 1,
+      "name": "clip_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 2,
+      "name": "participant_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 3,
+      "name": "session_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 4,
+      "name": "source_recording_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 5,
+      "name": "interval",
+      "nullable": false,
+      "type": {
+        "fields": [
+          {
+            "field_id": 6,
+            "name": "schema_version",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 7,
+            "name": "start_us",
+            "nullable": false,
+            "type": "int64"
+          },
+          {
+            "field_id": 8,
+            "name": "end_us",
+            "nullable": false,
+            "type": "int64"
+          }
+        ],
+        "kind": "struct"
+      }
+    },
+    {
+      "field_id": 9,
+      "name": "handedness",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 10,
+      "name": "mirror_state",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 11,
+      "name": "artifact",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "field_id": 12,
+            "name": "schema_version",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 13,
+            "name": "artifact_id",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 14,
+            "name": "role",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 15,
+            "name": "media_type",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 16,
+            "name": "sha256",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 17,
+            "name": "size_bytes",
+            "nullable": false,
+            "type": "int64"
+          },
+          {
+            "field_id": 18,
+            "name": "locator",
+            "nullable": false,
+            "type": {
+              "fields": [
+                {
+                  "field_id": 19,
+                  "name": "kind",
+                  "nullable": false,
+                  "type": "utf8"
+                },
+                {
+                  "field_id": 20,
+                  "name": "path",
+                  "nullable": true,
+                  "type": "utf8"
+                },
+                {
+                  "field_id": 21,
+                  "name": "uri",
+                  "nullable": true,
+                  "type": "utf8"
+                }
+              ],
+              "kind": "struct"
+            }
+          }
+        ],
+        "kind": "struct"
+      }
+    }
+  ],
+  "format": "arrow-schema-snapshot/1",
+  "schema_version": "clips-table/1",
+  "table_name": "clips",
+  "writer_generated_file_metadata": {
+    "ARROW:schema": "authoritative Arrow schema encoding"
+  }
+}

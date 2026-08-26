@@ -1,0 +1,466 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab's strict table and dataset validators remain authoritative for canonical ordering, semantic hashes, foreign keys, intervals, consent binding, lineage, sample projection, split inheritance, and artifact-byte verification.",
+  "$defs": {
+    "ArtifactRefV1": {
+      "additionalProperties": false,
+      "description": "Exact bytes plus a portable location; the location is never the identity.",
+      "properties": {
+        "artifact_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "media_type": {
+          "maxLength": 127,
+          "minLength": 3,
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$",
+          "title": "Media Type",
+          "type": "string"
+        },
+        "role": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "artifact-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "role",
+        "media_type",
+        "sha256",
+        "size_bytes",
+        "locator"
+      ],
+      "title": "ArtifactRefV1",
+      "type": "object"
+    },
+    "ArtifactUriLocatorV1": {
+      "additionalProperties": false,
+      "description": "A storage-independent logical URI resolved by a future artifact adapter.",
+      "properties": {
+        "kind": {
+          "const": "artifact_uri",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 1024,
+          "minLength": 12,
+          "pattern": "^signlab://[a-z][a-z0-9-]{0,63}(/[a-z][a-z0-9._-]{0,127})+$",
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "uri"
+      ],
+      "title": "ArtifactUriLocatorV1",
+      "type": "object"
+    },
+    "ConsentScopeV1": {
+      "additionalProperties": false,
+      "description": "An explicit permission ceiling; every permission is required on the wire.",
+      "properties": {
+        "audio_collection": {
+          "const": false,
+          "title": "Audio Collection",
+          "type": "boolean"
+        },
+        "commercial_sale": {
+          "const": false,
+          "title": "Commercial Sale",
+          "type": "boolean"
+        },
+        "derived_features": {
+          "title": "Derived Features",
+          "type": "boolean"
+        },
+        "derived_features_redistribution": {
+          "title": "Derived Features Redistribution",
+          "type": "boolean"
+        },
+        "evaluation_results_redistribution": {
+          "title": "Evaluation Results Redistribution",
+          "type": "boolean"
+        },
+        "identity_inference": {
+          "const": false,
+          "title": "Identity Inference",
+          "type": "boolean"
+        },
+        "minor_participation": {
+          "const": false,
+          "title": "Minor Participation",
+          "type": "boolean"
+        },
+        "model_evaluation": {
+          "title": "Model Evaluation",
+          "type": "boolean"
+        },
+        "model_training": {
+          "title": "Model Training",
+          "type": "boolean"
+        },
+        "model_weights_redistribution": {
+          "title": "Model Weights Redistribution",
+          "type": "boolean"
+        },
+        "public_demonstration": {
+          "title": "Public Demonstration",
+          "type": "boolean"
+        },
+        "raw_media_capture": {
+          "title": "Raw Media Capture",
+          "type": "boolean"
+        },
+        "raw_media_redistribution": {
+          "title": "Raw Media Redistribution",
+          "type": "boolean"
+        },
+        "raw_media_retention": {
+          "title": "Raw Media Retention",
+          "type": "boolean"
+        },
+        "research_use": {
+          "title": "Research Use",
+          "type": "boolean"
+        },
+        "same_purpose_future_research": {
+          "title": "Same Purpose Future Research",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "consent-scope/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "withdrawal_supported": {
+          "const": true,
+          "title": "Withdrawal Supported",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "schema_version",
+        "research_use",
+        "raw_media_capture",
+        "model_training",
+        "model_evaluation",
+        "public_demonstration",
+        "model_weights_redistribution",
+        "raw_media_retention",
+        "raw_media_redistribution",
+        "derived_features",
+        "derived_features_redistribution",
+        "evaluation_results_redistribution",
+        "same_purpose_future_research",
+        "withdrawal_supported",
+        "audio_collection",
+        "minor_participation",
+        "identity_inference",
+        "commercial_sale"
+      ],
+      "title": "ConsentScopeV1",
+      "type": "object"
+    },
+    "RecordingConsentGrantV1": {
+      "additionalProperties": false,
+      "description": "The explicit, receipt-bounded consent scope attached to one recording.",
+      "properties": {
+        "captured_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "grant_id": {
+          "pattern": "^grant_[0-9a-f]{32}$",
+          "title": "Grant Id",
+          "type": "string"
+        },
+        "issued_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Issued At",
+          "type": "string"
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        },
+        "purpose_id": {
+          "pattern": "^purpose_[0-9a-f]{32}$",
+          "title": "Purpose Id",
+          "type": "string"
+        },
+        "receipt_id": {
+          "pattern": "^receipt_[0-9a-f]{32}$",
+          "title": "Receipt Id",
+          "type": "string"
+        },
+        "receipt_scope_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Receipt Scope Sha256",
+          "type": "string"
+        },
+        "recording_id": {
+          "pattern": "^recording_[0-9a-f]{32}$",
+          "title": "Recording Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "recording-consent-grant/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/ConsentScopeV1"
+        },
+        "scope_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Scope Sha256",
+          "type": "string"
+        },
+        "study_id": {
+          "pattern": "^study_[0-9a-f]{32}$",
+          "title": "Study Id",
+          "type": "string"
+        },
+        "taxonomy": {
+          "$ref": "#/$defs/TaxonomyRef"
+        }
+      },
+      "required": [
+        "schema_version",
+        "grant_id",
+        "recording_id",
+        "participant_id",
+        "receipt_id",
+        "purpose_id",
+        "study_id",
+        "taxonomy",
+        "scope",
+        "scope_sha256",
+        "receipt_scope_sha256",
+        "issued_at",
+        "captured_at"
+      ],
+      "title": "RecordingConsentGrantV1",
+      "type": "object"
+    },
+    "RecordingRowV1": {
+      "additionalProperties": false,
+      "description": "One raw recording bound to grouping, bytes, and its consent snapshot.",
+      "properties": {
+        "audio_present": {
+          "const": false,
+          "title": "Audio Present",
+          "type": "boolean"
+        },
+        "captured_at": {
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "consent_grant": {
+          "$ref": "#/$defs/RecordingConsentGrantV1"
+        },
+        "device_id": {
+          "pattern": "^device_[0-9a-f]{32}$",
+          "title": "Device Id",
+          "type": "string"
+        },
+        "duration_us": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "Duration Us",
+          "type": "integer"
+        },
+        "handedness": {
+          "enum": [
+            "left",
+            "right",
+            "both",
+            "ambidextrous",
+            "unknown"
+          ],
+          "title": "Handedness",
+          "type": "string"
+        },
+        "media": {
+          "$ref": "#/$defs/ArtifactRefV1"
+        },
+        "mirror_state": {
+          "enum": [
+            "not_mirrored",
+            "mirrored"
+          ],
+          "title": "Mirror State",
+          "type": "string"
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        },
+        "recording_id": {
+          "pattern": "^recording_[0-9a-f]{32}$",
+          "title": "Recording Id",
+          "type": "string"
+        },
+        "rotation_degrees": {
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ],
+          "title": "Rotation Degrees",
+          "type": "integer"
+        },
+        "session_id": {
+          "pattern": "^session_[0-9a-f]{32}$",
+          "title": "Session Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "recording_id",
+        "participant_id",
+        "session_id",
+        "device_id",
+        "captured_at",
+        "duration_us",
+        "handedness",
+        "mirror_state",
+        "rotation_degrees",
+        "audio_present",
+        "media",
+        "consent_grant"
+      ],
+      "title": "RecordingRowV1",
+      "type": "object"
+    },
+    "TaxonomyRef": {
+      "additionalProperties": false,
+      "description": "Portable identity embedded in downstream manifests and bundles.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "taxonomy-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "sha256"
+      ],
+      "title": "TaxonomyRef",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/recordings-table-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/RecordingRowV1"
+      },
+      "title": "Rows",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "recordings-table/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rows"
+  ],
+  "title": "RecordingsTableV1",
+  "type": "object"
+}

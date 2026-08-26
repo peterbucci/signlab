@@ -1,0 +1,194 @@
+{
+  "allowed_schema_metadata": {
+    "signlab:content_sha256": "sha256:<64 lowercase hex characters>",
+    "signlab:schema_sha256": "sha256:98c71c39747b31cb825811b698d60ba783f6428b38741b2c5f3929e75425396e",
+    "signlab:schema_version": "derived-artifacts-table/1",
+    "signlab:table_kind": "derived_artifacts"
+  },
+  "fields": [
+    {
+      "field_id": 1,
+      "name": "derived_artifact_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 2,
+      "name": "derivation_kind",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 3,
+      "name": "parent_artifact_ids",
+      "nullable": false,
+      "type": {
+        "element": {
+          "field_id": 4,
+          "name": "element",
+          "nullable": false,
+          "type": "utf8"
+        },
+        "kind": "list"
+      }
+    },
+    {
+      "field_id": 5,
+      "name": "participant_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 6,
+      "name": "session_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 7,
+      "name": "source_recording_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 8,
+      "name": "clip_id",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 9,
+      "name": "annotation_id",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 10,
+      "name": "sample_id",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 11,
+      "name": "label_id",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 12,
+      "name": "split_id",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 13,
+      "name": "partition",
+      "nullable": true,
+      "type": "utf8"
+    },
+    {
+      "field_id": 14,
+      "name": "handedness",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 15,
+      "name": "mirror_state",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 16,
+      "name": "operation_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 17,
+      "name": "operation_version",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 18,
+      "name": "artifact",
+      "nullable": false,
+      "type": {
+        "fields": [
+          {
+            "field_id": 19,
+            "name": "schema_version",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 20,
+            "name": "artifact_id",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 21,
+            "name": "role",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 22,
+            "name": "media_type",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 23,
+            "name": "sha256",
+            "nullable": false,
+            "type": "utf8"
+          },
+          {
+            "field_id": 24,
+            "name": "size_bytes",
+            "nullable": false,
+            "type": "int64"
+          },
+          {
+            "field_id": 25,
+            "name": "locator",
+            "nullable": false,
+            "type": {
+              "fields": [
+                {
+                  "field_id": 26,
+                  "name": "kind",
+                  "nullable": false,
+                  "type": "utf8"
+                },
+                {
+                  "field_id": 27,
+                  "name": "path",
+                  "nullable": true,
+                  "type": "utf8"
+                },
+                {
+                  "field_id": 28,
+                  "name": "uri",
+                  "nullable": true,
+                  "type": "utf8"
+                }
+              ],
+              "kind": "struct"
+            }
+          }
+        ],
+        "kind": "struct"
+      }
+    }
+  ],
+  "format": "arrow-schema-snapshot/1",
+  "schema_version": "derived-artifacts-table/1",
+  "table_name": "derived_artifacts",
+  "writer_generated_file_metadata": {
+    "ARROW:schema": "authoritative Arrow schema encoding"
+  }
+}

@@ -79,6 +79,11 @@ The [versioned pipeline contracts](docs/contracts.md) give datasets, grouped
 splits, preprocessing plans, resolved configurations, terminal runs, and research
 models portable RFC 8785 identities with explicit compatibility checks.
 
+The [dataset manifest and Parquet contract](docs/dataset-manifests.md) defines the
+normalized participant, session, recording, clip, annotation, and derived-artifact
+tables, their lineage and consent checks, and the distinction between semantic
+dataset identity and exact Parquet bytes.
+
 The [legacy audit](docs/legacy-audit.md) and
 [portable evidence export](docs/legacy-export.md) document what was retained from
 the school project, why it is development-only, and how to validate it without any
@@ -111,9 +116,10 @@ implementation backlog.
 
 The immutable legacy audit, reproducible developer foundation, sanitized legacy
 evidence export, versioned gesture taxonomy, and fail-closed participant-data
-governance baseline are established. The versioned pipeline-contract chain now
-establishes the Phase 1 portability gate; no headline model result is considered
-valid until the grouped evaluation foundations are complete.
+governance baseline are established. The current dataset contract adds six
+normalized, lineage-preserving Parquet tables while retaining the published v1
+reader. No headline model result is considered valid until the remaining grouped
+evaluation foundations are complete.
 
 ## Data and privacy
 

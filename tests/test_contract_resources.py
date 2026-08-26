@@ -97,10 +97,10 @@ def _packaged_inventory() -> set[str]:
     return inventory
 
 
-def test_exactly_six_standalone_draft_202012_schemas_are_generated_and_packaged() -> None:
+def test_exactly_seven_standalone_draft_202012_schemas_are_generated_and_packaged() -> None:
     schemas = generated_contract_schemas()
 
-    assert len(schemas) == 6
+    assert len(schemas) == 7
     assert set(schemas) == set(CONTRACT_SCHEMA_MODELS)
     for filename, schema in schemas.items():
         Draft202012Validator.check_schema(schema)
@@ -194,7 +194,7 @@ def test_schema_boundary_defers_digest_and_cross_document_identity_to_applicatio
 def test_generated_resource_writer_is_complete_pretty_and_byte_stable(tmp_path: Path) -> None:
     expected = generated_contract_resource_texts()
 
-    assert len(expected) == 12
+    assert len(expected) == 13
     assert set(expected) == GENERATED_RESOURCE_NAMES
     first_written = write_resources(tmp_path)
     first_bytes = {
@@ -214,7 +214,7 @@ def test_generated_resource_writer_is_complete_pretty_and_byte_stable(tmp_path: 
 
 def test_packaged_resource_inventory_is_exact_and_has_no_drift() -> None:
     assert _packaged_inventory() == GENERATED_RESOURCE_NAMES
-    assert len(_packaged_inventory()) == 12
+    assert len(_packaged_inventory()) == 13
     validate_packaged_contract_resources()
 
 

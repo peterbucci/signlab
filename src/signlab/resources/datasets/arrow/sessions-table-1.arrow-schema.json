@@ -1,0 +1,100 @@
+{
+  "allowed_schema_metadata": {
+    "signlab:content_sha256": "sha256:<64 lowercase hex characters>",
+    "signlab:schema_sha256": "sha256:6fd960a8684dde5b21d93cb9ff10c6329d3f0b6a7016feeaf853916fa542b2fa",
+    "signlab:schema_version": "sessions-table/1",
+    "signlab:table_kind": "sessions"
+  },
+  "fields": [
+    {
+      "field_id": 1,
+      "name": "session_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 2,
+      "name": "participant_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 3,
+      "name": "device_id",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 4,
+      "name": "started_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "field_id": 5,
+      "name": "finished_at",
+      "nullable": false,
+      "type": "timestamp[us, tz=UTC]"
+    },
+    {
+      "field_id": 6,
+      "name": "capture_mode",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 7,
+      "name": "capture_software_version",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 8,
+      "name": "camera_facing",
+      "nullable": false,
+      "type": "utf8"
+    },
+    {
+      "field_id": 9,
+      "name": "frame_width_px",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 10,
+      "name": "frame_height_px",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 11,
+      "name": "frame_rate_numerator",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 12,
+      "name": "frame_rate_denominator",
+      "nullable": false,
+      "type": "int64"
+    },
+    {
+      "field_id": 13,
+      "name": "rotation_degrees",
+      "nullable": false,
+      "type": "int16"
+    },
+    {
+      "field_id": 14,
+      "name": "mirror_state",
+      "nullable": false,
+      "type": "utf8"
+    }
+  ],
+  "format": "arrow-schema-snapshot/1",
+  "schema_version": "sessions-table/1",
+  "table_name": "sessions",
+  "writer_generated_file_metadata": {
+    "ARROW:schema": "authoritative Arrow schema encoding"
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "content": {
+    "governance_policy": {
+      "document_id": "document_00000000000000000000000000000003",
+      "document_type": "governance_policy",
+      "effective_at": "2026-08-26T00:00:00Z",
+      "schema_version": "document-reference/1",
+      "sha256": "sha256:5a29272296198c03f4c118d27ee19955174f4b26141284380a653eb874d4dfa9",
+      "uri": "signlab://governance/data-governance-policy/1.0.0",
+      "version": "1.0.0"
+    },
+    "lineage_inventory_sha256": "sha256:191d80752fff985682bf93cb2dea960e5a38f9a4c3a90be071c36d4a311ee4a7",
+    "sample_schema_version": "feature-window/1",
+    "samples": [
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000001",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "objects/sha256/p-a4/sha256-a405ee79b8e40f46f696055053d3ac09c96497c6b1a83297699f0e3661aa4ae1/sample_00000000000000000000000000000001"
+          },
+          "media_type": "application/vnd.signlab.feature-window+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:a405ee79b8e40f46f696055053d3ac09c96497c6b1a83297699f0e3661aa4ae1",
+          "size_bytes": 2049
+        },
+        "label_id": "hello",
+        "participant_id": "participant_00000000000000000000000000000001",
+        "sample_id": "sample_00000000000000000000000000000001",
+        "session_id": "session_00000000000000000000000000000001",
+        "source_recording_id": "recording_00000000000000000000000000000031"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000002",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "objects/sha256/p-19/sha256-19af1229a779b90ea2cf7593a7f7b4a939d94b3d7d74ac5fe810346418134975/sample_00000000000000000000000000000002"
+          },
+          "media_type": "application/vnd.signlab.feature-window+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:19af1229a779b90ea2cf7593a7f7b4a939d94b3d7d74ac5fe810346418134975",
+          "size_bytes": 2050
+        },
+        "label_id": "hello",
+        "participant_id": "participant_00000000000000000000000000000001",
+        "sample_id": "sample_00000000000000000000000000000002",
+        "session_id": "session_00000000000000000000000000000001",
+        "source_recording_id": "recording_00000000000000000000000000000031"
+      },
+      {
+        "artifact": {
+          "artifact_id": "sample_00000000000000000000000000000003",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "objects/sha256/p-ed/sha256-ed13059c7d9bf4c68a383bfcdb2e4145c1f7622c1a74a8ccfc9da6bc93869b40/sample_00000000000000000000000000000003"
+          },
+          "media_type": "application/vnd.signlab.feature-window+json",
+          "role": "sample_data",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:ed13059c7d9bf4c68a383bfcdb2e4145c1f7622c1a74a8ccfc9da6bc93869b40",
+          "size_bytes": 2051
+        },
+        "label_id": "hello",
+        "participant_id": "participant_00000000000000000000000000000001",
+        "sample_id": "sample_00000000000000000000000000000003",
+        "session_id": "session_00000000000000000000000000000001",
+        "source_recording_id": "recording_00000000000000000000000000000031"
+      }
+    ],
+    "schema_version": "dataset-content/2",
+    "tables": {
+      "annotations": {
+        "artifact": {
+          "artifact_id": "synthetic_annotations_table",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "tables/annotations.parquet"
+          },
+          "media_type": "application/vnd.apache.parquet",
+          "role": "dataset_table",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:364f921ee2b8a043e549eb2ae4177df722c5000dfb215f9a3d6ce33ba90dfad0",
+          "size_bytes": 8197
+        },
+        "content_sha256": "sha256:dcd6919628522a36d34f0d2a2aefbc7a2c64ca5340ce7e1e173029b67dd2577b",
+        "row_count": 1,
+        "schema_version": "dataset-table-reference/1",
+        "table_name": "annotations",
+        "table_schema_version": "annotations-table/1"
+      },
+      "clips": {
+        "artifact": {
+          "artifact_id": "synthetic_clips_table",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "tables/clips.parquet"
+          },
+          "media_type": "application/vnd.apache.parquet",
+          "role": "dataset_table",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:92bf84ac2a435bbbe676b450b930469f594aec272d1b4ff845033c9ac4530c23",
+          "size_bytes": 8196
+        },
+        "content_sha256": "sha256:819f4bb5f4a915deac1d344e06cc56805f787701c2d8662c486da08e46461448",
+        "row_count": 1,
+        "schema_version": "dataset-table-reference/1",
+        "table_name": "clips",
+        "table_schema_version": "clips-table/1"
+      },
+      "derived_artifacts": {
+        "artifact": {
+          "artifact_id": "synthetic_derived_artifacts_table",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "tables/derived_artifacts.parquet"
+          },
+          "media_type": "application/vnd.apache.parquet",
+          "role": "dataset_table",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:18aa42d68b99a9b5c11ad2cae4e03ada3eacfa312b24aa6c4e4774d88a988001",
+          "size_bytes": 8198
+        },
+        "content_sha256": "sha256:b65cc0cc4b779437780487946244ee50691c448783d7a0eac4f7d8ddad343f65",
+        "row_count": 3,
+        "schema_version": "dataset-table-reference/1",
+        "table_name": "derived_artifacts",
+        "table_schema_version": "derived-artifacts-table/1"
+      },
+      "participants": {
+        "artifact": {
+          "artifact_id": "synthetic_participants_table",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "tables/participants.parquet"
+          },
+          "media_type": "application/vnd.apache.parquet",
+          "role": "dataset_table",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:e50357f14e874ac5539bac6ddc7509f3e429cd35bfc37f758d891230b954c72c",
+          "size_bytes": 8193
+        },
+        "content_sha256": "sha256:eb47911ecc4c60d30110210b73dcb265279fb69284fa31a25a0560a2f6a3a227",
+        "row_count": 1,
+        "schema_version": "dataset-table-reference/1",
+        "table_name": "participants",
+        "table_schema_version": "participants-table/1"
+      },
+      "recordings": {
+        "artifact": {
+          "artifact_id": "synthetic_recordings_table",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "tables/recordings.parquet"
+          },
+          "media_type": "application/vnd.apache.parquet",
+          "role": "dataset_table",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:e6c6201a7b9e483b836163fbc5b838389ce0fbd95cb16a7b81f5e36521cd6729",
+          "size_bytes": 8195
+        },
+        "content_sha256": "sha256:5c79b0629d997de6bdaab75f78e2be94ed02bb1dc9e9cf3219db3d1641aca364",
+        "row_count": 1,
+        "schema_version": "dataset-table-reference/1",
+        "table_name": "recordings",
+        "table_schema_version": "recordings-table/1"
+      },
+      "schema_version": "dataset-table-set/1",
+      "sessions": {
+        "artifact": {
+          "artifact_id": "synthetic_sessions_table",
+          "locator": {
+            "kind": "workspace_relative",
+            "path": "tables/sessions.parquet"
+          },
+          "media_type": "application/vnd.apache.parquet",
+          "role": "dataset_table",
+          "schema_version": "artifact-reference/1",
+          "sha256": "sha256:fa1df4be5b1afa40435818a00648e9ec750020802d8d37e39e1cf1a77a68533f",
+          "size_bytes": 8194
+        },
+        "content_sha256": "sha256:0a77852161a088baded1248c7c71945aa43569b6ef01771bb649af7602e5730a",
+        "row_count": 1,
+        "schema_version": "dataset-table-reference/1",
+        "table_name": "sessions",
+        "table_schema_version": "sessions-table/1"
+      }
+    },
+    "taxonomy": {
+      "id": "signlab-five",
+      "schema_version": "taxonomy-reference/1",
+      "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+      "version": "1.0.0"
+    }
+  },
+  "data_sha256": "sha256:7ffe179ec96e80b3cb4ce4c3b59b6b05193e9f56e805bbcdb8c0e4e6ccfcbe43",
+  "dataset_id": "synthetic_table_dataset",
+  "schema_version": "dataset-manifest/2",
+  "version": "2.0.0"
+}

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import stat
 import subprocess
 import sys
 import tarfile
@@ -60,11 +61,33 @@ EXPECTED_CONTRACT_RESOURCES = {
     "examples/run-record.example.json",
     "examples/split-manifest.example.json",
     "schemas/dataset-manifest-1.schema.json",
+    "schemas/dataset-manifest-2.schema.json",
     "schemas/model-manifest-1.schema.json",
     "schemas/preprocessing-plan-1.schema.json",
     "schemas/resolved-configuration-1.schema.json",
     "schemas/run-record-1.schema.json",
     "schemas/split-manifest-1.schema.json",
+}
+EXPECTED_DATASET_RESOURCES = {
+    "arrow/annotations-table-1.arrow-schema.json",
+    "arrow/clips-table-1.arrow-schema.json",
+    "arrow/derived-artifacts-table-1.arrow-schema.json",
+    "arrow/participants-table-1.arrow-schema.json",
+    "arrow/recordings-table-1.arrow-schema.json",
+    "arrow/sessions-table-1.arrow-schema.json",
+    "examples/annotations-table-1.example.json",
+    "examples/clips-table-1.example.json",
+    "examples/dataset-manifest-2.example.json",
+    "examples/derived-artifacts-table-1.example.json",
+    "examples/participants-table-1.example.json",
+    "examples/recordings-table-1.example.json",
+    "examples/sessions-table-1.example.json",
+    "schemas/annotations-table-1.schema.json",
+    "schemas/clips-table-1.schema.json",
+    "schemas/derived-artifacts-table-1.schema.json",
+    "schemas/participants-table-1.schema.json",
+    "schemas/recordings-table-1.schema.json",
+    "schemas/sessions-table-1.schema.json",
 }
 FORBIDDEN_REPOSITORY_ROOTS = {
     "artifacts",
@@ -109,16 +132,50 @@ FORBIDDEN_SUFFIXES = {
     ".webm",
     ".whl",
 }
+_WINDOWS_RESERVED_NAMES = {
+    "aux",
+    "clock$",
+    "con",
+    "conin$",
+    "conout$",
+    "nul",
+    "prn",
+    *(f"com{number}" for number in range(10)),
+    *(f"lpt{number}" for number in range(10)),
+}
+_WINDOWS_FORBIDDEN_CHARACTERS = frozenset('<>"|?*')
 
 
 def validate_member_names(member_names: Iterable[str]) -> tuple[str, ...]:
     """Return sanitized policy failures for archive member names."""
     errors: list[str] = []
+    normalized_names: dict[str, str] = {}
     for member_name in member_names:
-        path = PurePosixPath(member_name)
+        path_text = member_name[:-1] if member_name.endswith("/") else member_name
+        raw_parts = path_text.split("/")
+        is_non_portable = (
+            not path_text
+            or "\\" in path_text
+            or ":" in path_text
+            or "\x00" in path_text
+            or any(part in {"", ".", ".."} for part in raw_parts)
+            or any(
+                part.endswith((" ", "."))
+                or part.split(".", maxsplit=1)[0].casefold() in _WINDOWS_RESERVED_NAMES
+                or any(character in _WINDOWS_FORBIDDEN_CHARACTERS for character in part)
+                or any(ord(character) < 32 or ord(character) == 127 for character in part)
+                for part in raw_parts
+            )
+        )
+        path = PurePosixPath(path_text)
         lowered_parts = tuple(part.lower() for part in path.parts)
-        if path.is_absolute() or ".." in path.parts:
+        if is_non_portable or path.is_absolute():
             errors.append("archive contains a non-portable member path")
+        normalized_name = path_text.casefold()
+        if normalized_name in normalized_names:
+            errors.append("archive contains duplicate or case-colliding member paths")
+        else:
+            normalized_names[normalized_name] = path_text
         repository_parts = lowered_parts
         if repository_parts and repository_parts[0].startswith("signlab-"):
             repository_parts = repository_parts[1:]
@@ -140,6 +197,12 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
         members = archive.infolist()
         names = [member.filename for member in members]
         errors.extend(validate_member_names(names))
+        if any(
+            stat.S_IFMT(member.external_attr >> 16)
+            not in ({0, stat.S_IFDIR} if member.is_dir() else {0, stat.S_IFREG})
+            for member in members
+        ):
+            errors.append("wheel contains a non-regular member")
         if not any(name.endswith("signlab/py.typed") for name in names):
             errors.append("wheel is missing the typed-package marker")
         if not any(name.startswith("signlab/commands/") for name in names):
@@ -181,6 +244,17 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             expected_contract_members
         ):
             errors.append("wheel does not contain the exact pipeline-contract resource set")
+        dataset_prefix = "signlab/resources/datasets/"
+        dataset_members = [
+            name.removeprefix(dataset_prefix)
+            for name in names
+            if name.startswith(dataset_prefix) and not name.endswith("/")
+        ]
+        expected_dataset_members = EXPECTED_DATASET_RESOURCES | {"__init__.py"}
+        if set(dataset_members) != expected_dataset_members or len(dataset_members) != len(
+            expected_dataset_members
+        ):
+            errors.append("wheel does not contain the exact dataset resource set")
         if not any(name.endswith(".dist-info/METADATA") for name in names):
             errors.append("wheel is missing distribution metadata")
         entry_point_members = [
@@ -206,8 +280,11 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
 def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
     errors: list[str] = []
     with tarfile.open(sdist, mode="r:gz") as archive:
-        members = [member for member in archive.getmembers() if member.isfile()]
-        errors.extend(validate_member_names(member.name for member in members))
+        all_members = archive.getmembers()
+        errors.extend(validate_member_names(member.name for member in all_members))
+        if any(not member.isfile() and not member.isdir() for member in all_members):
+            errors.append("source distribution contains a non-regular member")
+        members = [member for member in all_members if member.isfile()]
         archive_root = sdist.name.removesuffix(".tar.gz")
         package_prefix = f"{archive_root}/src/signlab/"
         if not any(member.name == f"{package_prefix}py.typed" for member in members):
@@ -238,6 +315,17 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
             errors.append(
                 "source distribution does not contain the exact pipeline-contract resource set"
             )
+        dataset_prefix = f"{package_prefix}resources/datasets/"
+        dataset_members = [
+            member.name.removeprefix(dataset_prefix)
+            for member in members
+            if member.name.startswith(dataset_prefix)
+        ]
+        expected_dataset_members = EXPECTED_DATASET_RESOURCES | {"__init__.py"}
+        if set(dataset_members) != expected_dataset_members or len(dataset_members) != len(
+            expected_dataset_members
+        ):
+            errors.append("source distribution does not contain the exact dataset resource set")
         if any(member.size > MAX_MEMBER_BYTES for member in members):
             errors.append("source distribution contains a member larger than 1 MiB")
     return tuple(sorted(set(errors)))
@@ -341,6 +429,29 @@ def _install_and_smoke_test(distribution: Path) -> None:
         )
         _run(
             [str(console_script), "contracts", "validate-resources"],
+            environment=environment,
+            cwd=environment_root,
+        )
+        _run(
+            [str(console_script), "data", "validate-resources"],
+            environment=environment,
+            cwd=environment_root,
+        )
+        example_dataset = environment_root / "example-dataset"
+        _run(
+            [str(console_script), "data", "write-example-dataset", str(example_dataset)],
+            environment=environment,
+            cwd=environment_root,
+        )
+        _run(
+            [
+                str(console_script),
+                "data",
+                "validate-dataset",
+                str(example_dataset / "dataset-manifest.json"),
+                "--workspace-root",
+                str(example_dataset),
+            ],
             environment=environment,
             cwd=environment_root,
         )

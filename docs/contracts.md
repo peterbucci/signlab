@@ -8,7 +8,7 @@ do not replace application validation.
 
 ## Contract chain
 
-The six v1 contracts form one digest-bound provenance chain:
+The six published v1 contracts form the retained digest-bound provenance chain:
 
 ```text
 dataset manifest
@@ -21,7 +21,8 @@ dataset manifest
 
 | Contract | Identity and responsibility |
 | --- | --- |
-| `dataset-manifest/1` | A portable dataset envelope, exact sample membership, leakage groups, taxonomy/governance bindings, and a storage-independent `data_sha256` |
+| `dataset-manifest/1` | The retained portable dataset envelope, exact sample membership, leakage groups, taxonomy/governance bindings, and a storage-independent `data_sha256` |
+| `dataset-manifest/2` | The current writer, adding exact semantic and Parquet-byte references for the six normalized dataset tables without changing the downstream provenance model |
 | `split-manifest/1` | Exact train/validation/test membership, participant/session/source-recording isolation, seed, and the exact dataset identities |
 | `preprocessing-plan/1` | An ordered chain of versioned operations with explicit adjacent input/output schema compatibility |
 | `resolved-configuration/1` | Fully expanded model, optimizer, trainer, and evaluator settings plus exact upstream references and deterministic seed policy |
@@ -34,12 +35,12 @@ and `assert_run_compatible(...)` checks are available at earlier pipeline stages
 Valid hashes prove identity and integrity, not consent, authenticity, approval, or
 promotion. Those decisions remain separate authenticated policy checks.
 
-This foundation intentionally does not pre-empt later domain stories. The Phase 1
-dataset story adds recording, clip, annotation, consent, quality, and Parquet table
-contracts to the dataset envelope. Representation and extraction stories register
-concrete preprocessing operations. The portable-inference epic defines the exact
-ONNX browser-bundle component set and parity policy. Those contracts must reference
-these identities rather than create a second provenance system.
+The [Phase 1 dataset contract](dataset-manifests.md) now adds participant, session,
+recording, clip, annotation, consent, lineage, and derived-artifact Parquet tables
+to `dataset-manifest/2`. Representation and extraction stories register concrete
+preprocessing operations. The portable-inference epic defines the exact ONNX
+browser-bundle component set and parity policy. Those contracts reference these
+identities rather than create a second provenance system.
 
 ## Canonical JSON and hashes
 
@@ -108,6 +109,12 @@ lowercase, credential-free, query-free, fragment-free, and percent-encoding-free
 A URI is a locator—not an integrity claim—and is always paired with a full content
 digest.
 
+The current [dataset-manifest/2 policy](dataset-manifests.md#time-labels-and-grouping)
+is narrower: row artifacts must use their exact hash-derived object location and
+table artifacts must use their registered table name, so participant or host text
+cannot enter a dataset locator. The retained v1 contracts keep their published
+portable-locator behavior.
+
 ## Compatibility and migration
 
 The JSON Schema dialect marker (`$schema`), schema resource identity (`$id`), and
@@ -117,7 +124,7 @@ before Pydantic validation.
 
 | Contract family | Current writer | Retained readers | Automatic migration |
 | --- | --- | --- | --- |
-| Dataset manifest | `dataset-manifest/1` | `/1` | Never |
+| Dataset manifest | `dataset-manifest/2` | `/1`, `/2` | Never |
 | Split manifest | `split-manifest/1` | `/1` | Never |
 | Preprocessing plan | `preprocessing-plan/1` | `/1` | Never |
 | Resolved configuration | `resolved-configuration/1` | `/1` | Never |
@@ -127,10 +134,11 @@ before Pydantic validation.
 Unknown, missing, legacy, and future versions fail closed with the supported reader
 and this migration section. Because v1 is the first published pipeline-contract
 set, no fictional v0 migration is supplied. The packaged v1 examples, schemas, and
-golden hashes are the backward-compatibility corpus.
+golden hashes remain the backward-compatibility corpus; v2 dataset resources are a
+separate current-writer example.
 
 The current-writer registry is deliberately separate from the retained-reference
-registry. When a future writer advances to `/2`, existing `/1` references remain
+registry. When a writer advances, existing `/1` references remain
 valid for as long as the `/1` reader is retained; changing the current writer must
 never silently retire historical provenance.
 

@@ -15,6 +15,7 @@ from signlab.contracts.resources import ContractResourceError, build_example_con
 
 SUPPORTED_VERSIONS = (
     "dataset-manifest/1",
+    "dataset-manifest/2",
     "model-manifest/1",
     "preprocessing-plan/1",
     "resolved-configuration/1",
@@ -142,7 +143,7 @@ def test_validate_invalid_contracts_never_echo_input_or_path(
     [
         b'{"private":"participant-private-token"}',
         b'{"schema_version":42,"private":"participant-private-token"}',
-        b'{"schema_version":"dataset-manifest/2","private":"participant-private-token"}',
+        b'{"schema_version":"dataset-manifest/3","private":"participant-private-token"}',
     ],
     ids=["missing", "wrong-type", "future-version"],
 )

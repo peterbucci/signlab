@@ -1,0 +1,189 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab's strict table and dataset validators remain authoritative for canonical ordering, semantic hashes, foreign keys, intervals, consent binding, lineage, sample projection, split inheritance, and artifact-byte verification.",
+  "$defs": {
+    "AnnotationRowV1": {
+      "additionalProperties": false,
+      "description": "One reviewed label or coded exclusion in root-recording time.",
+      "properties": {
+        "annotation_id": {
+          "pattern": "^annotation_[0-9a-f]{32}$",
+          "title": "Annotation Id",
+          "type": "string"
+        },
+        "clip_id": {
+          "anyOf": [
+            {
+              "pattern": "^clip_[0-9a-f]{32}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Clip Id"
+        },
+        "disposition": {
+          "enum": [
+            "class_label",
+            "ambiguous",
+            "ignore"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "eligible_for_training": {
+          "title": "Eligible For Training",
+          "type": "boolean"
+        },
+        "interval": {
+          "$ref": "#/$defs/MediaIntervalV1"
+        },
+        "label_id": {
+          "anyOf": [
+            {
+              "enum": [
+                "hello",
+                "no",
+                "please",
+                "thank_you",
+                "yes",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Label Id"
+        },
+        "other_kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "partial_target",
+                "transition_fragment",
+                "oov_gesture",
+                "incidental_activity",
+                "two_hand_non_target"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Other Kind"
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "minLength": 3,
+              "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason Code"
+        },
+        "review_status": {
+          "enum": [
+            "draft",
+            "reviewed",
+            "adjudicated"
+          ],
+          "title": "Review Status",
+          "type": "string"
+        },
+        "session_id": {
+          "pattern": "^session_[0-9a-f]{32}$",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "source_recording_id": {
+          "pattern": "^recording_[0-9a-f]{32}$",
+          "title": "Source Recording Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "annotation_id",
+        "participant_id",
+        "session_id",
+        "source_recording_id",
+        "clip_id",
+        "interval",
+        "disposition",
+        "label_id",
+        "other_kind",
+        "reason_code",
+        "review_status",
+        "eligible_for_training"
+      ],
+      "title": "AnnotationRowV1",
+      "type": "object"
+    },
+    "MediaIntervalV1": {
+      "additionalProperties": false,
+      "description": "A non-empty half-open interval in root-recording microseconds.",
+      "properties": {
+        "end_us": {
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991,
+          "title": "End Us",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": "media-interval/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "start_us": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Start Us",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "start_us",
+        "end_us"
+      ],
+      "title": "MediaIntervalV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/annotations-table-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/AnnotationRowV1"
+      },
+      "title": "Rows",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "annotations-table/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rows"
+  ],
+  "title": "AnnotationsTableV1",
+  "type": "object"
+}

@@ -1,0 +1,57 @@
+{
+  "$comment": "This JSON Schema enforces portable structure and locally expressible invariants. SignLab's strict table and dataset validators remain authoritative for canonical ordering, semantic hashes, foreign keys, intervals, consent binding, lineage, sample projection, split inheritance, and artifact-byte verification.",
+  "$defs": {
+    "ParticipantRowV1": {
+      "additionalProperties": false,
+      "description": "One pseudonymous participant without identity-vault attributes.",
+      "properties": {
+        "handedness": {
+          "enum": [
+            "left",
+            "right",
+            "both",
+            "ambidextrous",
+            "unknown"
+          ],
+          "title": "Handedness",
+          "type": "string"
+        },
+        "participant_id": {
+          "pattern": "^participant_[0-9a-f]{32}$",
+          "title": "Participant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "participant_id",
+        "handedness"
+      ],
+      "title": "ParticipantRowV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/participants-table-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ParticipantRowV1"
+      },
+      "title": "Rows",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "participants-table/1",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rows"
+  ],
+  "title": "ParticipantsTableV1",
+  "type": "object"
+}

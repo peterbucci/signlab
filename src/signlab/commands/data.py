@@ -16,6 +16,97 @@ app = create_group(
 )
 
 
+@app.command("validate-resources")
+def validate_dataset_resources() -> None:
+    """Validate packaged table schemas, Arrow snapshots, and synthetic examples."""
+
+    from signlab.datasets.resources import validate_packaged_dataset_resources
+
+    try:
+        validate_packaged_dataset_resources()
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Packaged dataset resource validation failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo("Packaged dataset schemas and examples are valid.")
+
+
+@app.command("write-example-dataset")
+def write_example_dataset(
+    output: Annotated[
+        Path,
+        typer.Argument(
+            file_okay=False,
+            resolve_path=True,
+            help="New or empty output directory for the synthetic bundle.",
+        ),
+    ],
+) -> None:
+    """Write a synthetic bundle and verify its tables and relationships."""
+
+    from signlab.datasets.bundle import write_dataset_bundle
+    from signlab.datasets.resources import build_example_dataset_bundle
+
+    try:
+        example = build_example_dataset_bundle()
+        write_dataset_bundle(example.manifest, example.tables, output)
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Synthetic dataset bundle could not be written and verified.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo("Synthetic bundle written; Parquet table bytes and relationships verified.")
+
+
+@app.command("validate-dataset")
+def validate_dataset(
+    manifest: Annotated[
+        Path,
+        typer.Argument(
+            help="Table-backed dataset-manifest/2 JSON document.",
+        ),
+    ],
+    workspace_root: Annotated[
+        Path,
+        typer.Option(
+            "--workspace-root",
+            help="Explicit root for workspace-relative Parquet table locators.",
+        ),
+    ],
+    split: Annotated[
+        Path | None,
+        typer.Option(
+            "--split",
+            help="Optional exact split-manifest/1 to reconcile.",
+        ),
+    ] = None,
+) -> None:
+    """Verify Parquet bytes, schemas, semantic relationships, and optional split."""
+
+    # Keep PyArrow off the import path for unrelated CLI commands.
+    from signlab.contracts.pipeline import validate_split_manifest
+    from signlab.datasets.bundle import validate_dataset_bundle
+
+    try:
+        manifest_document = manifest.read_bytes()
+        checked_split = validate_split_manifest(split.read_bytes()) if split is not None else None
+        result = validate_dataset_bundle(
+            manifest_document,
+            workspace_root,
+            split=checked_split,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo(
+            "Dataset validation failed: manifest, table bytes, or relationships are invalid.",
+            err=True,
+        )
+        raise typer.Exit(code=1) from error
+
+    typer.echo(f"Dataset data SHA-256: {result.data_sha256}")
+    typer.echo(f"Parquet table bytes: {result.parquet_table_bytes.replace('_', ' ')}")
+    typer.echo(f"Dataset semantic integrity: {result.semantic_integrity.replace('_', ' ')}")
+    typer.echo(f"Referenced row artifacts: {result.artifact_byte_integrity.replace('_', ' ')}")
+    typer.echo(f"Split compatibility: {result.split_compatibility.replace('_', ' ')}")
+    typer.echo(f"Current consent authorization: {result.consent_authorization.replace('_', ' ')}")
+
+
 @app.command("export-legacy")
 def export_legacy(
     legacy_root: Annotated[

@@ -34,7 +34,7 @@ ContractKind = Literal[
     "model",
 ]
 CURRENT_CONTRACT_SCHEMAS: Final[dict[ContractKind, str]] = {
-    "dataset": "dataset-manifest/1",
+    "dataset": "dataset-manifest/2",
     "split": "split-manifest/1",
     "preprocessing": "preprocessing-plan/1",
     "resolved_configuration": "resolved-configuration/1",
@@ -42,7 +42,7 @@ CURRENT_CONTRACT_SCHEMAS: Final[dict[ContractKind, str]] = {
     "model": "model-manifest/1",
 }
 SUPPORTED_CONTRACT_REFERENCE_SCHEMAS: Final[dict[ContractKind, frozenset[str]]] = {
-    "dataset": frozenset({"dataset-manifest/1"}),
+    "dataset": frozenset({"dataset-manifest/1", "dataset-manifest/2"}),
     "split": frozenset({"split-manifest/1"}),
     "preprocessing": frozenset({"preprocessing-plan/1"}),
     "resolved_configuration": frozenset({"resolved-configuration/1"}),
@@ -134,7 +134,11 @@ def _validate_utc_timestamp(value: str) -> str:
         raise ValueError(
             "timestamp must be a real UTC second in YYYY-MM-DDTHH:MM:SSZ form"
         ) from error
-    if parsed.strftime("%Y-%m-%dT%H:%M:%SZ") != value:
+    canonical = (
+        f"{parsed.year:04d}-{parsed.month:02d}-{parsed.day:02d}T"
+        f"{parsed.hour:02d}:{parsed.minute:02d}:{parsed.second:02d}Z"
+    )
+    if canonical != value:
         raise ValueError("timestamp must use canonical UTC form")
     return value
 
