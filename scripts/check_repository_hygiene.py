@@ -33,6 +33,7 @@ PRIVATE_SUFFIXES = {
     ".dll",
     ".dylib",
     ".exe",
+    ".gz",
     ".h5",
     ".hdf5",
     ".joblib",
@@ -57,10 +58,13 @@ PRIVATE_SUFFIXES = {
     ".sqlite3",
     ".safetensors",
     ".so",
+    ".tar",
     ".task",
     ".tflite",
+    ".tgz",
     ".webm",
     ".whl",
+    ".zip",
 }
 PUBLIC_FIXTURE_SUFFIXES = {
     ".avi",

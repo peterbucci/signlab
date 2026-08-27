@@ -1,0 +1,202 @@
+{
+  "$comment": "This JSON Schema enforces portable structure. SignLab's strict external-data validators remain authoritative for canonical hashes, immutable resource bindings, label mappings, archive ordering, signer split isolation, license boundaries, and artifact-byte verification.",
+  "$defs": {
+    "ExternalLabelMappingV1": {
+      "additionalProperties": false,
+      "description": "One reviewed source-gloss mapping into the narrower SignLab taxonomy.",
+      "properties": {
+        "language_equivalence_claimed": {
+          "const": false,
+          "title": "Language Equivalence Claimed",
+          "type": "boolean"
+        },
+        "review_status": {
+          "const": "reviewed_gloss_alignment",
+          "title": "Review Status",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "external-label-mapping/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_label": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "title": "Source Label",
+          "type": "string"
+        },
+        "target_label_id": {
+          "enum": [
+            "hello",
+            "no",
+            "please",
+            "thank_you",
+            "yes"
+          ],
+          "title": "Target Label Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "source_label",
+        "target_label_id",
+        "review_status",
+        "language_equivalence_claimed"
+      ],
+      "title": "ExternalLabelMappingV1",
+      "type": "object"
+    },
+    "TaxonomyRef": {
+      "additionalProperties": false,
+      "description": "Portable identity embedded in downstream manifests and bundles.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "taxonomy-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "id",
+        "version",
+        "sha256"
+      ],
+      "title": "TaxonomyRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/external-dataset-selection-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Frozen source subset and explicit label mappings for one SignLab use.",
+  "properties": {
+    "category": {
+      "enum": [
+        "game",
+        "non-game"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "claim_scope": {
+      "const": "signlab_predefined_gestures_only",
+      "title": "Claim Scope",
+      "type": "string"
+    },
+    "learned_negative_included": {
+      "const": false,
+      "title": "Learned Negative Included",
+      "type": "boolean"
+    },
+    "mappings": {
+      "items": {
+        "$ref": "#/$defs/ExternalLabelMappingV1"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Mappings",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "external-dataset-selection/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "selection_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Selection Id",
+      "type": "string"
+    },
+    "source_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Source Id",
+      "type": "string"
+    },
+    "source_version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Source Version",
+      "type": "string"
+    },
+    "splits": {
+      "maxItems": 3,
+      "minItems": 3,
+      "prefixItems": [
+        {
+          "enum": [
+            "train",
+            "val",
+            "test"
+          ],
+          "type": "string"
+        },
+        {
+          "enum": [
+            "train",
+            "val",
+            "test"
+          ],
+          "type": "string"
+        },
+        {
+          "enum": [
+            "train",
+            "val",
+            "test"
+          ],
+          "type": "string"
+        }
+      ],
+      "title": "Splits",
+      "type": "array"
+    },
+    "taxonomy": {
+      "$ref": "#/$defs/TaxonomyRef"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "selection_id",
+    "version",
+    "source_id",
+    "source_version",
+    "taxonomy",
+    "category",
+    "splits",
+    "mappings",
+    "learned_negative_included",
+    "claim_scope"
+  ],
+  "title": "ExternalDatasetSelectionV1",
+  "type": "object"
+}

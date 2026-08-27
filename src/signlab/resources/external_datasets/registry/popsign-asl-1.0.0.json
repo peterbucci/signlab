@@ -1,0 +1,48 @@
+{
+  "categories": [
+    "game",
+    "non-game"
+  ],
+  "contains_identifiable_human_video": true,
+  "dataset_url": "https://signdata.cc.gatech.edu/view/datasets/popsign_v1_0/index.html",
+  "download_guide_url": "https://signdata.cc.gatech.edu/view/guides/downloading_popsign/index.html",
+  "download_id": "popsign_v1_0",
+  "download_url_template": "https://signdata.cc.gatech.edu/data/{download_id}/{category}/{split}/{source_label}.tar",
+  "license": {
+    "attribution_required": true,
+    "attribution_text": "PopSign ASL v1.0, Georgia Institute of Technology and Deaf Professional Arts Network, licensed under CC BY 4.0.",
+    "change_notice_required": true,
+    "license_id": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "redistribution_permitted": true,
+    "schema_version": "external-license/1"
+  },
+  "provider_reports_participant_consent": true,
+  "publisher_checksums_available": false,
+  "publishers": [
+    "Deaf Professional Arts Network",
+    "Georgia Institute of Technology"
+  ],
+  "schema_version": "licensed-dataset-source/1",
+  "signlab_participant_consent_applicable": false,
+  "source_id": "popsign-asl",
+  "splits": [
+    "train",
+    "val",
+    "test"
+  ],
+  "suitable_uses": [
+    "isolated_sign_recognition",
+    "mobile_isolated_sign_recognition"
+  ],
+  "title": "PopSign ASL v1.0",
+  "total_signers": 47,
+  "total_signs": 250,
+  "total_videos": 200686,
+  "unsuitable_uses": [
+    "continuous_sign_recognition",
+    "sign_language_translation"
+  ],
+  "version": "1.0.0",
+  "website_preview_media_permitted": false
+}

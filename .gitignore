@@ -71,6 +71,10 @@ mlruns/
 *.task
 *.tflite
 *.webm
+*.gz
+*.tar
+*.tgz
+*.zip
 
 # Local databases and caches
 *.db
