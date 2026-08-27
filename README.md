@@ -20,9 +20,12 @@ pipeline, leakage-resistant evaluation, and a privacy-preserving browser demo.
 ## Initial architecture
 
 ```text
-Private research data
-  raw videos -> versioned manifest -> MediaPipe Tasks extraction
-             -> feature variants -> train/calibrate/evaluate -> model bundle
+Authorized source media
+  licensed public archives -> external-dataset-manifest/1 --+
+  future consented video  -> raw-dataset-manifest/1 ----------+-> extraction
+                                                              -> feature variants
+                                                              -> train/evaluate
+                                                              -> model bundle
 
 Local research tools
   Python CLI + DVC + MLflow + Parquet
@@ -91,6 +94,13 @@ behavior, reviewed annotation projection, and the atomic `raw-dataset-manifest/1
 handoff. Its executable example is synthetic only; real media remains fail-closed
 without readiness approval, private storage, and authenticated consent verification.
 
+The [licensed external-dataset guide](docs/external-datasets.md) defines a separate
+offline PopSign ASL v1.0 registry, five-target label selection, deterministic
+acquisition plan, hostile-tar import boundary, and `external-dataset-manifest/1`.
+CC BY 4.0 authorization is recorded without being misrepresented as SignLab
+participant consent; the source contains identifiable people and remains outside
+Git.
+
 The [version-pinned landmark extraction guide](docs/landmark-extraction.md) defines
 the exact MediaPipe/PyAV runtime and model bytes, source-timestamp preservation,
 two-hand tracking, raw hand/body observation masks, deterministic Parquet evidence,
@@ -126,7 +136,7 @@ legacy application dependencies.
 The delivery plan is organized into seven phases:
 
 0. Preserve and audit the legacy school project.
-1. Build the reproducible, consent-aware data foundation.
+1. Build the reproducible, license- and consent-aware data foundation.
 2. Establish trustworthy baselines and continuous evaluation.
 3. Export and validate a portable inference bundle.
 4. Build and validate the static browser demo.
@@ -143,7 +153,10 @@ The immutable legacy audit, reproducible developer foundation, sanitized legacy
 evidence export, versioned gesture taxonomy, and fail-closed participant-data
 governance baseline are established. A UI-independent capture sidecar and atomic raw
 importer now produce a validated `raw-dataset-manifest/1` handoff from explicitly
-synthetic inputs. The sample-bearing dataset contract retains six normalized,
+synthetic inputs. A separate offline licensed-data boundary registers PopSign ASL
+v1.0, freezes the reviewed five-target mapping and 15-archive plan, and imports only
+explicitly acknowledged local archives into `external-dataset-manifest/1`. The
+sample-bearing dataset contract retains six normalized,
 lineage-preserving Parquet tables and the published v1 reader. A pinned MediaPipe
 Tasks boundary now produces schema-validated, lineage-bound landmark Parquet with
 separate semantic and exact-byte evidence; public examples remain synthetic. The
@@ -160,7 +173,10 @@ separate encrypted identity vault; research systems use random pseudonymous IDs.
 Approved data belongs behind a controlled DVC remote whose pointers and lock history
 live in a separate access-controlled metadata repository. The public repository
 contains only explicitly synthetic DVC metadata. Public fixtures must be synthetic,
-explicitly consented, or separately licensed.
+explicitly consented, or separately licensed. Licensed human media stays ignored
+and content-addressed locally unless a reviewed redistribution decision explicitly
+permits a particular artifact. Dataset-license authorization never substitutes for
+SignLab participant consent.
 
 ## License
 

@@ -11,6 +11,9 @@ synthetic builders. Run `generate_taxonomy_schemas.py`,
 corresponding source changes, then review and commit the deterministic output.
 Dataset table JSON Schemas, examples, and Arrow-schema snapshots come from
 `generate_dataset_resources.py`; it deliberately does not commit Parquet bytes.
+Licensed public-source records, selections, and external acquisition/manifest
+schemas come from `generate_external_dataset_resources.py`; it never downloads or
+packages external media or archives.
 Capture identifier, collection-sidecar, and raw dataset handoff schemas come from
 `generate_ingest_resources.py`. Version-pinned extraction resources come from
 `generate_extraction_resources.py`; landmark-quality policy and report schemas come

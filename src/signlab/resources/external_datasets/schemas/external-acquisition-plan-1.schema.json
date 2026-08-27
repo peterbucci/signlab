@@ -1,0 +1,229 @@
+{
+  "$comment": "This JSON Schema enforces portable structure. SignLab's strict external-data validators remain authoritative for canonical hashes, immutable resource bindings, label mappings, archive ordering, signer split isolation, license boundaries, and artifact-byte verification.",
+  "$defs": {
+    "ExternalArchivePlanV1": {
+      "additionalProperties": false,
+      "description": "One official archive that an operator downloads outside SignLab.",
+      "properties": {
+        "archive_format": {
+          "const": "tar",
+          "title": "Archive Format",
+          "type": "string"
+        },
+        "archive_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Archive Id",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "game",
+            "non-game"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "download_url": {
+          "maxLength": 2048,
+          "minLength": 12,
+          "pattern": "^https://",
+          "title": "Download Url",
+          "type": "string"
+        },
+        "integrity_basis": {
+          "const": "trust_on_first_use_then_sha256",
+          "title": "Integrity Basis",
+          "type": "string"
+        },
+        "local_archive": {
+          "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+        },
+        "publisher_sha256": {
+          "title": "Publisher Sha256",
+          "type": "null"
+        },
+        "schema_version": {
+          "const": "external-archive-plan/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_label": {
+          "maxLength": 64,
+          "minLength": 1,
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "title": "Source Label",
+          "type": "string"
+        },
+        "split": {
+          "enum": [
+            "train",
+            "val",
+            "test"
+          ],
+          "title": "Split",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "archive_id",
+        "category",
+        "split",
+        "source_label",
+        "download_url",
+        "local_archive",
+        "archive_format",
+        "publisher_sha256",
+        "integrity_basis"
+      ],
+      "title": "ExternalArchivePlanV1",
+      "type": "object"
+    },
+    "ExternalResourceRefV1": {
+      "additionalProperties": false,
+      "description": "Digest-bound reference to one immutable external-data resource.",
+      "properties": {
+        "resource_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "resource_kind": {
+          "enum": [
+            "source",
+            "selection"
+          ],
+          "title": "Resource Kind",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "external-resource-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "resource_kind",
+        "resource_id",
+        "version",
+        "sha256"
+      ],
+      "title": "ExternalResourceRefV1",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/external-acquisition-plan-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Deterministic, network-free handoff from reviewed metadata to local archives.",
+  "properties": {
+    "archives": {
+      "items": {
+        "$ref": "#/$defs/ExternalArchivePlanV1"
+      },
+      "maxItems": 4096,
+      "minItems": 1,
+      "title": "Archives",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "network_access": {
+      "const": "forbidden",
+      "title": "Network Access",
+      "type": "string"
+    },
+    "plan_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "plan_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Plan Sha256",
+      "type": "string"
+    },
+    "preview_media": {
+      "const": "forbidden",
+      "title": "Preview Media",
+      "type": "string"
+    },
+    "required_license_acknowledgement": {
+      "const": "CC-BY-4.0",
+      "title": "Required License Acknowledgement",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "external-acquisition-plan/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "selection": {
+      "$ref": "#/$defs/ExternalResourceRefV1"
+    },
+    "source": {
+      "$ref": "#/$defs/ExternalResourceRefV1"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "plan_id",
+    "version",
+    "source",
+    "selection",
+    "network_access",
+    "preview_media",
+    "required_license_acknowledgement",
+    "archives",
+    "plan_sha256"
+  ],
+  "title": "ExternalAcquisitionPlanV1",
+  "type": "object"
+}

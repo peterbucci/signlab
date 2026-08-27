@@ -13,6 +13,7 @@ from scripts import verify_distribution as distribution_verifier
 from scripts.verify_distribution import (
     EXPECTED_CONTRACT_RESOURCES,
     EXPECTED_DATASET_RESOURCES,
+    EXPECTED_EXTERNAL_DATASET_RESOURCES,
     EXPECTED_EXTRACTION_RESOURCES,
     EXPECTED_GOVERNANCE_RESOURCES,
     EXPECTED_QUALITY_RESOURCES,
@@ -32,12 +33,14 @@ def _write_sdist(
     extraction_resources: Iterable[str] = EXPECTED_EXTRACTION_RESOURCES,
     extra_members: Iterable[tarfile.TarInfo] = (),
     quality_resources: Iterable[str] = EXPECTED_QUALITY_RESOURCES,
+    external_dataset_resources: Iterable[str] = EXPECTED_EXTERNAL_DATASET_RESOURCES,
 ) -> None:
     archive_root = path.name.removesuffix(".tar.gz")
     member_names = [
         f"{archive_root}/src/signlab/py.typed",
         f"{archive_root}/src/signlab/resources/contracts/__init__.py",
         f"{archive_root}/src/signlab/resources/datasets/__init__.py",
+        f"{archive_root}/src/signlab/resources/external_datasets/__init__.py",
         f"{archive_root}/src/signlab/resources/extraction/__init__.py",
         f"{archive_root}/src/signlab/resources/governance/__init__.py",
         f"{archive_root}/src/signlab/resources/quality/__init__.py",
@@ -52,6 +55,10 @@ def _write_sdist(
         *(
             f"{archive_root}/src/signlab/resources/datasets/{resource}"
             for resource in dataset_resources
+        ),
+        *(
+            f"{archive_root}/src/signlab/resources/external_datasets/{resource}"
+            for resource in external_dataset_resources
         ),
         *(
             f"{archive_root}/src/signlab/resources/extraction/{resource}"
@@ -79,12 +86,14 @@ def _write_wheel(
     dataset_resources: Iterable[str] = EXPECTED_DATASET_RESOURCES,
     extraction_resources: Iterable[str] = EXPECTED_EXTRACTION_RESOURCES,
     quality_resources: Iterable[str] = EXPECTED_QUALITY_RESOURCES,
+    external_dataset_resources: Iterable[str] = EXPECTED_EXTERNAL_DATASET_RESOURCES,
 ) -> None:
     member_names = [
         "signlab/py.typed",
         "signlab/commands/__init__.py",
         "signlab/resources/contracts/__init__.py",
         "signlab/resources/datasets/__init__.py",
+        "signlab/resources/external_datasets/__init__.py",
         "signlab/resources/extraction/__init__.py",
         "signlab/resources/governance/__init__.py",
         "signlab/resources/quality/__init__.py",
@@ -93,6 +102,7 @@ def _write_wheel(
         *(f"signlab/resources/governance/{name}" for name in governance_resources),
         *(f"signlab/resources/contracts/{name}" for name in contract_resources),
         *(f"signlab/resources/datasets/{name}" for name in dataset_resources),
+        *(f"signlab/resources/external_datasets/{name}" for name in external_dataset_resources),
         *(f"signlab/resources/extraction/{name}" for name in extraction_resources),
         *(f"signlab/resources/quality/{name}" for name in quality_resources),
         "signlab-0.1.0.dist-info/METADATA",
@@ -135,6 +145,21 @@ def test_distribution_policy_rejects_traversal_and_private_artifacts() -> None:
         "archive contains a private or generated artifact",
     )
     assert validate_member_names(("signlab/models/hand_landmarker.task",)) == (
+        "archive contains a private or generated artifact",
+    )
+
+
+@pytest.mark.parametrize(
+    "member_name",
+    [
+        "signlab/resources/external_datasets/media.tar",
+        "signlab/resources/external_datasets/media.tar.gz",
+        "signlab/resources/external_datasets/media.tgz",
+        "signlab/resources/external_datasets/media.zip",
+    ],
+)
+def test_distribution_policy_rejects_committed_data_archives(member_name: str) -> None:
+    assert validate_member_names((member_name,)) == (
         "archive contains a private or generated artifact",
     )
 
@@ -426,6 +451,69 @@ def test_archives_require_the_exact_nonduplicate_extraction_resource_set(
             expected_error,
         )
     assert errors == expected_errors
+
+
+@pytest.mark.parametrize("archive_kind", ["wheel", "sdist"])
+@pytest.mark.parametrize("mutation", ["missing", "extra", "duplicate"])
+def test_archives_require_the_exact_nonduplicate_external_dataset_resource_set(
+    tmp_path: Path,
+    archive_kind: str,
+    mutation: str,
+) -> None:
+    resources = sorted(EXPECTED_EXTERNAL_DATASET_RESOURCES)
+    if mutation == "missing":
+        resources.remove("registry/popsign-asl-1.0.0.json")
+    elif mutation == "extra":
+        resources.append("registry/unexpected-1.0.0.json")
+    else:
+        resources.append("selections/signlab-five-popsign-1.0.0.json")
+
+    if archive_kind == "wheel":
+        archive = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+        if mutation == "duplicate":
+            with pytest.warns(UserWarning, match="Duplicate name"):
+                _write_wheel(
+                    archive,
+                    EXPECTED_GOVERNANCE_RESOURCES,
+                    external_dataset_resources=resources,
+                )
+        else:
+            _write_wheel(
+                archive,
+                EXPECTED_GOVERNANCE_RESOURCES,
+                external_dataset_resources=resources,
+            )
+        errors = _inspect_wheel(archive)
+        expected_error = "wheel does not contain the exact external-dataset resource set"
+    else:
+        archive = tmp_path / "signlab-0.1.0.tar.gz"
+        _write_sdist(
+            archive,
+            EXPECTED_GOVERNANCE_RESOURCES,
+            external_dataset_resources=resources,
+        )
+        errors = _inspect_sdist(archive)
+        expected_error = (
+            "source distribution does not contain the exact external-dataset resource set"
+        )
+
+    expected_errors: tuple[str, ...] = (expected_error,)
+    if mutation == "duplicate":
+        expected_errors = (
+            "archive contains duplicate or case-colliding member paths",
+            expected_error,
+        )
+    assert errors == expected_errors
+
+
+def test_archives_accept_the_exact_external_dataset_resource_set(tmp_path: Path) -> None:
+    wheel = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+    sdist = tmp_path / "signlab-0.1.0.tar.gz"
+    _write_wheel(wheel, EXPECTED_GOVERNANCE_RESOURCES)
+    _write_sdist(sdist, EXPECTED_GOVERNANCE_RESOURCES)
+
+    assert _inspect_wheel(wheel) == ()
+    assert _inspect_sdist(sdist) == ()
 
 
 @pytest.mark.parametrize("archive_kind", ["wheel", "sdist"])

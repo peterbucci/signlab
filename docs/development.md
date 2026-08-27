@@ -102,6 +102,17 @@ uv run python scripts/generate_contract_resources.py
 uv run signlab contracts validate-resources
 ```
 
+After changing a licensed external-dataset contract, source registry, or reviewed
+label selection, run:
+
+```shell
+uv run python scripts/generate_external_dataset_resources.py
+uv run signlab data validate-resources
+```
+
+That generator owns only reviewable JSON metadata and schemas. It never downloads
+or packages public-dataset video or tar archives.
+
 After changing an extraction contract, default config, model lock, or landmark
 Arrow schema, run:
 

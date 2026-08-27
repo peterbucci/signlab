@@ -12,7 +12,9 @@ from signlab.legacy.exporter import LegacyExportError, export_legacy_evidence
 from signlab.legacy.validator import validate_legacy_export
 
 app = create_group(
-    help_text="Capture, import, validate, version, and split consent-approved datasets."
+    help_text=(
+        "Capture, import, validate, version, and split consent- or license-authorized datasets."
+    )
 )
 
 
@@ -259,6 +261,157 @@ def validate_raw_dataset_command(
     typer.echo(f"Lineage inventory: {checked.lineage_inventory_integrity}")
     typer.echo(f"Quarantine inventory: {checked.quarantine_inventory_integrity}")
     typer.echo(f"Current consent authorization: {checked.consent_authorization.replace('_', ' ')}")
+
+
+@app.command("plan-external-dataset")
+def plan_external_dataset_command(
+    source: Annotated[
+        Literal["popsign-asl-v1"],
+        typer.Argument(help="Registered licensed dataset release to plan."),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New or byte-identical acquisition-plan JSON file."),
+    ],
+) -> None:
+    """Write the reviewed offline plan without downloading human media."""
+
+    from signlab.datasets.popsign import (
+        PopSignDatasetError,
+        build_popsign_v1_plan,
+        write_external_acquisition_plan,
+    )
+
+    try:
+        plan = build_popsign_v1_plan()
+        result = write_external_acquisition_plan(plan, output)
+    except (PopSignDatasetError, OSError, TypeError, ValueError) as error:
+        typer.echo("External dataset planning failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"External dataset plan: {result.status}.")
+    typer.echo("Registered source: PopSign ASL v1.0.")
+    typer.echo(f"Planned archives: {result.archive_count}")
+    typer.echo(f"Acquisition plan SHA-256: {result.plan_sha256}")
+    typer.echo("Network access: not used.")
+
+
+def _echo_external_dataset_summary(
+    *,
+    status: str,
+    content_sha256: str,
+    archive_count: int,
+    media_count: int,
+    semantic_integrity: str,
+    media_byte_integrity: str,
+    archive_byte_integrity: str,
+    license_authorization: str,
+) -> None:
+    """Emit only aggregate, path-free evidence for licensed external media."""
+
+    typer.echo(f"External dataset: {status.replace('_', ' ')}.")
+    typer.echo(f"External data SHA-256: {content_sha256}")
+    typer.echo(f"Licensed archives: {archive_count}")
+    typer.echo(f"Imported media: {media_count}")
+    typer.echo(f"Dataset semantics: {semantic_integrity.replace('_', ' ')}")
+    typer.echo(f"Imported media bytes: {media_byte_integrity.replace('_', ' ')}")
+    typer.echo(f"Original archive bytes: {archive_byte_integrity.replace('_', ' ')}")
+    typer.echo(f"License authorization: {license_authorization.replace('_', ' ')}")
+    typer.echo("SignLab participant consent: not applicable to licensed public data.")
+
+
+@app.command("import-popsign")
+def import_popsign_command(
+    plan: Annotated[
+        Path,
+        typer.Argument(help="Exact reviewed external-acquisition-plan/1 JSON document."),
+    ],
+    archive_root: Annotated[
+        Path,
+        typer.Option("--archive-root", help="Local root containing every planned archive."),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New or byte-identical external dataset bundle."),
+    ],
+    accept_license: Annotated[
+        str,
+        typer.Option(
+            "--accept-license",
+            help="Explicit license acknowledgement; this release requires CC-BY-4.0.",
+        ),
+    ],
+) -> None:
+    """Import explicitly licensed local PopSign archives without network access."""
+
+    from signlab.datasets.popsign import PopSignDatasetError, import_popsign_v1_archives
+
+    try:
+        result = import_popsign_v1_archives(
+            plan.read_bytes(),
+            archive_root=archive_root,
+            destination=output,
+            accept_license=accept_license,
+        )
+    except (PopSignDatasetError, OSError, TypeError, ValueError) as error:
+        typer.echo("External dataset import failed.", err=True)
+        raise typer.Exit(code=1) from error
+    checked = result.validation
+    _echo_external_dataset_summary(
+        status=result.status,
+        content_sha256=checked.content_sha256,
+        archive_count=checked.archive_count,
+        media_count=checked.media_count,
+        semantic_integrity=checked.semantic_integrity,
+        media_byte_integrity=checked.media_byte_integrity,
+        archive_byte_integrity=checked.archive_byte_integrity,
+        license_authorization=checked.license_authorization,
+    )
+
+
+@app.command("validate-external-dataset")
+def validate_external_dataset_command(
+    manifest: Annotated[
+        Path,
+        typer.Argument(help="External-dataset-manifest/1 JSON document."),
+    ],
+    workspace_root: Annotated[
+        Path,
+        typer.Option("--workspace-root", help="Explicit external bundle root."),
+    ],
+    archive_root: Annotated[
+        Path | None,
+        typer.Option(
+            "--archive-root",
+            help="Optional local archive root for exact source-byte revalidation.",
+        ),
+    ] = None,
+) -> None:
+    """Verify licensed-media lineage, inventory, and content-addressed bytes."""
+
+    from signlab.datasets.popsign import (
+        PopSignDatasetError,
+        validate_external_dataset_bundle,
+    )
+
+    try:
+        checked = validate_external_dataset_bundle(
+            manifest.read_bytes(),
+            workspace_root,
+            archive_root=archive_root,
+        )
+    except (PopSignDatasetError, OSError, TypeError, ValueError) as error:
+        typer.echo("External dataset validation failed.", err=True)
+        raise typer.Exit(code=1) from error
+    _echo_external_dataset_summary(
+        status="verified",
+        content_sha256=checked.content_sha256,
+        archive_count=checked.archive_count,
+        media_count=checked.media_count,
+        semantic_integrity=checked.semantic_integrity,
+        media_byte_integrity=checked.media_byte_integrity,
+        archive_byte_integrity=checked.archive_byte_integrity,
+        license_authorization=checked.license_authorization,
+    )
 
 
 def _echo_landmark_extraction_summary(
@@ -616,8 +769,11 @@ def run_reproduction_stage_command(
 
 @app.command("validate-resources")
 def validate_dataset_resources() -> None:
-    """Validate packaged dataset, ingest, extraction, and quality resources."""
+    """Validate packaged dataset, external, ingest, extraction, and quality resources."""
 
+    from signlab.datasets.external_resources import (
+        validate_packaged_external_dataset_resources,
+    )
     from signlab.datasets.ingest_resources import validate_packaged_ingest_resources
     from signlab.datasets.resources import validate_packaged_dataset_resources
     from signlab.extraction.resources import validate_packaged_extraction_resources
@@ -625,13 +781,14 @@ def validate_dataset_resources() -> None:
 
     try:
         validate_packaged_dataset_resources()
+        validate_packaged_external_dataset_resources()
         validate_packaged_ingest_resources()
         validate_packaged_extraction_resources()
         validate_packaged_quality_resources()
     except (OSError, TypeError, ValueError) as error:
         typer.echo("Packaged dataset resource validation failed.", err=True)
         raise typer.Exit(code=1) from error
-    typer.echo("Packaged dataset, ingest, extraction, and quality resources are valid.")
+    typer.echo("Packaged dataset, external, ingest, extraction, and quality resources are valid.")
 
 
 @app.command("write-example-dataset")

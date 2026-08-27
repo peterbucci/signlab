@@ -262,7 +262,7 @@ def test_dataset_resource_validation_includes_extraction_resources(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from signlab.datasets import ingest_resources
+    from signlab.datasets import external_resources, ingest_resources
     from signlab.datasets import resources as dataset_resources
     from signlab.extraction import resources as extraction_resources
     from signlab.quality import resources as quality_resources
@@ -272,6 +272,11 @@ def test_dataset_resource_validation_includes_extraction_resources(
         dataset_resources,
         "validate_packaged_dataset_resources",
         lambda: calls.append("dataset"),
+    )
+    monkeypatch.setattr(
+        external_resources,
+        "validate_packaged_external_dataset_resources",
+        lambda: calls.append("external"),
     )
     monkeypatch.setattr(
         ingest_resources,
@@ -292,9 +297,9 @@ def test_dataset_resource_validation_includes_extraction_resources(
     result = runner.invoke(cli.app, ["data", "validate-resources"])
 
     assert result.exit_code == 0
-    assert calls == ["dataset", "ingest", "extraction", "quality"]
+    assert calls == ["dataset", "external", "ingest", "extraction", "quality"]
     assert result.output.strip() == (
-        "Packaged dataset, ingest, extraction, and quality resources are valid."
+        "Packaged dataset, external, ingest, extraction, and quality resources are valid."
     )
 
 

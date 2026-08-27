@@ -1,0 +1,259 @@
+{
+  "$comment": "This JSON Schema enforces portable structure. SignLab's strict external-data validators remain authoritative for canonical hashes, immutable resource bindings, label mappings, archive ordering, signer split isolation, license boundaries, and artifact-byte verification.",
+  "$defs": {
+    "ExternalLicenseV1": {
+      "additionalProperties": false,
+      "description": "Machine-readable obligations for one externally governed dataset release.",
+      "properties": {
+        "attribution_required": {
+          "const": true,
+          "title": "Attribution Required",
+          "type": "boolean"
+        },
+        "attribution_text": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "^\\S(?:.*\\S)?$",
+          "title": "Attribution Text",
+          "type": "string"
+        },
+        "change_notice_required": {
+          "const": true,
+          "title": "Change Notice Required",
+          "type": "boolean"
+        },
+        "license_id": {
+          "const": "CC-BY-4.0",
+          "title": "License Id",
+          "type": "string"
+        },
+        "license_url": {
+          "maxLength": 2048,
+          "minLength": 12,
+          "pattern": "^https://",
+          "title": "License Url",
+          "type": "string"
+        },
+        "redistribution_permitted": {
+          "const": true,
+          "title": "Redistribution Permitted",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "external-license/1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "license_id",
+        "license_url",
+        "attribution_text",
+        "attribution_required",
+        "change_notice_required",
+        "redistribution_permitted"
+      ],
+      "title": "ExternalLicenseV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/licensed-dataset-source-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Reviewed source facts that remain distinct from SignLab participant consent.",
+  "properties": {
+    "categories": {
+      "items": {
+        "enum": [
+          "game",
+          "non-game"
+        ],
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 1,
+      "title": "Categories",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "contains_identifiable_human_video": {
+      "const": true,
+      "title": "Contains Identifiable Human Video",
+      "type": "boolean"
+    },
+    "dataset_url": {
+      "maxLength": 2048,
+      "minLength": 12,
+      "pattern": "^https://",
+      "title": "Dataset Url",
+      "type": "string"
+    },
+    "download_guide_url": {
+      "maxLength": 2048,
+      "minLength": 12,
+      "pattern": "^https://",
+      "title": "Download Guide Url",
+      "type": "string"
+    },
+    "download_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Download Id",
+      "type": "string"
+    },
+    "download_url_template": {
+      "maxLength": 2048,
+      "minLength": 12,
+      "pattern": "^https://",
+      "title": "Download Url Template",
+      "type": "string"
+    },
+    "license": {
+      "$ref": "#/$defs/ExternalLicenseV1"
+    },
+    "provider_reports_participant_consent": {
+      "const": true,
+      "title": "Provider Reports Participant Consent",
+      "type": "boolean"
+    },
+    "publisher_checksums_available": {
+      "const": false,
+      "title": "Publisher Checksums Available",
+      "type": "boolean"
+    },
+    "publishers": {
+      "items": {
+        "maxLength": 1000,
+        "minLength": 1,
+        "pattern": "^\\S(?:.*\\S)?$",
+        "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Publishers",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "schema_version": {
+      "const": "licensed-dataset-source/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "signlab_participant_consent_applicable": {
+      "const": false,
+      "title": "Signlab Participant Consent Applicable",
+      "type": "boolean"
+    },
+    "source_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Source Id",
+      "type": "string"
+    },
+    "splits": {
+      "items": {
+        "enum": [
+          "train",
+          "val",
+          "test"
+        ],
+        "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 1,
+      "title": "Splits",
+      "type": "array"
+    },
+    "suitable_uses": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 3,
+        "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+        "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Suitable Uses",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "title": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "pattern": "^\\S(?:.*\\S)?$",
+      "title": "Title",
+      "type": "string"
+    },
+    "total_signers": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Total Signers",
+      "type": "integer"
+    },
+    "total_signs": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Total Signs",
+      "type": "integer"
+    },
+    "total_videos": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Total Videos",
+      "type": "integer"
+    },
+    "unsuitable_uses": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 3,
+        "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+        "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Unsuitable Uses",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    },
+    "website_preview_media_permitted": {
+      "const": false,
+      "title": "Website Preview Media Permitted",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source_id",
+    "version",
+    "title",
+    "publishers",
+    "dataset_url",
+    "download_guide_url",
+    "download_id",
+    "download_url_template",
+    "license",
+    "categories",
+    "splits",
+    "total_videos",
+    "total_signs",
+    "total_signers",
+    "contains_identifiable_human_video",
+    "provider_reports_participant_consent",
+    "signlab_participant_consent_applicable",
+    "publisher_checksums_available",
+    "website_preview_media_permitted",
+    "suitable_uses",
+    "unsuitable_uses"
+  ],
+  "title": "LicensedDatasetSourceV1",
+  "type": "object"
+}

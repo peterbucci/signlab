@@ -89,6 +89,14 @@ EXPECTED_DATASET_RESOURCES = {
     "schemas/recordings-table-1.schema.json",
     "schemas/sessions-table-1.schema.json",
 }
+EXPECTED_EXTERNAL_DATASET_RESOURCES = {
+    "registry/popsign-asl-1.0.0.json",
+    "schemas/external-acquisition-plan-1.schema.json",
+    "schemas/external-dataset-manifest-1.schema.json",
+    "schemas/external-dataset-selection-1.schema.json",
+    "schemas/licensed-dataset-source-1.schema.json",
+    "selections/signlab-five-popsign-1.0.0.json",
+}
 EXPECTED_EXTRACTION_RESOURCES = {
     "arrow/landmark-frames-table-1.arrow-schema.json",
     "config/mediapipe-extraction-config-1.default.json",
@@ -119,6 +127,7 @@ FORBIDDEN_SUFFIXES = {
     ".dll",
     ".dylib",
     ".exe",
+    ".gz",
     ".h5",
     ".hdf5",
     ".joblib",
@@ -144,9 +153,12 @@ FORBIDDEN_SUFFIXES = {
     ".sqlite",
     ".sqlite3",
     ".task",
+    ".tar",
     ".tflite",
+    ".tgz",
     ".webm",
     ".whl",
+    ".zip",
 }
 _WINDOWS_RESERVED_NAMES = {
     "aux",
@@ -272,6 +284,17 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             expected_dataset_members
         ):
             errors.append("wheel does not contain the exact dataset resource set")
+        external_dataset_prefix = "signlab/resources/external_datasets/"
+        external_dataset_members = [
+            name.removeprefix(external_dataset_prefix)
+            for name in names
+            if name.startswith(external_dataset_prefix) and not name.endswith("/")
+        ]
+        expected_external_dataset_members = EXPECTED_EXTERNAL_DATASET_RESOURCES | {"__init__.py"}
+        if set(external_dataset_members) != expected_external_dataset_members or len(
+            external_dataset_members
+        ) != len(expected_external_dataset_members):
+            errors.append("wheel does not contain the exact external-dataset resource set")
         extraction_prefix = "signlab/resources/extraction/"
         extraction_members = [
             name.removeprefix(extraction_prefix)
@@ -365,6 +388,19 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
             expected_dataset_members
         ):
             errors.append("source distribution does not contain the exact dataset resource set")
+        external_dataset_prefix = f"{package_prefix}resources/external_datasets/"
+        external_dataset_members = [
+            member.name.removeprefix(external_dataset_prefix)
+            for member in members
+            if member.name.startswith(external_dataset_prefix)
+        ]
+        expected_external_dataset_members = EXPECTED_EXTERNAL_DATASET_RESOURCES | {"__init__.py"}
+        if set(external_dataset_members) != expected_external_dataset_members or len(
+            external_dataset_members
+        ) != len(expected_external_dataset_members):
+            errors.append(
+                "source distribution does not contain the exact external-dataset resource set"
+            )
         extraction_prefix = f"{package_prefix}resources/extraction/"
         extraction_members = [
             member.name.removeprefix(extraction_prefix)

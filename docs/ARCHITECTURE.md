@@ -3,8 +3,10 @@
 ## Core release
 
 ```text
-Authorized source media (future) or synthetic fixture + collection-sidecar/1
-  -> raw-dataset-manifest/1
+Licensed public archives -> external-dataset-manifest/1 --+
+Synthetic fixture or future consented media                  |
+  + collection-sidecar/1 -> raw-dataset-manifest/1 ----------+
+  -> reviewed extraction input bridge
   -> MediaPipe Tasks extraction
      - image-space and world hand landmarks
      - selected body anchors
@@ -27,6 +29,16 @@ synthetic DVC receipts. Public Git contains only the synthetic fixture lock. Whe
 Story #19 creates the first approved production version, participant-data pointers
 and production lock history will live in a separate protected metadata repository.
 See [data versioning](data-versioning.md).
+
+The [licensed external-data boundary](external-datasets.md) is intentionally
+separate from participant ingest. It registers source, license, attribution,
+sensitivity, use limitations, a reviewed label mapping, and an offline acquisition
+plan. Its PopSign adapter imports only operator-downloaded official archives and
+publishes `external-dataset-manifest/1`; it never downloads human media. The
+manifest preserves source split and exact byte lineage with source-namespaced opaque
+signer identities, but it contains no SignLab consent object. Story #74 owns the
+later bridge into the common extraction path; Story #73 does not create features or
+trainable samples.
 
 ## State model
 

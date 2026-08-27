@@ -8,9 +8,13 @@ known limitations.
 
 ## Phase 1 — Reproducible data foundation
 
-Define consent-aware manifests, DVC versioning, grouped split generation, a shared
-MediaPipe Tasks extractor, raw landmark/timestamp/mask storage, quality validation,
-and a pilot multi-signer collection protocol.
+Define authorization-aware manifests for licensed public and future consented data,
+DVC versioning, grouped split generation, a shared MediaPipe Tasks extractor, raw
+landmark/timestamp/mask storage, quality validation, and portable representations.
+Build the portfolio corpus from a reviewed licensed subset plus explicitly
+constructed replay. Preserve an original multi-signer participant study as a
+deferred extension rather than blocking the technical release or marking it done
+with public data.
 
 ## Phase 2 — Trustworthy ML core
 
@@ -43,6 +47,8 @@ MLflow does not already provide.
 ## Milestone gates
 
 - Do not tune architectures before split-leakage tests pass.
+- Do not represent a dataset license as SignLab participant consent.
+- Do not describe constructed public-data replay as natural continuous sessions.
 - Do not publish accuracy before signer/session-held-out evaluation exists.
 - Do not build the browser demo before an immutable bundle and parity fixtures exist.
 - Do not build the optional platform before the static public release is complete.

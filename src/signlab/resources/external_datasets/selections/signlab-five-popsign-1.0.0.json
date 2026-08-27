@@ -1,0 +1,58 @@
+{
+  "category": "game",
+  "claim_scope": "signlab_predefined_gestures_only",
+  "learned_negative_included": false,
+  "mappings": [
+    {
+      "language_equivalence_claimed": false,
+      "review_status": "reviewed_gloss_alignment",
+      "schema_version": "external-label-mapping/1",
+      "source_label": "hello",
+      "target_label_id": "hello"
+    },
+    {
+      "language_equivalence_claimed": false,
+      "review_status": "reviewed_gloss_alignment",
+      "schema_version": "external-label-mapping/1",
+      "source_label": "no",
+      "target_label_id": "no"
+    },
+    {
+      "language_equivalence_claimed": false,
+      "review_status": "reviewed_gloss_alignment",
+      "schema_version": "external-label-mapping/1",
+      "source_label": "please",
+      "target_label_id": "please"
+    },
+    {
+      "language_equivalence_claimed": false,
+      "review_status": "reviewed_gloss_alignment",
+      "schema_version": "external-label-mapping/1",
+      "source_label": "thankyou",
+      "target_label_id": "thank_you"
+    },
+    {
+      "language_equivalence_claimed": false,
+      "review_status": "reviewed_gloss_alignment",
+      "schema_version": "external-label-mapping/1",
+      "source_label": "yes",
+      "target_label_id": "yes"
+    }
+  ],
+  "schema_version": "external-dataset-selection/1",
+  "selection_id": "signlab-five-popsign",
+  "source_id": "popsign-asl",
+  "source_version": "1.0.0",
+  "splits": [
+    "train",
+    "val",
+    "test"
+  ],
+  "taxonomy": {
+    "id": "signlab-five",
+    "schema_version": "taxonomy-reference/1",
+    "sha256": "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d",
+    "version": "1.0.0"
+  },
+  "version": "1.0.0"
+}
