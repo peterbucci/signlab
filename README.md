@@ -168,7 +168,9 @@ quality boundary records deterministic timing, gap, pose, continuity, and triage
 evidence without rewriting extraction. A pure portable-feature service now derives
 three exact representation variants, optional geometry and elapsed-time kinematics,
 masked training-only statistics, and content-addressed cache objects. Licensed
-PopSign execution and corpus publication remain the next data-foundation bridge.
+PopSign execution now produces one deterministic, leakage-checked 80-sample public
+smoke split from the verified retained landmark inventory without rerunning MediaPipe.
+Baseline experiment loading and evaluation remain the next bridge.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
 until the remaining licensed-corpus and grouped-evaluation foundations are complete.

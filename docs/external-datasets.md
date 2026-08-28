@@ -152,6 +152,23 @@ explicitly rebased windowed Parquet are both retained; quality and features cons
 same windowed view. The 750-file no-extraction evaluation is recorded in
 [`popsign-active-window-v1.md`](reports/popsign-active-window-v1.md).
 
+After that evaluation succeeds, freeze the exact experiment membership from those
+same retained Parquets; this command has no video or MediaPipe input:
+
+```shell
+uv run signlab data freeze-public-corpus-split \
+  data/raw/external/popsign-v1/external-dataset-manifest.json \
+  --source-root LOCAL_IMMUTABLE_79_CORPUS_ROOT \
+  --output LOCAL_FROZEN_SPLIT_ROOT
+```
+
+The command requires the pinned 750-file inventory and exact 582 pass / 111 warning /
+46 quarantine / 11 no-window replay. It then applies the fixed offline rule, writes
+only the 80 portable feature files and their leakage-checked split manifest, and
+reconciles every feature before success. The completed real-data verification is
+recorded in
+[`popsign-frozen-smoke-split-v1.md`](reports/popsign-frozen-smoke-split-v1.md).
+
 ## Import and security guarantees
 
 The importer treats every tar as hostile input. It streams regular MP4 members and
