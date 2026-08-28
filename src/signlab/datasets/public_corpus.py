@@ -29,6 +29,11 @@ from signlab.contracts.features import landmark_feature_plan_digest
 from signlab.contracts.quality import landmark_quality_policy_digest
 from signlab.datasets.external_resources import load_popsign_source
 from signlab.datasets.popsign import validate_external_dataset_bundle
+from signlab.datasets.popsign_window import (
+    POPSIGN_WINDOW_RULE_ID,
+    materialize_popsign_window,
+    select_popsign_window,
+)
 from signlab.extraction.batch import ExtractionBatchError, extract_media_landmarks
 from signlab.extraction.parquet import write_landmark_frames
 from signlab.extraction.resources import load_packaged_default_extraction_config
@@ -269,6 +274,7 @@ def _summary_markdown(summary: dict[str, object]) -> str:
         f"- Hand model: `{summary['hand_model_sha256']}`",
         f"- Pose model: `{summary['pose_model_sha256']}`",
         f"- Quality policy: `{summary['quality_policy_sha256']}`",
+        f"- Active-sign window: `{summary['active_window_rule_id']}`",
         f"- Feature plan: `{summary['feature_plan_sha256']}`",
         f"- Source orientation basis: `{summary['source_orientation_basis']}`",
         "",
@@ -330,6 +336,7 @@ def _trainable_summary_markdown(summary: dict[str, object]) -> str:
         f"- Hand model: `{summary['hand_model_sha256']}`",
         f"- Pose model: `{summary['pose_model_sha256']}`",
         f"- Quality policy: `{summary['quality_policy_sha256']}`",
+        f"- Active-sign window: `{summary['active_window_rule_id']}`",
         f"- Feature plan: `{summary['feature_plan_sha256']}`",
         f"- Source orientation basis: `{summary['source_orientation_basis']}`",
         "",
@@ -434,6 +441,19 @@ def build_public_corpus(
             return None
         _verify_media_bytes(source_path, media)
 
+        source_content_sha256 = landmark_frames_table_digest(table)
+        source_parquet_path = _content_path(
+            destination,
+            "source-landmarks",
+            source_content_sha256,
+            ".parquet",
+        )
+        source_parquet = write_landmark_frames(table, source_parquet_path)
+        active_window = select_popsign_window(table)
+        if not active_window.selected:
+            exclusions[f"window.{active_window.reason}"] += 1
+            return None
+        table = materialize_popsign_window(table, active_window)
         content_sha256 = landmark_frames_table_digest(table)
         parquet_path = _content_path(destination, "landmarks", content_sha256, ".parquet")
         parquet = write_landmark_frames(table, parquet_path)
@@ -489,6 +509,19 @@ def build_public_corpus(
                 "source_mirror_state": _SOURCE_MIRROR_STATE,
                 "source_orientation_basis": _SOURCE_ORIENTATION_BASIS,
                 "expected_hand_count": 1,
+                "source_landmark_content_sha256": source_content_sha256,
+                "source_landmark_parquet_sha256": source_parquet.sha256,
+                "source_landmark_parquet_size_bytes": source_parquet.size_bytes,
+                "source_landmark_frame_count": source_parquet.row_count,
+                "source_landmark_path": source_parquet_path.relative_to(destination).as_posix(),
+                "active_window": {
+                    "rule_id": active_window.rule_id,
+                    "reason": active_window.reason,
+                    "first_source_frame_index": active_window.first_source_frame_index,
+                    "last_source_frame_index": active_window.last_source_frame_index,
+                    "first_source_pts": active_window.first_source_pts,
+                    "last_source_pts": active_window.last_source_pts,
+                },
                 "landmark_content_sha256": content_sha256,
                 "landmark_parquet_sha256": parquet.sha256,
                 "landmark_parquet_size_bytes": parquet.size_bytes,
@@ -637,6 +670,7 @@ def build_public_corpus(
         "hand_model_sha256": assets.hand_model_sha256,
         "pose_model_sha256": assets.pose_model_sha256,
         "quality_policy_sha256": policy_sha256,
+        "active_window_rule_id": POPSIGN_WINDOW_RULE_ID,
         "feature_plan_id": feature_plan.plan_id,
         "feature_plan_sha256": feature_plan_sha256,
         "selected": selected,
@@ -688,6 +722,7 @@ def build_public_corpus(
         "hand_model_sha256": assets.hand_model_sha256,
         "pose_model_sha256": assets.pose_model_sha256,
         "quality_policy_sha256": policy_sha256,
+        "active_window_rule_id": POPSIGN_WINDOW_RULE_ID,
         "feature_plan_id": feature_plan.plan_id,
         "feature_plan_sha256": feature_plan_sha256,
         "source_orientation_basis": _SOURCE_ORIENTATION_BASIS,

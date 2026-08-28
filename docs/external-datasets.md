@@ -146,6 +146,12 @@ bound feature and runs a metric-free five-class fit/predict interface check. Thi
 proves data plumbing only; it is not an accuracy claim or the training system
 planned for later stories.
 
+Before quality assessment, PopSign isolated-sign sequences use the fixed, label-blind
+`popsign_longest_detected_hand_episode/1` window. The original extracted Parquet and the
+explicitly rebased windowed Parquet are both retained; quality and features consume the
+same windowed view. The 750-file no-extraction evaluation is recorded in
+[`popsign-active-window-v1.md`](reports/popsign-active-window-v1.md).
+
 ## Import and security guarantees
 
 The importer treats every tar as hostile input. It streams regular MP4 members and

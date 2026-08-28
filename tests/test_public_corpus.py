@@ -129,14 +129,23 @@ def test_public_corpus_tries_next_candidate_and_repeats_identically(
             ),
         ),
     )
-    timestamps = (0, 33_333, 66_667)
+    timestamps = (0, 33_333, 66_667, 100_000, 133_333, 166_667, 200_000)
     rejected_fixture = make_feature_fixture(
         timestamps,
         hand_rows=tuple(
             make_hand_row(timestamp_us=timestamp, first_present=False) for timestamp in timestamps
         ),
     )
-    accepted_fixture = make_feature_fixture(timestamps)
+    accepted_fixture = make_feature_fixture(
+        timestamps,
+        hand_rows=tuple(
+            make_hand_row(
+                timestamp_us=timestamp,
+                first_present=2 <= index <= 4,
+            )
+            for index, timestamp in enumerate(timestamps)
+        ),
+    )
     tables = {
         candidates[0].recording_id: _with_recording_id(
             rejected_fixture.table, candidates[0].recording_id
@@ -190,14 +199,26 @@ def test_public_corpus_tries_next_candidate_and_repeats_identically(
     assert first.group_count == 2
     assert first.summary["exclusions"] == {
         "extraction.failed": 5,
-        "quality.reject": 1,
         "selection.attempt_limit": 1,
         "selection.not_needed_after_accepted": 1,
+        "window.no_hand_observations": 1,
     }
     assert progress == [(1, 2, True), (2, 2, False)]
     corpus = json.loads(first_corpus)
-    assert corpus["selected"][0]["sample_id"] == candidates[1].sample_id
-    assert corpus["selected"][0]["feature_sequence_sha256"].startswith("sha256:")
+    selected = corpus["selected"][0]
+    assert selected["sample_id"] == candidates[1].sample_id
+    assert selected["feature_sequence_sha256"].startswith("sha256:")
+    assert selected["active_window"] == {
+        "first_source_frame_index": 2,
+        "first_source_pts": accepted_fixture.table.rows[2].source_pts,
+        "last_source_frame_index": 4,
+        "last_source_pts": accepted_fixture.table.rows[4].source_pts,
+        "reason": "selected_longest_detected_hand_episode",
+        "rule_id": "popsign_longest_detected_hand_episode/1",
+    }
+    assert selected["source_landmark_content_sha256"] != selected["landmark_content_sha256"]
+    assert (output / selected["source_landmark_path"]).is_file()
+    assert (output / selected["landmark_path"]).is_file()
     assert (output / "public-corpus-summary.md").is_file()
 
 
