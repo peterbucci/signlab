@@ -22,6 +22,7 @@ from signlab.contracts.extraction import (
     LandmarkSequenceRefV1,
     Point3V1,
     assert_landmark_sequence_ref_matches_table,
+    landmark_frames_table_digest,
 )
 from signlab.contracts.quality import (
     QUALITY_METRIC_DIRECTIONS,
@@ -149,8 +150,25 @@ def build_elapsed_time_resampling_plan(
 ) -> TemporalResamplingSummaryV1:
     """Summarize a nominal elapsed-time grid without materializing coordinates."""
 
-    if table.rows[0].source_recording_id != recording.recording_id:
+    return _build_elapsed_time_resampling_plan(
+        table,
+        source_recording_id=recording.recording_id,
+        declared_duration_us=recording.duration_us,
+        policy=policy,
+    )
+
+
+def _build_elapsed_time_resampling_plan(
+    table: LandmarkFramesTableV1,
+    *,
+    source_recording_id: str,
+    declared_duration_us: int,
+    policy: LandmarkQualityPolicyV1,
+) -> TemporalResamplingSummaryV1:
+    if table.rows[0].source_recording_id != source_recording_id:
         raise QualityPolicyError("landmark table and recording identities do not match")
+    if declared_duration_us <= 0:
+        raise QualityPolicyError("declared duration must be positive")
     observed_span_us = table.rows[-1].relative_timestamp_us
     target_count, last_target_timestamp_us = elapsed_time_grid_shape(
         observed_span_us,
@@ -163,9 +181,9 @@ def build_elapsed_time_resampling_plan(
         grid_rule=policy.resampling_rule,
         target_rate_numerator=policy.target_rate_numerator,
         target_rate_denominator=policy.target_rate_denominator,
-        declared_duration_us=recording.duration_us,
+        declared_duration_us=declared_duration_us,
         observed_span_us=observed_span_us,
-        declared_unobserved_tail_us=max(recording.duration_us - observed_span_us, 0),
+        declared_unobserved_tail_us=max(declared_duration_us - observed_span_us, 0),
         declared_unobserved_tail_decision="preserve_missing",
         target_count=target_count,
         first_target_timestamp_us=0,
@@ -645,6 +663,35 @@ def assess_landmark_sequence(
     """Assess one exact raw sequence without mutating observations or masks."""
 
     _validate_source_binding(reference, table, recording)
+    return assess_landmark_source(
+        table,
+        policy,
+        source_recording_id=recording.recording_id,
+        source_sequence_content_sha256=reference.content_sha256,
+        source_landmark_parquet_sha256=reference.lineage.artifact.sha256,
+        declared_duration_us=recording.duration_us,
+        expected_hand_count=_expected_hand_count(recording),
+    )
+
+
+def assess_landmark_source(
+    table: LandmarkFramesTableV1,
+    policy: LandmarkQualityPolicyV1,
+    *,
+    source_recording_id: str,
+    source_sequence_content_sha256: str,
+    source_landmark_parquet_sha256: str,
+    declared_duration_us: int,
+    expected_hand_count: Literal[1, 2],
+) -> SequenceQualityReportV1:
+    """Assess verified landmarks without requiring participant-consent records."""
+
+    if table.rows[0].source_recording_id != source_recording_id:
+        raise QualityPolicyError("landmark table and recording identities do not match")
+    if landmark_frames_table_digest(table) != source_sequence_content_sha256:
+        raise QualityPolicyError("landmark table content identity does not match")
+    if expected_hand_count not in (1, 2):
+        raise QualityPolicyError("expected hand count must be one or two")
     rows = table.rows
     timestamp_events, median_delta, maximum_delta = _timestamp_diagnostics(rows, policy)
     swap_spans = _suspected_swap_spans(rows, policy)
@@ -654,7 +701,7 @@ def assess_landmark_sequence(
     invalid_source = sum(row.invalid_reason == "source_frame_invalid" for row in rows)
     invalid_task = sum(row.invalid_reason == "task_inference_failed" for row in rows)
     valid_count = len(rows) - invalid_source - invalid_task
-    expected_hands = _expected_hand_count(recording)
+    expected_hands = expected_hand_count
     expected_observations = sum(min(row.observed_hand_count, expected_hands) for row in rows)
     expected_opportunities = len(rows) * expected_hands
     hand_confidences = tuple(
@@ -748,16 +795,17 @@ def assess_landmark_sequence(
     )
     report_payload: dict[str, object] = {
         "schema_version": "sequence-quality-report/1",
-        "source_recording_id": recording.recording_id,
-        "source_sequence_content_sha256": reference.content_sha256,
-        "source_landmark_parquet_sha256": reference.lineage.artifact.sha256,
+        "source_recording_id": source_recording_id,
+        "source_sequence_content_sha256": source_sequence_content_sha256,
+        "source_landmark_parquet_sha256": source_landmark_parquet_sha256,
         "policy_sha256": landmark_quality_policy_digest(policy),
         "metrics": metrics.model_dump(mode="json", round_trip=True),
         "gaps": [gap.model_dump(mode="json", round_trip=True) for gap in gaps],
-        "resampling": build_elapsed_time_resampling_plan(
+        "resampling": _build_elapsed_time_resampling_plan(
             table,
-            recording,
-            policy,
+            source_recording_id=source_recording_id,
+            declared_duration_us=declared_duration_us,
+            policy=policy,
         ).model_dump(mode="json", round_trip=True),
         "findings": [finding.model_dump(mode="json", round_trip=True) for finding in findings],
         "disposition": disposition,
@@ -834,6 +882,7 @@ __all__ = [
     "QualityPolicyError",
     "aggregate_quality_reports",
     "assess_landmark_sequence",
+    "assess_landmark_source",
     "build_elapsed_time_resampling_plan",
     "elapsed_resampling_timestamps",
     "interpolate_coordinate",

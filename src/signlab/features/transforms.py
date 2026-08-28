@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Literal, cast
 
 from signlab.contracts.canonical import canonical_json_bytes
+from signlab.contracts.dataset import MirrorState
 from signlab.contracts.extraction import (
     BODY_ANCHOR_NAMES,
     BodyAnchorV1,
@@ -15,6 +16,7 @@ from signlab.contracts.extraction import (
     LandmarkSequenceRefV1,
     Point3V1,
     assert_landmark_sequence_ref_matches_table,
+    landmark_frames_table_digest,
 )
 from signlab.contracts.features import (
     FEATURE_HAND_SLOTS,
@@ -544,20 +546,25 @@ def _padded_timestamps(
     return tuple(timestamps)
 
 
-def _validate_bindings(
+def _validate_source_bindings(
     table: LandmarkFramesTableV1,
-    sequence: LandmarkSequenceRefV1,
     quality: SequenceQualityReportV1,
     plan: LandmarkFeaturePlanV1,
+    *,
+    source_recording_id: str,
+    source_landmarks_sha256: str,
+    source_landmark_parquet_sha256: str,
 ) -> tuple[int, ...]:
     try:
-        assert_landmark_sequence_ref_matches_table(sequence, table)
         assert_sequence_quality_report_matches_table(quality, table)
     except ValueError as error:
         raise FeatureTransformError("feature inputs do not share one source sequence") from error
     if (
-        quality.source_sequence_content_sha256 != sequence.content_sha256
-        or quality.source_landmark_parquet_sha256 != sequence.lineage.artifact.sha256
+        table.rows[0].source_recording_id != source_recording_id
+        or quality.source_recording_id != source_recording_id
+        or landmark_frames_table_digest(table) != source_landmarks_sha256
+        or quality.source_sequence_content_sha256 != source_landmarks_sha256
+        or quality.source_landmark_parquet_sha256 != source_landmark_parquet_sha256
     ):
         raise FeatureTransformError("feature quality evidence does not match extraction lineage")
     if quality.metrics.timestamp_discontinuity_count:
@@ -595,17 +602,50 @@ def derive_feature_sequence(
 ) -> PortableFeatureSequenceV1:
     """Derive one fixed-shape feature sequence without mutating raw extraction."""
 
-    if not isinstance(table, LandmarkFramesTableV1) or not isinstance(
-        sequence, LandmarkSequenceRefV1
-    ):
-        raise FeatureTransformError("feature sources must be validated contracts")
+    if not isinstance(sequence, LandmarkSequenceRefV1):
+        raise FeatureTransformError("feature source must be a validated contract")
+    try:
+        sequence = LandmarkSequenceRefV1.model_validate(sequence, strict=True)
+        assert_landmark_sequence_ref_matches_table(sequence, table)
+    except ValueError as error:
+        raise FeatureTransformError("feature source does not match landmark rows") from error
+    return derive_feature_source(
+        table,
+        quality,
+        plan,
+        source_recording_id=sequence.lineage.source_recording_id,
+        source_media_sha256=sequence.source_media_sha256,
+        source_landmarks_sha256=sequence.content_sha256,
+        source_landmark_parquet_sha256=sequence.lineage.artifact.sha256,
+        source_mirror_state=sequence.source_mirror_state,
+        extraction_config_sha256=extraction_config_sha256,
+        statistics=statistics,
+    )
+
+
+def derive_feature_source(
+    table: LandmarkFramesTableV1,
+    quality: SequenceQualityReportV1,
+    plan: LandmarkFeaturePlanV1,
+    *,
+    source_recording_id: str,
+    source_media_sha256: str,
+    source_landmarks_sha256: str,
+    source_landmark_parquet_sha256: str,
+    source_mirror_state: MirrorState,
+    extraction_config_sha256: str,
+    statistics: FeatureStatisticsV1 | None = None,
+) -> PortableFeatureSequenceV1:
+    """Derive features from verified source facts without participant records."""
+
+    if not isinstance(table, LandmarkFramesTableV1):
+        raise FeatureTransformError("feature source must be a validated contract")
     if not isinstance(quality, SequenceQualityReportV1) or not isinstance(
         plan, LandmarkFeaturePlanV1
     ):
         raise FeatureTransformError("feature policy inputs must be validated contracts")
     try:
         table = LandmarkFramesTableV1.model_validate(table, strict=True)
-        sequence = LandmarkSequenceRefV1.model_validate(sequence, strict=True)
         quality = SequenceQualityReportV1.model_validate(quality, strict=True)
         plan = LandmarkFeaturePlanV1.model_validate(plan, strict=True)
         if statistics is not None:
@@ -615,13 +655,20 @@ def derive_feature_sequence(
     except ValueError:
         raise FeatureTransformError("feature inputs must be valid immutable contracts") from None
 
-    grid = _validate_bindings(table, sequence, quality, plan)
+    grid = _validate_source_bindings(
+        table,
+        quality,
+        plan,
+        source_recording_id=source_recording_id,
+        source_landmarks_sha256=source_landmarks_sha256,
+        source_landmark_parquet_sha256=source_landmark_parquet_sha256,
+    )
     source_timestamps = tuple(frame.relative_timestamp_us for frame in table.rows)
     gaps_by_signal = {
         signal: tuple(gap for gap in quality.gaps if gap.signal == signal)
         for signal in (*FEATURE_HAND_SLOTS, "left_shoulder", "right_shoulder")
     }
-    mirrored = sequence.source_mirror_state == "mirrored"
+    mirrored = source_mirror_state == "mirrored"
     raw_rows: list[_FeatureRow] = []
     for target_us in grid:
         hands = cast(
@@ -670,9 +717,9 @@ def derive_feature_sequence(
     output_rows = (*selected_rows, *((neutral,) * padding_count))
     payload: dict[str, object] = {
         "schema_version": "portable-feature-sequence/1",
-        "source_recording_id": sequence.lineage.source_recording_id,
-        "source_media_sha256": sequence.source_media_sha256,
-        "source_landmarks_sha256": sequence.content_sha256,
+        "source_recording_id": source_recording_id,
+        "source_media_sha256": source_media_sha256,
+        "source_landmarks_sha256": source_landmarks_sha256,
         "extraction_config_sha256": extraction_config_sha256,
         "quality_policy_sha256": quality.policy_sha256,
         "quality_report_sha256": quality.report_sha256,
@@ -721,4 +768,4 @@ def derive_feature_sequence(
         ) from error
 
 
-__all__ = ["FeatureTransformError", "derive_feature_sequence"]
+__all__ = ["FeatureTransformError", "derive_feature_sequence", "derive_feature_source"]

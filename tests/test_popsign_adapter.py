@@ -50,10 +50,10 @@ def _archive_path(root: Path, archive: ExternalArchivePlanV1) -> Path:
 
 
 def _normal_member(archive: ExternalArchivePlanV1) -> _TarMember:
-    participant = f"fixture-signer-{archive.split}"
-    recording = f"recording-{archive.source_label}-20260827T120000"
+    participant = f"gtsignstudy4a.fixture_{archive.split}"
+    recording = "2026_08_27_12_00_00.000-0"
     return _TarMember(
-        name=f"clips/{participant}--{recording}-.mp4",
+        name=f"{participant}-{archive.source_label}-{recording}.mp4",
         payload=(
             b"\x00\x00\x00\x18ftypmp42signlab-synthetic-video:" + archive.archive_id.encode("ascii")
         ),
@@ -233,8 +233,8 @@ def test_import_is_deterministic_idempotent_content_addressed_and_opaque(
     ).read_bytes()
 
     serialized = render_external_dataset_json(first.manifest)
-    assert "fixture-signer" not in serialized
-    assert "20260827T120000" not in serialized
+    assert "gtsignstudy4a.fixture_" not in serialized
+    assert "2026_08_27_12_00_00.000" not in serialized
     assert "--" not in serialized
     assert first.manifest.source_metadata_retained is False
     assert first.manifest.license_acknowledgement.signlab_participant_consent == ("not_applicable")
@@ -264,6 +264,40 @@ def test_import_is_deterministic_idempotent_content_addressed_and_opaque(
         assert record.sha256 == _sha256(source_path)
         assert record.size_bytes == source_path.stat().st_size
         assert record.member_count == 1
+
+
+def test_import_accepts_official_member_name_and_keeps_provider_tokens_opaque(
+    tmp_path: Path,
+) -> None:
+    plan = build_popsign_v1_plan()
+    archive = next(
+        item for item in plan.archives if item.split == "train" and item.source_label == "hello"
+    )
+    official_name = "gtsignstudy4a.8037-hello-2023_01_26_23_17_55.552-0.mp4"
+    archive_root = tmp_path / "archives"
+    bundle = tmp_path / "bundle"
+    _write_corpus(
+        archive_root,
+        plan,
+        overrides={archive.archive_id: (_TarMember(official_name),)},
+    )
+
+    imported = import_popsign_v1_archives(
+        plan,
+        archive_root=archive_root,
+        destination=bundle,
+        accept_license=POPSIGN_LICENSE_ACKNOWLEDGEMENT,
+    )
+
+    media = next(item for item in imported.manifest.media if item.archive_id == archive.archive_id)
+    serialized = render_external_dataset_json(imported.manifest)
+    assert media.source_label == archive.source_label
+    assert media.participant_id.startswith("participant_")
+    assert media.recording_id.startswith("recording_")
+    assert media.sample_id.startswith("sample_")
+    assert official_name not in serialized
+    assert "gtsignstudy4a.8037" not in serialized
+    assert "2023_01_26_23_17_55.552" not in serialized
 
 
 def test_validation_survives_moving_both_relative_roots(tmp_path: Path) -> None:
@@ -301,11 +335,11 @@ def test_import_rejects_a_signer_that_crosses_source_splits(tmp_path: Path) -> N
     train = plan.archives[0]
     validation = plan.archives[5]
     shared_train = _TarMember(
-        name="shared-signer--train-recording-.mp4",
+        name=(f"shared.signer-{train.source_label}-2026_08_27_12_00_00.000-0.mp4"),
         payload=b"synthetic-train-video",
     )
     shared_validation = _TarMember(
-        name="shared-signer--validation-recording-.mp4",
+        name=(f"shared.signer-{validation.source_label}-2026_08_27_12_00_01.000-0.mp4"),
         payload=b"synthetic-validation-video",
     )
     archive_root = tmp_path / "private-signer-path" / "archives"
@@ -396,16 +430,28 @@ def test_import_rejects_a_signer_that_crosses_source_splits(tmp_path: Path) -> N
         ),
         pytest.param(
             (
-                _TarMember("signer--recording-.mp4", payload=b"one"),
-                _TarMember("signer--recording-.mp4", payload=b"two"),
+                _TarMember(
+                    "gtsignstudy4a.8037-hello-2023_01_26_23_17_55.552-0.mp4",
+                    payload=b"one",
+                ),
+                _TarMember(
+                    "gtsignstudy4a.8037-hello-2023_01_26_23_17_55.552-0.mp4",
+                    payload=b"two",
+                ),
             ),
             "archive.structure_invalid",
             id="duplicate-name",
         ),
         pytest.param(
             (
-                _TarMember("Signer--Recording-.mp4", payload=b"one"),
-                _TarMember("signer--recording-.mp4", payload=b"two"),
+                _TarMember(
+                    "GTSignStudy4a.8037-hello-2023_01_26_23_17_55.552-0.mp4",
+                    payload=b"one",
+                ),
+                _TarMember(
+                    "gtsignstudy4a.8037-hello-2023_01_26_23_17_55.552-0.mp4",
+                    payload=b"two",
+                ),
             ),
             "archive.structure_invalid",
             id="case-colliding-name",
@@ -909,6 +955,45 @@ def test_import_rejects_ambiguous_control_unicode_and_provider_names(
     _assert_error(captured, category, name)
 
 
+@pytest.mark.parametrize(
+    "name",
+    [
+        "gtsignstudy4a.8037-please-2023_01_26_23_17_55.552-0.mp4",
+        "gtsignstudy4a.8037-please-2023_01_26-hello-0.mp4",
+        "gtsignstudy4a.8037-hello-2023_01_26-hello-23_17_55.552-0.mp4",
+    ],
+    ids=[
+        "mismatched-archive-label",
+        "mismatched-label-before-expected-boundary",
+        "ambiguous-archive-label",
+    ],
+)
+def test_import_rejects_official_names_without_one_exact_archive_label(
+    tmp_path: Path,
+    name: str,
+) -> None:
+    plan = build_popsign_v1_plan()
+    archive = next(
+        item for item in plan.archives if item.split == "train" and item.source_label == "hello"
+    )
+    archive_root = tmp_path / "archives"
+    _write_corpus(
+        archive_root,
+        plan,
+        overrides={archive.archive_id: (_TarMember(name),)},
+    )
+
+    with pytest.raises(PopSignDatasetError) as captured:
+        import_popsign_v1_archives(
+            plan,
+            archive_root=archive_root,
+            destination=tmp_path / "bundle",
+            accept_license=POPSIGN_LICENSE_ACKNOWLEDGEMENT,
+        )
+
+    _assert_error(captured, "archive.member_invalid", name)
+
+
 def test_identical_media_bytes_are_stored_once_but_keep_distinct_records(
     tmp_path: Path,
 ) -> None:
@@ -921,8 +1006,14 @@ def test_identical_media_bytes_are_stored_once_but_keep_distinct_records(
         plan,
         overrides={
             first.archive_id: (
-                _TarMember("signer-train--recording-one-.mp4", shared),
-                _TarMember("signer-train--recording-two-.mp4", shared),
+                _TarMember(
+                    f"gtsignstudy4a.9001-{first.source_label}-2026_08_27_12_00_00.000-0.mp4",
+                    shared,
+                ),
+                _TarMember(
+                    f"gtsignstudy4a.9001-{first.source_label}-2026_08_27_12_00_01.000-1.mp4",
+                    shared,
+                ),
             )
         },
     )

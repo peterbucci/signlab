@@ -85,6 +85,7 @@ _MAX_MEMBER_BYTES: Final = 2 * 1024 * 1024 * 1024
 _MAX_UNCOMPRESSED_BYTES: Final = 64 * 1024 * 1024 * 1024
 _OPAQUE_DIGEST_PREFIX: Final = b"signlab.external.popsign/1\0"
 _PROVIDER_TOKEN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:+-]*$")
+_PROVIDER_PARTICIPANT_TOKEN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:+]*$")
 
 _ERROR_MESSAGES: Final[dict[ExternalDatasetErrorCategory, str]] = {
     "plan.invalid": "the external acquisition plan is invalid or unsupported",
@@ -442,19 +443,19 @@ def _normalized_member_name(name: str) -> str:
         raise PopSignDatasetError("archive.structure_invalid") from error
 
 
-def _provider_tokens(normalized_name: str) -> tuple[str, str]:
+def _provider_tokens(normalized_name: str, source_label: SourceLabel) -> tuple[str, str]:
     basename = normalized_name.rsplit("/", 1)[-1]
-    if not basename.endswith("-.mp4"):
+    if not basename.endswith(".mp4"):
         raise PopSignDatasetError("archive.member_invalid")
-    stem = basename[: -len("-.mp4")]
-    parts = stem.split("--")
-    if len(parts) != 2:
+    stem = basename[: -len(".mp4")]
+    label_boundary = f"-{source_label}-"
+    if stem.count(label_boundary) != 1:
         raise PopSignDatasetError("archive.member_invalid")
-    participant, recording = parts
+    participant, recording = stem.split(label_boundary, maxsplit=1)
     if (
         not 1 <= len(participant) <= 128
         or not 1 <= len(recording) <= 256
-        or _PROVIDER_TOKEN.fullmatch(participant) is None
+        or _PROVIDER_PARTICIPANT_TOKEN.fullmatch(participant) is None
         or _PROVIDER_TOKEN.fullmatch(recording) is None
     ):
         raise PopSignDatasetError("archive.member_invalid")
@@ -659,7 +660,10 @@ def _scan_archive(
                     uncompressed_size += member.size
                     if uncompressed_size > _MAX_UNCOMPRESSED_BYTES:
                         raise PopSignDatasetError("archive.limit_exceeded")
-                    participant_token, recording_token = _provider_tokens(normalized_name)
+                    participant_token, recording_token = _provider_tokens(
+                        normalized_name,
+                        archive_plan.source_label,
+                    )
                     extracted = opened.extractfile(member)
                     if extracted is None:
                         raise PopSignDatasetError("archive.member_invalid")

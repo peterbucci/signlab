@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, ClassVar, cast
 
+import numpy as np
 import pytest
 
 import signlab.extraction.runtime as runtime
@@ -161,6 +162,28 @@ def test_decoder_preserves_source_timing_and_makes_task_milliseconds_strict(
     assert all(frame.formats == ["rgb24"] for frame in frames)
     assert fake_av.calls[0][1] == "r"
     assert fake_av.container.closed
+
+
+def test_decoder_detaches_padded_rgb_rows_before_inference(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    padded = np.arange(24, dtype=np.uint8).reshape(2, 4, 3)
+    rgb = padded[:, :3, :]
+    assert not rgb.flags.c_contiguous
+    frame = _FakeVideoFrame(100, Fraction(1, 30), rgb)
+    monkeypatch.setattr(
+        runtime,
+        "_load_av_module",
+        lambda: _FakeAv(_FakeContainer((frame,))),
+    )
+
+    decoded = tuple(runtime.iter_decoded_frames(tmp_path / "private-video.mp4"))
+
+    assert len(decoded) == 1
+    assert isinstance(decoded[0].rgb, np.ndarray)
+    assert decoded[0].rgb.flags.c_contiguous
+    assert np.array_equal(decoded[0].rgb, rgb)
 
 
 def test_decoder_retains_timing_when_rgb_conversion_marks_source_frame_invalid(

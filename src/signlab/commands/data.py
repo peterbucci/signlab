@@ -414,6 +414,71 @@ def validate_external_dataset_command(
     )
 
 
+@app.command("build-public-corpus")
+def build_public_corpus_command(
+    manifest: Annotated[
+        Path,
+        typer.Argument(help="External-dataset-manifest/1 JSON document."),
+    ],
+    external_root: Annotated[
+        Path,
+        typer.Option("--external-root", help="Validated external dataset bundle root."),
+    ],
+    model_root: Annotated[
+        Path,
+        typer.Option("--model-root", help="Directory containing the two pinned task assets."),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="Local content-addressed public corpus directory."),
+    ],
+    archive_root: Annotated[
+        Path | None,
+        typer.Option(
+            "--archive-root",
+            help="Optional official archive root for exact source-byte revalidation.",
+        ),
+    ] = None,
+    max_candidates_per_group: Annotated[
+        int,
+        typer.Option(
+            "--max-candidates-per-group",
+            min=1,
+            help="Bounded number of stable candidates tried for each source split and target.",
+        ),
+    ] = 5,
+) -> None:
+    """Run one bounded licensed PopSign slice through the existing pipeline."""
+
+    from signlab.datasets.public_corpus import build_public_corpus
+
+    def show_progress(index: int, total: int, accepted: bool) -> None:
+        if index == 1 or index % 10 == 0 or index == total:
+            typer.echo(
+                f"Public corpus groups: {index}/{total} "
+                f"(latest {'selected' if accepted else 'unfilled'})."
+            )
+
+    try:
+        result = build_public_corpus(
+            manifest,
+            external_root=external_root,
+            model_root=model_root,
+            output_root=output,
+            archive_root=archive_root,
+            max_candidates_per_group=max_candidates_per_group,
+            progress=show_progress,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Public corpus build failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"Selected usable clips: {result.selected_count}/{result.group_count} groups.")
+    typer.echo(f"Coded unselected or unusable clips: {result.exclusion_count}.")
+    typer.echo(f"Public corpus SHA-256: {result.corpus_sha256}")
+    typer.echo("Aggregate JSON and Markdown reports: written.")
+    typer.echo("Claim scope: licensed isolated public data only.")
+
+
 def _echo_landmark_extraction_summary(
     *,
     status: str,
