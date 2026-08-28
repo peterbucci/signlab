@@ -1,0 +1,216 @@
+{
+  "$comment": "This JSON Schema enforces portable landmark-feature structure. SignLab's strict feature validators remain authoritative for canonical hashes, registered feature ordering, cross-runtime quantization, fixed shapes and masks, training-only statistics, and cache-key bindings.",
+  "$id": "https://signlab.dev/schemas/portable-feature-sequence-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Fixed-shape quantized features plus explicit provenance and masks.",
+  "properties": {
+    "body_available_mask": {
+      "items": {
+        "type": "boolean"
+      },
+      "minItems": 2,
+      "title": "Body Available Mask",
+      "type": "array"
+    },
+    "extraction_config_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Extraction Config Sha256",
+      "type": "string"
+    },
+    "feature_names": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Feature Names",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "feature_plan_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Feature Plan Sha256",
+      "type": "string"
+    },
+    "hand_present_mask": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "boolean"
+          }
+        ],
+        "type": "array"
+      },
+      "minItems": 2,
+      "title": "Hand Present Mask",
+      "type": "array"
+    },
+    "interpolated_mask": {
+      "items": {
+        "items": {
+          "type": "boolean"
+        },
+        "type": "array"
+      },
+      "minItems": 2,
+      "title": "Interpolated Mask",
+      "type": "array"
+    },
+    "observed_mask": {
+      "items": {
+        "items": {
+          "type": "boolean"
+        },
+        "type": "array"
+      },
+      "minItems": 2,
+      "title": "Observed Mask",
+      "type": "array"
+    },
+    "padding_mask": {
+      "items": {
+        "type": "boolean"
+      },
+      "minItems": 2,
+      "title": "Padding Mask",
+      "type": "array"
+    },
+    "quality_policy_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Quality Policy Sha256",
+      "type": "string"
+    },
+    "quality_report_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Quality Report Sha256",
+      "type": "string"
+    },
+    "quantization_scale": {
+      "const": 1000000,
+      "title": "Quantization Scale",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "portable-feature-sequence/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "selected_source_indices": {
+      "items": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Selected Source Indices",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "sequence_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sequence Sha256",
+      "type": "string"
+    },
+    "source_grid_frame_count": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "title": "Source Grid Frame Count",
+      "type": "integer"
+    },
+    "source_landmarks_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Source Landmarks Sha256",
+      "type": "string"
+    },
+    "source_media_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Source Media Sha256",
+      "type": "string"
+    },
+    "source_recording_id": {
+      "pattern": "^recording_[0-9a-f]{32}$",
+      "title": "Source Recording Id",
+      "type": "string"
+    },
+    "statistics_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Statistics Sha256"
+    },
+    "timestamps_us": {
+      "items": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "minItems": 2,
+      "title": "Timestamps Us",
+      "type": "array"
+    },
+    "valid_mask": {
+      "items": {
+        "items": {
+          "type": "boolean"
+        },
+        "type": "array"
+      },
+      "minItems": 2,
+      "title": "Valid Mask",
+      "type": "array"
+    },
+    "values_q": {
+      "items": {
+        "items": {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "minItems": 2,
+      "title": "Values Q",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source_recording_id",
+    "source_media_sha256",
+    "source_landmarks_sha256",
+    "extraction_config_sha256",
+    "quality_policy_sha256",
+    "quality_report_sha256",
+    "feature_plan_sha256",
+    "statistics_sha256",
+    "feature_names",
+    "quantization_scale",
+    "source_grid_frame_count",
+    "selected_source_indices",
+    "timestamps_us",
+    "values_q",
+    "valid_mask",
+    "observed_mask",
+    "interpolated_mask",
+    "hand_present_mask",
+    "body_available_mask",
+    "padding_mask",
+    "sequence_sha256"
+  ],
+  "title": "PortableFeatureSequenceV1",
+  "type": "object"
+}

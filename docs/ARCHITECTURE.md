@@ -102,11 +102,16 @@ confidence, discontinuity, and suspected-swap findings from those exact immutabl
 rows. It publishes only a canonical
 report manifest: raw Parquet is never rewritten, short-gap interpolation remains a
 declared plan rather than a feature tensor, and no sample or split identity is created.
-Story #22 defines normalization and portable features. Private participant extraction
-additionally requires authenticated authorization for the consent scope's
-`derived_features` field and runs in a network-isolated environment after task assets
-have been acquired. Public extraction and quality fixtures are synthetic and do not
-relax that gate.
+The [portable feature boundary](landmark-representations.md) now derives three
+independently selectable, fixed-shape representations from those exact rows and
+quality decisions. It preserves stable hand slots, masks missing body context,
+fits optional normalization on explicitly identified training inputs only, and
+uses all upstream semantic hashes in a content-addressed cache. Licensed-corpus
+execution and publication remain Story #74 rather than being hidden inside the
+transform library. Private participant extraction additionally requires
+authenticated authorization for the consent scope's `derived_features` field and
+runs in a network-isolated environment after task assets have been acquired. Public
+extraction and quality fixtures are synthetic and do not relax that gate.
 
 The sample-bearing [dataset manifest](dataset-manifests.md) includes stable
 identifiers for clips, participants, sessions, source recordings, devices, camera

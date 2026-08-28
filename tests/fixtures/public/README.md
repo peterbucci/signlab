@@ -24,3 +24,12 @@ including explicit source-frame and task-inference failures. It exercises
 deterministic hand association, absence and invalid masks, replay, and output
 serialization without shipping a model or representing a person. The scripted
 backend exists only in tests and is not selectable from the SignLab command line.
+
+`features/` contains MIT-licensed expected hashes and aggregate counts for nine
+project-authored synthetic landmark scenarios. The inputs are invented numeric hand
+and pose shapes defined by the test builders; they were not captured from a person,
+camera, public corpus, or participant. Alongside exact canonical hashes, the corpus
+stores complete expected quantized value arrays so another runtime can apply the
+declared one-quantum tolerance. The golden covers all three representations, one and
+two hands, mirrored equivalence, an approved gap, a suspected-swap barrier, missing
+pose, irregular timing, optional geometry and derivatives, and padding.

@@ -769,7 +769,7 @@ def run_reproduction_stage_command(
 
 @app.command("validate-resources")
 def validate_dataset_resources() -> None:
-    """Validate packaged dataset, external, ingest, extraction, and quality resources."""
+    """Validate all packaged data-foundation resources."""
 
     from signlab.datasets.external_resources import (
         validate_packaged_external_dataset_resources,
@@ -777,6 +777,7 @@ def validate_dataset_resources() -> None:
     from signlab.datasets.ingest_resources import validate_packaged_ingest_resources
     from signlab.datasets.resources import validate_packaged_dataset_resources
     from signlab.extraction.resources import validate_packaged_extraction_resources
+    from signlab.features.resources import validate_packaged_feature_resources
     from signlab.quality.resources import validate_packaged_quality_resources
 
     try:
@@ -785,10 +786,13 @@ def validate_dataset_resources() -> None:
         validate_packaged_ingest_resources()
         validate_packaged_extraction_resources()
         validate_packaged_quality_resources()
+        validate_packaged_feature_resources()
     except (OSError, TypeError, ValueError) as error:
         typer.echo("Packaged dataset resource validation failed.", err=True)
         raise typer.Exit(code=1) from error
-    typer.echo("Packaged dataset, external, ingest, extraction, and quality resources are valid.")
+    typer.echo(
+        "Packaged dataset, external, ingest, extraction, quality, and feature resources are valid."
+    )
 
 
 @app.command("write-example-dataset")

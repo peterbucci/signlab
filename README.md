@@ -61,6 +61,8 @@ uv run ruff format --check .
 uv run mypy
 uv run pytest
 uv run python scripts/check_repository_hygiene.py
+uv run python scripts/generate_feature_resources.py --check
+uv run python scripts/generate_feature_goldens.py --check
 uv build --no-build-isolation
 uv run python scripts/verify_distribution.py dist
 ```
@@ -107,8 +109,10 @@ two-hand tracking, raw hand/body observation masks, deterministic Parquet eviden
 and the network-isolated private-data boundary. The subsequent
 [landmark quality policy](docs/landmark-quality.md) assesses those immutable rows
 with elapsed-time timing and resampling evidence, explicit gap and continuity
-findings, deterministic triage, and a report-only manifest; feature materialization
-remains a later stage.
+findings, deterministic triage, and a report-only manifest. The subsequent
+[portable landmark representation](docs/landmark-representations.md) stage now
+materializes hand-local, body-relative, and combined fixed-shape features with
+train-only fitted statistics, complete cache identities, and synthetic goldens.
 
 The [versioned pipeline contracts](docs/contracts.md) give datasets, grouped
 splits, preprocessing plans, resolved configurations, terminal runs, and research
@@ -160,10 +164,14 @@ sample-bearing dataset contract retains six normalized,
 lineage-preserving Parquet tables and the published v1 reader. A pinned MediaPipe
 Tasks boundary now produces schema-validated, lineage-bound landmark Parquet with
 separate semantic and exact-byte evidence; public examples remain synthetic. The
-registered DVC graph remains the Story #14 fixture receipt scaffold rather than a
-production extraction runner. No headline model result is considered valid until
-the remaining quality, representation, and grouped-evaluation foundations are
-complete.
+quality boundary records deterministic timing, gap, pose, continuity, and triage
+evidence without rewriting extraction. A pure portable-feature service now derives
+three exact representation variants, optional geometry and elapsed-time kinematics,
+masked training-only statistics, and content-addressed cache objects. Licensed
+PopSign execution and corpus publication remain the next data-foundation bridge.
+The registered DVC graph remains the Story #14 fixture receipt scaffold rather
+than a production extraction runner. No headline model result is considered valid
+until the remaining licensed-corpus and grouped-evaluation foundations are complete.
 
 ## Data and privacy
 

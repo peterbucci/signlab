@@ -112,8 +112,10 @@ manufacturing motion.
 General Fourier resampling is not used. The
 [SciPy resampling documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html)
 requires equidistant input samples and directs non-constant intervals to
-interpolation methods. Feature-specific filtering and anti-aliasing remain explicit
-preprocessing choices for Story #22.
+interpolation methods. The
+[portable feature boundary](landmark-representations.md) consumes this exact grid
+and the approved coordinate gaps; any later filtering or anti-aliasing remains an
+explicit preprocessing choice.
 
 ## Continuity and suspected swaps
 

@@ -15,6 +15,7 @@ from scripts.verify_distribution import (
     EXPECTED_DATASET_RESOURCES,
     EXPECTED_EXTERNAL_DATASET_RESOURCES,
     EXPECTED_EXTRACTION_RESOURCES,
+    EXPECTED_FEATURE_RESOURCES,
     EXPECTED_GOVERNANCE_RESOURCES,
     EXPECTED_QUALITY_RESOURCES,
     EXPECTED_TAXONOMY_SCHEMAS,
@@ -31,6 +32,7 @@ def _write_sdist(
     contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
     dataset_resources: Iterable[str] = EXPECTED_DATASET_RESOURCES,
     extraction_resources: Iterable[str] = EXPECTED_EXTRACTION_RESOURCES,
+    feature_resources: Iterable[str] = EXPECTED_FEATURE_RESOURCES,
     extra_members: Iterable[tarfile.TarInfo] = (),
     quality_resources: Iterable[str] = EXPECTED_QUALITY_RESOURCES,
     external_dataset_resources: Iterable[str] = EXPECTED_EXTERNAL_DATASET_RESOURCES,
@@ -42,6 +44,7 @@ def _write_sdist(
         f"{archive_root}/src/signlab/resources/datasets/__init__.py",
         f"{archive_root}/src/signlab/resources/external_datasets/__init__.py",
         f"{archive_root}/src/signlab/resources/extraction/__init__.py",
+        f"{archive_root}/src/signlab/resources/features/__init__.py",
         f"{archive_root}/src/signlab/resources/governance/__init__.py",
         f"{archive_root}/src/signlab/resources/quality/__init__.py",
         *(
@@ -65,6 +68,10 @@ def _write_sdist(
             for resource in extraction_resources
         ),
         *(
+            f"{archive_root}/src/signlab/resources/features/{resource}"
+            for resource in feature_resources
+        ),
+        *(
             f"{archive_root}/src/signlab/resources/quality/{resource}"
             for resource in quality_resources
         ),
@@ -85,6 +92,7 @@ def _write_wheel(
     contract_resources: Iterable[str] = EXPECTED_CONTRACT_RESOURCES,
     dataset_resources: Iterable[str] = EXPECTED_DATASET_RESOURCES,
     extraction_resources: Iterable[str] = EXPECTED_EXTRACTION_RESOURCES,
+    feature_resources: Iterable[str] = EXPECTED_FEATURE_RESOURCES,
     quality_resources: Iterable[str] = EXPECTED_QUALITY_RESOURCES,
     external_dataset_resources: Iterable[str] = EXPECTED_EXTERNAL_DATASET_RESOURCES,
 ) -> None:
@@ -95,6 +103,7 @@ def _write_wheel(
         "signlab/resources/datasets/__init__.py",
         "signlab/resources/external_datasets/__init__.py",
         "signlab/resources/extraction/__init__.py",
+        "signlab/resources/features/__init__.py",
         "signlab/resources/governance/__init__.py",
         "signlab/resources/quality/__init__.py",
         "signlab/resources/taxonomies/signlab-five-1.0.0.json",
@@ -104,6 +113,7 @@ def _write_wheel(
         *(f"signlab/resources/datasets/{name}" for name in dataset_resources),
         *(f"signlab/resources/external_datasets/{name}" for name in external_dataset_resources),
         *(f"signlab/resources/extraction/{name}" for name in extraction_resources),
+        *(f"signlab/resources/features/{name}" for name in feature_resources),
         *(f"signlab/resources/quality/{name}" for name in quality_resources),
         "signlab-0.1.0.dist-info/METADATA",
         "signlab-0.1.0.dist-info/entry_points.txt",
@@ -443,6 +453,57 @@ def test_archives_require_the_exact_nonduplicate_extraction_resource_set(
         )
         errors = _inspect_sdist(archive)
         expected_error = "source distribution does not contain the exact extraction resource set"
+
+    expected_errors: tuple[str, ...] = (expected_error,)
+    if mutation == "duplicate":
+        expected_errors = (
+            "archive contains duplicate or case-colliding member paths",
+            expected_error,
+        )
+    assert errors == expected_errors
+
+
+@pytest.mark.parametrize("archive_kind", ["wheel", "sdist"])
+@pytest.mark.parametrize("mutation", ["missing", "extra", "duplicate"])
+def test_archives_require_the_exact_nonduplicate_feature_resource_set(
+    tmp_path: Path,
+    archive_kind: str,
+    mutation: str,
+) -> None:
+    resources = sorted(EXPECTED_FEATURE_RESOURCES)
+    if mutation == "missing":
+        resources.remove("schemas/landmark-feature-plan-1.schema.json")
+    elif mutation == "extra":
+        resources.append("schemas/unexpected-feature-1.schema.json")
+    else:
+        resources.append("config/combined-64-1.default.json")
+
+    if archive_kind == "wheel":
+        archive = tmp_path / "signlab-0.1.0-py3-none-any.whl"
+        if mutation == "duplicate":
+            with pytest.warns(UserWarning, match="Duplicate name"):
+                _write_wheel(
+                    archive,
+                    EXPECTED_GOVERNANCE_RESOURCES,
+                    feature_resources=resources,
+                )
+        else:
+            _write_wheel(
+                archive,
+                EXPECTED_GOVERNANCE_RESOURCES,
+                feature_resources=resources,
+            )
+        errors = _inspect_wheel(archive)
+        expected_error = "wheel does not contain the exact feature resource set"
+    else:
+        archive = tmp_path / "signlab-0.1.0.tar.gz"
+        _write_sdist(
+            archive,
+            EXPECTED_GOVERNANCE_RESOURCES,
+            feature_resources=resources,
+        )
+        errors = _inspect_sdist(archive)
+        expected_error = "source distribution does not contain the exact feature resource set"
 
     expected_errors: tuple[str, ...] = (expected_error,)
     if mutation == "duplicate":
