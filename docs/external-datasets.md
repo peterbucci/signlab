@@ -65,13 +65,15 @@ uv run signlab data plan-external-dataset popsign-asl-v1 --output popsign-plan.j
 
 Read the plan, the source data card, and the CC BY 4.0 terms. Download each listed
 archive with a tool of your choice and save it at its plan-relative path beneath a
-local archive root. SignLab itself performs no network request.
+local download root. `LOCAL_DOWNLOAD_ROOT` must contain the plan's `archives/`
+directory; do not pass the `archives/` directory itself. SignLab performs no network
+request.
 
 Import already-downloaded archives only after explicit license acknowledgement:
 
 ```shell
 uv run signlab data import-popsign popsign-plan.json \
-  --archive-root LOCAL_ARCHIVES \
+  --archive-root LOCAL_DOWNLOAD_ROOT \
   --output data/raw/external/popsign-v1 \
   --accept-license CC-BY-4.0
 ```
@@ -84,7 +86,7 @@ media byte without overclaiming that the external archive files were re-read.
 uv run signlab data validate-external-dataset \
   data/raw/external/popsign-v1/external-dataset-manifest.json \
   --workspace-root data/raw/external/popsign-v1 \
-  --archive-root LOCAL_ARCHIVES
+  --archive-root LOCAL_DOWNLOAD_ROOT
 ```
 
 ## First runnable public-data slice
@@ -95,7 +97,7 @@ Build a deliberately bounded technical corpus after import:
 uv run signlab data build-public-corpus \
   data/raw/external/popsign-v1/external-dataset-manifest.json \
   --external-root data/raw/external/popsign-v1 \
-  --archive-root LOCAL_ARCHIVES \
+  --archive-root LOCAL_DOWNLOAD_ROOT \
   --model-root LOCAL_MODELS \
   --output data/processed/public-corpus-v1
 ```
@@ -111,6 +113,38 @@ continuous-sign recognition, or sign-language translation.
 
 CLI output contains only aggregate counts, status, and content identities. It does
 not print local paths, upstream filenames, timestamp tokens, or signer identifiers.
+
+## Trainable five-class smoke corpus
+
+After the first slice has proved the path, the same command can retain multiple
+usable clips without changing the adapter, extractor, quality policy, or feature
+plan:
+
+```shell
+uv run signlab data build-public-corpus \
+  data/raw/external/popsign-v1/external-dataset-manifest.json \
+  --external-root data/raw/external/popsign-v1 \
+  --archive-root LOCAL_DOWNLOAD_ROOT \
+  --model-root LOCAL_MODELS \
+  --output data/processed/popsign-trainable-smoke-v1 \
+  --trainable-smoke
+```
+
+This mode aims for 10 signer-distinct clips per gesture in PopSign's official
+training split and 3 per gesture in each official validation and test split: 80
+clips total. It gives every signer one stable attempt before retrying that signer,
+balances attempts across the 15 split/gesture groups, and stops at 750 actual
+extraction attempts. Signer uniqueness is enforced within each split/gesture group;
+the same signer may provide different gestures, while PopSign's signer-disjoint
+split assignments remain unchanged.
+
+The run is intentionally one-shot. Its report says either `ready` or `insufficient`
+and records every group shortfall. An insufficient result is a data decision: do not
+raise the cap, relax quality rules, or reuse a signer within a group. A ready result
+can be projected directly into split/label rows. Automated coverage loads every
+bound feature and runs a metric-free five-class fit/predict interface check. This
+proves data plumbing only; it is not an accuracy claim or the training system
+planned for later stories.
 
 ## Import and security guarantees
 

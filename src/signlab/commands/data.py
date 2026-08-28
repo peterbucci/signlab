@@ -444,18 +444,27 @@ def build_public_corpus_command(
         typer.Option(
             "--max-candidates-per-group",
             min=1,
-            help="Bounded number of stable candidates tried for each source split and target.",
+            help="Legacy-slice candidates tried per split and target.",
         ),
     ] = 5,
+    trainable_smoke: Annotated[
+        bool,
+        typer.Option(
+            "--trainable-smoke",
+            help="Aim for fixed 10/3/3 signer-distinct quotas under 750 attempts.",
+        ),
+    ] = False,
 ) -> None:
-    """Run one bounded licensed PopSign slice through the existing pipeline."""
+    """Run one bounded licensed PopSign corpus through the existing pipeline."""
 
     from signlab.datasets.public_corpus import build_public_corpus
 
     def show_progress(index: int, total: int, accepted: bool) -> None:
-        if index == 1 or index % 10 == 0 or index == total:
+        interval = 25 if trainable_smoke else 10
+        if index == 1 or index % interval == 0 or index == total:
+            unit = "attempts" if trainable_smoke else "groups"
             typer.echo(
-                f"Public corpus groups: {index}/{total} "
+                f"Public corpus {unit}: {index}/{total} "
                 f"(latest {'selected' if accepted else 'unfilled'})."
             )
 
@@ -467,12 +476,18 @@ def build_public_corpus_command(
             output_root=output,
             archive_root=archive_root,
             max_candidates_per_group=max_candidates_per_group,
+            trainable_smoke=trainable_smoke,
             progress=show_progress,
         )
     except (OSError, TypeError, ValueError) as error:
         typer.echo("Public corpus build failed.", err=True)
         raise typer.Exit(code=1) from error
-    typer.echo(f"Selected usable clips: {result.selected_count}/{result.group_count} groups.")
+    if trainable_smoke:
+        typer.echo(f"Trainable smoke decision: {result.decision.upper()}.")
+        typer.echo(f"Selected usable clips: {result.selected_count}/{result.target_count}.")
+        typer.echo(f"Attempted videos: {result.attempted_count}/{result.attempt_limit}.")
+    else:
+        typer.echo(f"Selected usable clips: {result.selected_count}/{result.group_count} groups.")
     typer.echo(f"Coded unselected or unusable clips: {result.exclusion_count}.")
     typer.echo(f"Public corpus SHA-256: {result.corpus_sha256}")
     typer.echo("Aggregate JSON and Markdown reports: written.")

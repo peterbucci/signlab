@@ -7,7 +7,8 @@ import os
 import tempfile
 from collections import Counter, defaultdict
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from fractions import Fraction
 from itertools import pairwise
 from pathlib import Path
 
@@ -15,6 +16,8 @@ from signlab.contracts.canonical import canonical_json_bytes, canonical_sha256
 from signlab.contracts.dataset import MirrorState
 from signlab.contracts.external_dataset import (
     ExternalMediaRecordV1,
+    ExternalSplit,
+    ExternalTargetLabel,
     validate_external_dataset_manifest,
 )
 from signlab.contracts.extraction import (
@@ -44,6 +47,16 @@ _SOURCE_ROTATION_DEGREES = 0
 _SOURCE_ORIENTATION_BASIS = (
     "reviewed_popsign_v1_official_samples_upright_with_readable_unmirrored_scene_text"
 )
+_TARGET_LABELS: tuple[ExternalTargetLabel, ...] = (
+    "hello",
+    "no",
+    "please",
+    "thank_you",
+    "yes",
+)
+_TRAINABLE_TARGETS: dict[ExternalSplit, int] = {"train": 10, "val": 3, "test": 3}
+_TRAINABLE_TARGET_COUNT = len(_TARGET_LABELS) * sum(_TRAINABLE_TARGETS.values())
+_TRAINABLE_ATTEMPT_LIMIT = 750
 
 
 class PublicCorpusError(ValueError):
@@ -56,7 +69,23 @@ class PublicCorpusBuildResult:
     selected_count: int
     group_count: int
     exclusion_count: int
+    attempted_count: int
+    target_count: int
+    attempt_limit: int | None
+    decision: str
     summary: dict[str, object]
+
+
+@dataclass(slots=True)
+class _TrainableGroupState:
+    source_split: ExternalSplit
+    target_label_id: ExternalTargetLabel
+    candidates: tuple[ExternalMediaRecordV1, ...]
+    target_count: int
+    candidate_index: int = 0
+    attempted_count: int = 0
+    selected_count: int = 0
+    selected_signers: set[str] = field(default_factory=set)
 
 
 def _duration_us(media_rows: tuple[LandmarkFrameV1, ...]) -> int:
@@ -145,7 +174,60 @@ def _ordered_counts(values: Counter[str]) -> dict[str, int]:
     return {key: values[key] for key in sorted(values)}
 
 
+def _signer_interleaved(
+    candidates: tuple[ExternalMediaRecordV1, ...],
+) -> tuple[ExternalMediaRecordV1, ...]:
+    """Give every signer one stable attempt before any signer receives another."""
+
+    by_signer: dict[str, list[ExternalMediaRecordV1]] = defaultdict(list)
+    for media in candidates:
+        by_signer[media.participant_id].append(media)
+    ordered_signers = tuple(sorted(by_signer))
+    for media_rows in by_signer.values():
+        media_rows.sort(key=lambda item: item.sample_id)
+    return tuple(
+        by_signer[signer][depth]
+        for depth in range(max((len(rows) for rows in by_signer.values()), default=0))
+        for signer in ordered_signers
+        if depth < len(by_signer[signer])
+    )
+
+
+def _trainable_group_results(
+    states: tuple[_TrainableGroupState, ...],
+    *,
+    attempted_count: int,
+) -> list[dict[str, object]]:
+    results: list[dict[str, object]] = []
+    for state in states:
+        if state.selected_count >= state.target_count:
+            terminal_reason = "target_reached"
+        elif state.candidate_index >= len(state.candidates):
+            terminal_reason = "candidates_exhausted"
+        elif attempted_count >= _TRAINABLE_ATTEMPT_LIMIT:
+            terminal_reason = "attempt_limit_reached"
+        else:
+            terminal_reason = "selection_stopped"
+        results.append(
+            {
+                "source_split": state.source_split,
+                "target_label_id": state.target_label_id,
+                "target_count": state.target_count,
+                "selected_count": state.selected_count,
+                "selected_signer_count": len(state.selected_signers),
+                "available_signer_count": len({media.participant_id for media in state.candidates}),
+                "attempted_count": state.attempted_count,
+                "shortfall_count": max(state.target_count - state.selected_count, 0),
+                "terminal_reason": terminal_reason,
+            }
+        )
+    return results
+
+
 def _summary_markdown(summary: dict[str, object]) -> str:
+    if summary.get("selection_mode") == "trainable_smoke":
+        return _trainable_summary_markdown(summary)
+
     selected_by_split = summary["selected_by_split"]
     selected_by_target = summary["selected_by_target"]
     exclusions = summary["exclusions"]
@@ -202,6 +284,69 @@ def _summary_markdown(summary: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
+def _trainable_summary_markdown(summary: dict[str, object]) -> str:
+    groups = summary["selection_groups"]
+    exclusions = summary["exclusions"]
+    assert isinstance(groups, list)
+    assert isinstance(exclusions, dict)
+    lines = [
+        "# PopSign trainable smoke-corpus decision",
+        "",
+        "This is the result of one predeclared, bounded run through SignLab's existing ",
+        "extraction, quality, and `combined-64` feature pipeline.",
+        "",
+        f"- Decision: **{str(summary['decision']).upper()}**",
+        f"- Selected usable clips: {summary['selected_count']}/{summary['target_count']}",
+        f"- Attempted videos: {summary['attempted_count']}/{summary['attempt_limit']}",
+        f"- Split/target groups below quota: {summary['unfilled_group_count']}",
+        f"- Globally represented signers: {summary['selected_signer_count']}",
+        f"- Corpus SHA-256: `{summary['corpus_sha256']}`",
+        f"- Selection rule: `{summary['selection_rule']}`",
+        "",
+        "## Split and gesture quotas",
+        "",
+        "Signer uniqueness is enforced within each split/gesture group. PopSign's official ",
+        "signer-disjoint train, validation, and test assignments are preserved.",
+        "",
+        "| Split | Gesture | Selected | Target | Distinct signers | Attempts | Result |",
+        "| --- | --- | ---: | ---: | ---: | ---: | --- |",
+        *[
+            "| {source_split} | {target_label_id} | {selected_count} | {target_count} | "
+            "{selected_signer_count} | {attempted_count} | {terminal_reason} |".format(**item)
+            for item in groups
+            if isinstance(item, dict)
+        ],
+        "",
+        "## Coded outcomes",
+        "",
+        "| Reason | Count |",
+        "| --- | ---: |",
+        *[f"| `{key}` | {value} |" for key, value in exclusions.items()],
+        "",
+        "## Reproducibility identities",
+        "",
+        f"- External dataset: `{summary['external_dataset_sha256']}`",
+        f"- Extraction configuration: `{summary['extraction_config_sha256']}`",
+        f"- Hand model: `{summary['hand_model_sha256']}`",
+        f"- Pose model: `{summary['pose_model_sha256']}`",
+        f"- Quality policy: `{summary['quality_policy_sha256']}`",
+        f"- Feature plan: `{summary['feature_plan_sha256']}`",
+        f"- Source orientation basis: `{summary['source_orientation_basis']}`",
+        "",
+        "## License and limits",
+        "",
+        str(summary["attribution"]),
+        "",
+        f"License: [{summary['license_id']}]({summary['license_url']}).",
+        "",
+        f"**Limitation:** {summary['limitation']}",
+        "",
+        "No model-performance metric is claimed by this data sufficiency run.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def build_public_corpus(
     manifest_path: str | Path,
     *,
@@ -210,12 +355,15 @@ def build_public_corpus(
     output_root: str | Path,
     archive_root: str | Path | None = None,
     max_candidates_per_group: int = 5,
+    trainable_smoke: bool = False,
     progress: Callable[[int, int, bool], None] | None = None,
 ) -> PublicCorpusBuildResult:
-    """Build at most one usable clip per source split and target."""
+    """Build the legacy vertical slice or one fixed, capped trainable smoke corpus."""
 
     if type(max_candidates_per_group) is not int or max_candidates_per_group <= 0:
         raise PublicCorpusError("candidate attempt limit must be positive")
+    if type(trainable_smoke) is not bool:
+        raise PublicCorpusError("trainable smoke selection must be a boolean")
     try:
         manifest_bytes = Path(manifest_path).read_bytes()
         external_validation = validate_external_dataset_bundle(
@@ -238,7 +386,9 @@ def build_public_corpus(
     policy_sha256 = landmark_quality_policy_digest(policy)
     feature_plan_sha256 = landmark_feature_plan_digest(feature_plan)
 
-    grouped: dict[tuple[str, str], list[ExternalMediaRecordV1]] = defaultdict(list)
+    grouped: dict[tuple[ExternalSplit, ExternalTargetLabel], list[ExternalMediaRecordV1]] = (
+        defaultdict(list)
+    )
     for media in manifest.media:
         grouped[(media.source_split, media.target_label_id)].append(media)
     groups = tuple(
@@ -248,111 +398,221 @@ def build_public_corpus(
             key=lambda item: (_SPLIT_ORDER[item[0][0]], item[0][1]),
         )
     )
+    if trainable_smoke:
+        expected_groups = {
+            (source_split, target_label_id)
+            for source_split in _TRAINABLE_TARGETS
+            for target_label_id in _TARGET_LABELS
+        }
+        if set(grouped) != expected_groups:
+            raise PublicCorpusError("trainable smoke selection requires all split-target groups")
 
     exclusions: Counter[str] = Counter()
     selected: list[dict[str, object]] = []
     selected_by_split: Counter[str] = Counter()
     selected_by_target: Counter[str] = Counter()
     selected_by_disposition: Counter[str] = Counter()
+    attempted_count = 0
 
-    for group_index, ((_split, _target), candidates) in enumerate(groups, start=1):
-        accepted = False
-        attempted = min(len(candidates), max_candidates_per_group)
-        for candidate_index, media in enumerate(candidates[:attempted]):
-            source_path = external_bundle.joinpath(*media.locator.path.split("/"))
-            _verify_media_bytes(source_path, media)
-            try:
-                table = extract_media_landmarks(
-                    media.recording_id,
-                    source_path,
-                    assets=assets,
-                    config=config,
-                )
-            except ExtractionBatchError:
-                exclusions["extraction.failed"] += 1
-                continue
-            _verify_media_bytes(source_path, media)
+    def attempt_candidate(
+        media: ExternalMediaRecordV1,
+    ) -> tuple[dict[str, object], str] | None:
+        nonlocal attempted_count
 
-            content_sha256 = landmark_frames_table_digest(table)
-            parquet_path = _content_path(destination, "landmarks", content_sha256, ".parquet")
-            parquet = write_landmark_frames(table, parquet_path)
-            quality = assess_landmark_source(
+        source_path = external_bundle.joinpath(*media.locator.path.split("/"))
+        _verify_media_bytes(source_path, media)
+        attempted_count += 1
+        try:
+            table = extract_media_landmarks(
+                media.recording_id,
+                source_path,
+                assets=assets,
+                config=config,
+            )
+        except ExtractionBatchError:
+            exclusions["extraction.failed"] += 1
+            return None
+        _verify_media_bytes(source_path, media)
+
+        content_sha256 = landmark_frames_table_digest(table)
+        parquet_path = _content_path(destination, "landmarks", content_sha256, ".parquet")
+        parquet = write_landmark_frames(table, parquet_path)
+        quality = assess_landmark_source(
+            table,
+            policy,
+            source_recording_id=media.recording_id,
+            source_sequence_content_sha256=content_sha256,
+            source_landmark_parquet_sha256=parquet.sha256,
+            declared_duration_us=_duration_us(table.rows),
+            expected_hand_count=1,
+        )
+        if quality.disposition in {"quarantine", "reject"}:
+            exclusions[f"quality.{quality.disposition}"] += 1
+            return None
+        if quality.metrics.timestamp_discontinuity_count:
+            exclusions["feature.timestamp_discontinuity"] += 1
+            return None
+        try:
+            feature = derive_feature_source(
                 table,
-                policy,
+                quality,
+                feature_plan,
                 source_recording_id=media.recording_id,
-                source_sequence_content_sha256=content_sha256,
+                source_media_sha256=media.sha256,
+                source_landmarks_sha256=content_sha256,
                 source_landmark_parquet_sha256=parquet.sha256,
-                declared_duration_us=_duration_us(table.rows),
-                expected_hand_count=1,
+                source_mirror_state=_SOURCE_MIRROR_STATE,
+                extraction_config_sha256=config_sha256,
             )
-            if quality.disposition in {"quarantine", "reject"}:
-                exclusions[f"quality.{quality.disposition}"] += 1
+        except FeatureTransformError as error:
+            raise PublicCorpusError("accepted landmarks could not produce features") from error
+        feature_path = _content_path(
+            destination,
+            "features",
+            feature.sequence_sha256,
+            ".json",
+        )
+        _write_bytes(feature_path, canonical_json_bytes(feature) + b"\n")
+        return (
+            {
+                "archive_id": media.archive_id,
+                "source_member_fingerprint": media.source_member_fingerprint,
+                "sample_id": media.sample_id,
+                "source_recording_id": media.recording_id,
+                "source_signer_id": media.participant_id,
+                "source_split": media.source_split,
+                "source_label": media.source_label,
+                "target_label_id": media.target_label_id,
+                "source_media_sha256": media.sha256,
+                "source_media_size_bytes": media.size_bytes,
+                "source_rotation_degrees": _SOURCE_ROTATION_DEGREES,
+                "source_mirror_state": _SOURCE_MIRROR_STATE,
+                "source_orientation_basis": _SOURCE_ORIENTATION_BASIS,
+                "expected_hand_count": 1,
+                "landmark_content_sha256": content_sha256,
+                "landmark_parquet_sha256": parquet.sha256,
+                "landmark_parquet_size_bytes": parquet.size_bytes,
+                "landmark_frame_count": parquet.row_count,
+                "landmark_path": parquet_path.relative_to(destination).as_posix(),
+                "quality_report_sha256": quality.report_sha256,
+                "quality_disposition": quality.disposition,
+                "expected_hand_coverage_ppm": quality.metrics.expected_hand_coverage_ppm,
+                "quality_finding_rule_ids": [item.rule_id for item in quality.findings],
+                "feature_sequence_sha256": feature.sequence_sha256,
+                "feature_path": feature_path.relative_to(destination).as_posix(),
+            },
+            quality.disposition,
+        )
+
+    def retain_candidate(
+        media: ExternalMediaRecordV1,
+        result: tuple[dict[str, object], str],
+    ) -> None:
+        record, disposition = result
+        selected.append(record)
+        selected_by_split[media.source_split] += 1
+        selected_by_target[media.target_label_id] += 1
+        selected_by_disposition[disposition] += 1
+
+    trainable_states: tuple[_TrainableGroupState, ...] = ()
+    if not trainable_smoke:
+        for group_index, ((_split, _target), candidates) in enumerate(groups, start=1):
+            accepted = False
+            attempted = min(len(candidates), max_candidates_per_group)
+            for candidate_index, media in enumerate(candidates[:attempted]):
+                result = attempt_candidate(media)
+                if result is None:
+                    continue
+                retain_candidate(media, result)
+                remaining = len(candidates) - candidate_index - 1
+                if remaining:
+                    exclusions["selection.not_needed_after_accepted"] += remaining
+                accepted = True
+                break
+            if not accepted and len(candidates) > attempted:
+                exclusions["selection.attempt_limit"] += len(candidates) - attempted
+            if progress is not None:
+                progress(group_index, len(groups), accepted)
+    else:
+        trainable_states = tuple(
+            _TrainableGroupState(
+                source_split=source_split,
+                target_label_id=target_label_id,
+                candidates=_signer_interleaved(candidates),
+                target_count=_TRAINABLE_TARGETS[source_split],
+            )
+            for (source_split, target_label_id), candidates in groups
+        )
+        while attempted_count < _TRAINABLE_ATTEMPT_LIMIT:
+            active = tuple(
+                state
+                for state in trainable_states
+                if state.selected_count < state.target_count
+                and state.candidate_index < len(state.candidates)
+            )
+            if not active:
+                break
+            state = min(
+                active,
+                key=lambda item: (
+                    Fraction(item.attempted_count, item.target_count),
+                    _SPLIT_ORDER[item.source_split],
+                    item.target_label_id,
+                ),
+            )
+            candidate_media: ExternalMediaRecordV1 | None = None
+            while state.candidate_index < len(state.candidates):
+                candidate = state.candidates[state.candidate_index]
+                state.candidate_index += 1
+                if candidate.participant_id in state.selected_signers:
+                    exclusions["selection.signer_already_selected"] += 1
+                    continue
+                candidate_media = candidate
+                break
+            if candidate_media is None:
                 continue
-            if quality.metrics.timestamp_discontinuity_count:
-                exclusions["feature.timestamp_discontinuity"] += 1
+            state.attempted_count += 1
+            result = attempt_candidate(candidate_media)
+            accepted = result is not None
+            if result is not None:
+                retain_candidate(candidate_media, result)
+                state.selected_count += 1
+                state.selected_signers.add(candidate_media.participant_id)
+            if progress is not None:
+                progress(attempted_count, _TRAINABLE_ATTEMPT_LIMIT, accepted)
+
+        for state in trainable_states:
+            remaining = len(state.candidates) - state.candidate_index
+            if not remaining:
                 continue
-            try:
-                feature = derive_feature_source(
-                    table,
-                    quality,
-                    feature_plan,
-                    source_recording_id=media.recording_id,
-                    source_media_sha256=media.sha256,
-                    source_landmarks_sha256=content_sha256,
-                    source_landmark_parquet_sha256=parquet.sha256,
-                    source_mirror_state=_SOURCE_MIRROR_STATE,
-                    extraction_config_sha256=config_sha256,
-                )
-            except FeatureTransformError as error:
-                raise PublicCorpusError("accepted landmarks could not produce features") from error
-            feature_path = _content_path(
-                destination,
-                "features",
-                feature.sequence_sha256,
-                ".json",
+            reason = (
+                "selection.not_needed_after_target"
+                if state.selected_count >= state.target_count
+                else "selection.total_attempt_limit"
             )
-            _write_bytes(feature_path, canonical_json_bytes(feature) + b"\n")
-            selected.append(
-                {
-                    "archive_id": media.archive_id,
-                    "source_member_fingerprint": media.source_member_fingerprint,
-                    "sample_id": media.sample_id,
-                    "source_recording_id": media.recording_id,
-                    "source_signer_id": media.participant_id,
-                    "source_split": media.source_split,
-                    "source_label": media.source_label,
-                    "target_label_id": media.target_label_id,
-                    "source_media_sha256": media.sha256,
-                    "source_media_size_bytes": media.size_bytes,
-                    "source_rotation_degrees": _SOURCE_ROTATION_DEGREES,
-                    "source_mirror_state": _SOURCE_MIRROR_STATE,
-                    "source_orientation_basis": _SOURCE_ORIENTATION_BASIS,
-                    "expected_hand_count": 1,
-                    "landmark_content_sha256": content_sha256,
-                    "landmark_parquet_sha256": parquet.sha256,
-                    "landmark_parquet_size_bytes": parquet.size_bytes,
-                    "landmark_frame_count": parquet.row_count,
-                    "landmark_path": parquet_path.relative_to(destination).as_posix(),
-                    "quality_report_sha256": quality.report_sha256,
-                    "quality_disposition": quality.disposition,
-                    "expected_hand_coverage_ppm": quality.metrics.expected_hand_coverage_ppm,
-                    "quality_finding_rule_ids": [item.rule_id for item in quality.findings],
-                    "feature_sequence_sha256": feature.sequence_sha256,
-                    "feature_path": feature_path.relative_to(destination).as_posix(),
-                }
+            exclusions[reason] += remaining
+        selected.sort(
+            key=lambda item: (
+                _SPLIT_ORDER[str(item["source_split"])],
+                str(item["target_label_id"]),
+                str(item["sample_id"]),
             )
-            selected_by_split[media.source_split] += 1
-            selected_by_target[media.target_label_id] += 1
-            selected_by_disposition[quality.disposition] += 1
-            remaining = len(candidates) - candidate_index - 1
-            if remaining:
-                exclusions["selection.not_needed_after_accepted"] += remaining
-            accepted = True
-            break
-        if not accepted and len(candidates) > attempted:
-            exclusions["selection.attempt_limit"] += len(candidates) - attempted
-        if progress is not None:
-            progress(group_index, len(groups), accepted)
+        )
+
+    trainable_group_results = _trainable_group_results(
+        trainable_states,
+        attempted_count=attempted_count,
+    )
+    shortfall_group_count = sum(
+        state.selected_count < state.target_count for state in trainable_states
+    )
+    decision = (
+        ("ready" if shortfall_group_count == 0 else "insufficient")
+        if trainable_smoke
+        else "legacy_vertical_slice"
+    )
+    target_count = _TRAINABLE_TARGET_COUNT if trainable_smoke else len(groups)
+    attempt_limit = _TRAINABLE_ATTEMPT_LIMIT if trainable_smoke else None
 
     corpus_payload: dict[str, object] = {
         "format": "signlab-public-corpus/1",
@@ -369,8 +629,6 @@ def build_public_corpus(
             }
             for item in manifest.archives
         ],
-        "selection_rule": "first_usable_by_stable_sample_id_per_split_target/1",
-        "max_candidates_per_group": max_candidates_per_group,
         "source_rotation_degrees": _SOURCE_ROTATION_DEGREES,
         "source_mirror_state": _SOURCE_MIRROR_STATE,
         "source_orientation_basis": _SOURCE_ORIENTATION_BASIS,
@@ -384,6 +642,25 @@ def build_public_corpus(
         "selected": selected,
         "exclusions": _ordered_counts(exclusions),
     }
+    if trainable_smoke:
+        corpus_payload.update(
+            {
+                "selection_mode": "trainable_smoke",
+                "selection_rule": "signer_interleaved_fair_split_target_quota/1",
+                "attempt_limit": _TRAINABLE_ATTEMPT_LIMIT,
+                "attempted_count": attempted_count,
+                "target_count": _TRAINABLE_TARGET_COUNT,
+                "decision": decision,
+                "selection_groups": trainable_group_results,
+            }
+        )
+    else:
+        corpus_payload.update(
+            {
+                "selection_rule": "first_usable_by_stable_sample_id_per_split_target/1",
+                "max_candidates_per_group": max_candidates_per_group,
+            }
+        )
     corpus_payload["corpus_sha256"] = canonical_sha256(
         corpus_payload,
         domain="signlab-public-corpus/1",
@@ -399,7 +676,9 @@ def build_public_corpus(
         "candidate_count": len(manifest.media),
         "group_count": group_count,
         "selected_count": selected_count,
-        "unfilled_group_count": group_count - selected_count,
+        "unfilled_group_count": (
+            shortfall_group_count if trainable_smoke else group_count - selected_count
+        ),
         "selected_signer_count": len({item["source_signer_id"] for item in selected}),
         "selected_by_split": _ordered_counts(selected_by_split),
         "selected_by_target": _ordered_counts(selected_by_target),
@@ -419,6 +698,19 @@ def build_public_corpus(
             "Public isolated-sign data only; no participant, continuous-sign, or natural-use claim."
         ),
     }
+    if trainable_smoke:
+        summary.update(
+            {
+                "selection_mode": "trainable_smoke",
+                "selection_rule": "signer_interleaved_fair_split_target_quota/1",
+                "attempt_limit": _TRAINABLE_ATTEMPT_LIMIT,
+                "attempted_count": attempted_count,
+                "target_count": _TRAINABLE_TARGET_COUNT,
+                "decision": decision,
+                "selection_groups": trainable_group_results,
+                "metric_claim": "none",
+            }
+        )
     summary["summary_sha256"] = canonical_sha256(
         summary,
         domain="signlab-public-corpus-summary/1",
@@ -435,8 +727,16 @@ def build_public_corpus(
         selected_count=selected_count,
         group_count=group_count,
         exclusion_count=sum(exclusions.values()),
+        attempted_count=attempted_count,
+        target_count=target_count,
+        attempt_limit=attempt_limit,
+        decision=decision,
         summary=summary,
     )
 
 
-__all__ = ["PublicCorpusBuildResult", "PublicCorpusError", "build_public_corpus"]
+__all__ = [
+    "PublicCorpusBuildResult",
+    "PublicCorpusError",
+    "build_public_corpus",
+]
