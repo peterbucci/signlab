@@ -182,7 +182,7 @@ def test_build_public_corpus_delegates_and_reports_aggregate_progress(
     archive_root = tmp_path / "private-archives"
     model_root = tmp_path / "private-models"
     output = tmp_path / "private-output"
-    calls: list[tuple[Path, Path, Path, Path, Path | None, int]] = []
+    calls: list[tuple[Path, Path, Path, Path, Path | None, int, bool]] = []
 
     def build(
         manifest_path: Path,
@@ -192,6 +192,7 @@ def test_build_public_corpus_delegates_and_reports_aggregate_progress(
         output_root: Path,
         archive_root: Path | None,
         max_candidates_per_group: int,
+        trainable_smoke: bool,
         progress: Callable[[int, int, bool], None],
     ) -> object:
         calls.append(
@@ -202,6 +203,7 @@ def test_build_public_corpus_delegates_and_reports_aggregate_progress(
                 output_root,
                 archive_root,
                 max_candidates_per_group,
+                trainable_smoke,
             )
         )
         progress(1, 2, True)
@@ -210,6 +212,10 @@ def test_build_public_corpus_delegates_and_reports_aggregate_progress(
             selected_count=1,
             group_count=2,
             exclusion_count=3,
+            attempted_count=2,
+            target_count=80,
+            attempt_limit=750,
+            decision="insufficient",
             corpus_sha256="sha256:" + "f" * 64,
         )
 
@@ -234,12 +240,34 @@ def test_build_public_corpus_delegates_and_reports_aggregate_progress(
     )
 
     assert result.exit_code == 0
-    assert calls == [(manifest, external_root, model_root, output, archive_root, 2)]
+    assert calls == [(manifest, external_root, model_root, output, archive_root, 2, False)]
     assert "Public corpus groups: 1/2 (latest selected)." in result.output
     assert "Public corpus groups: 2/2 (latest unfilled)." in result.output
     assert "Selected usable clips: 1/2 groups." in result.output
     assert "Coded unselected or unusable clips: 3." in result.output
     assert str(tmp_path) not in result.output
+
+    trainable = runner.invoke(
+        cli.app,
+        [
+            "data",
+            "build-public-corpus",
+            str(manifest),
+            "--external-root",
+            str(external_root),
+            "--model-root",
+            str(model_root),
+            "--output",
+            str(output),
+            "--trainable-smoke",
+        ],
+    )
+    assert trainable.exit_code == 0
+    assert calls[-1] == (manifest, external_root, model_root, output, None, 5, True)
+    assert "Public corpus attempts: 1/2 (latest selected)." in trainable.output
+    assert "Trainable smoke decision: INSUFFICIENT." in trainable.output
+    assert "Selected usable clips: 1/80." in trainable.output
+    assert "Attempted videos: 2/750." in trainable.output
 
 
 @pytest.mark.parametrize(
