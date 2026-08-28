@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -7,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from signlab import cli
-from signlab.datasets import popsign
+from signlab.datasets import popsign, public_corpus
 
 
 @pytest.fixture
@@ -171,6 +172,76 @@ def test_validate_external_dataset_reports_whether_original_archives_were_checke
     assert str(tmp_path) not in result.output
 
 
+def test_build_public_corpus_delegates_and_reports_aggregate_progress(
+    runner: CliRunner,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest = tmp_path / "private-manifest.json"
+    external_root = tmp_path / "private-external"
+    archive_root = tmp_path / "private-archives"
+    model_root = tmp_path / "private-models"
+    output = tmp_path / "private-output"
+    calls: list[tuple[Path, Path, Path, Path, Path | None, int]] = []
+
+    def build(
+        manifest_path: Path,
+        *,
+        external_root: Path,
+        model_root: Path,
+        output_root: Path,
+        archive_root: Path | None,
+        max_candidates_per_group: int,
+        progress: Callable[[int, int, bool], None],
+    ) -> object:
+        calls.append(
+            (
+                manifest_path,
+                external_root,
+                model_root,
+                output_root,
+                archive_root,
+                max_candidates_per_group,
+            )
+        )
+        progress(1, 2, True)
+        progress(2, 2, False)
+        return SimpleNamespace(
+            selected_count=1,
+            group_count=2,
+            exclusion_count=3,
+            corpus_sha256="sha256:" + "f" * 64,
+        )
+
+    monkeypatch.setattr(public_corpus, "build_public_corpus", build)
+    result = runner.invoke(
+        cli.app,
+        [
+            "data",
+            "build-public-corpus",
+            str(manifest),
+            "--external-root",
+            str(external_root),
+            "--archive-root",
+            str(archive_root),
+            "--model-root",
+            str(model_root),
+            "--output",
+            str(output),
+            "--max-candidates-per-group",
+            "2",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert calls == [(manifest, external_root, model_root, output, archive_root, 2)]
+    assert "Public corpus groups: 1/2 (latest selected)." in result.output
+    assert "Public corpus groups: 2/2 (latest unfilled)." in result.output
+    assert "Selected usable clips: 1/2 groups." in result.output
+    assert "Coded unselected or unusable clips: 3." in result.output
+    assert str(tmp_path) not in result.output
+
+
 @pytest.mark.parametrize(
     ("command", "expected"),
     [
@@ -208,6 +279,20 @@ def test_validate_external_dataset_reports_whether_original_archives_were_checke
             ],
             "External dataset validation failed.",
         ),
+        (
+            [
+                "data",
+                "build-public-corpus",
+                "private-manifest.json",
+                "--external-root",
+                "private-bundle",
+                "--model-root",
+                "private-models",
+                "--output",
+                "private-output",
+            ],
+            "Public corpus build failed.",
+        ),
     ],
 )
 def test_external_dataset_commands_redact_private_failures(
@@ -225,6 +310,7 @@ def test_external_dataset_commands_redact_private_failures(
     monkeypatch.setattr(popsign, "build_popsign_v1_plan", fail)
     monkeypatch.setattr(popsign, "import_popsign_v1_archives", fail)
     monkeypatch.setattr(popsign, "validate_external_dataset_bundle", fail)
+    monkeypatch.setattr(public_corpus, "build_public_corpus", fail)
 
     result = runner.invoke(cli.app, command)
 

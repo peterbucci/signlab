@@ -87,6 +87,28 @@ uv run signlab data validate-external-dataset \
   --archive-root LOCAL_ARCHIVES
 ```
 
+## First runnable public-data slice
+
+Build a deliberately bounded technical corpus after import:
+
+```shell
+uv run signlab data build-public-corpus \
+  data/raw/external/popsign-v1/external-dataset-manifest.json \
+  --external-root data/raw/external/popsign-v1 \
+  --archive-root LOCAL_ARCHIVES \
+  --model-root LOCAL_MODELS \
+  --output data/processed/public-corpus-v1
+```
+
+The command tries stable candidates and keeps at most one usable clip for each
+source split and target (15 clips maximum for this first slice). It reuses the
+pinned landmark extractor, the existing quality policy, and only the `combined-64`
+feature plan. Raw media,
+landmarks, and features stay outside Git; the output includes a deterministic local
+corpus manifest plus concise JSON and Markdown summaries. This slice supports only
+an isolated, predefined-gesture technical claim—it is not participant evidence,
+continuous-sign recognition, or sign-language translation.
+
 CLI output contains only aggregate counts, status, and content identities. It does
 not print local paths, upstream filenames, timestamp tokens, or signer identifiers.
 

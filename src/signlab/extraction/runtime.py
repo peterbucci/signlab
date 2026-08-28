@@ -277,6 +277,18 @@ def _frame_timing(frame: Any) -> tuple[int, int, int, Fraction]:
     return pts, numerator, denominator, Fraction(numerator, denominator)
 
 
+def _contiguous_rgb(value: object) -> object:
+    """Detach padded decoder rows before MediaPipe reads the RGB buffer."""
+
+    flags = getattr(value, "flags", None)
+    if getattr(flags, "c_contiguous", None) is not False:
+        return value
+    copy = getattr(value, "copy", None)
+    if not callable(copy):
+        raise ExtractionRuntimeError("extraction.decoder.invalid")
+    return copy(order="C")
+
+
 def iter_decoded_frames(source: str | Path) -> Iterator[DecodedFrame]:
     """Decode one video stream in presentation order with integer-derived timing."""
 
@@ -303,7 +315,7 @@ def iter_decoded_frames(source: str | Path) -> Iterator[DecodedFrame]:
                 natural_task_ms = relative_us // 1_000
                 task_timestamp_ms = max(natural_task_ms, previous_task_ms + 1)
                 try:
-                    rgb = vendor_frame.to_ndarray(format="rgb24")
+                    rgb = _contiguous_rgb(vendor_frame.to_ndarray(format="rgb24"))
                     source_valid = True
                 except Exception:
                     # PTS/time-base provenance remains usable even when a decoded

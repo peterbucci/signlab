@@ -497,7 +497,7 @@ def _valid_frame(
 
 
 def _extract_frames(
-    recording: RecordingRowV1,
+    recording_id: str,
     source: Path,
     assets: VerifiedModelAssets,
     runtime_config: ExtractionRuntimeConfig,
@@ -512,9 +512,7 @@ def _extract_frames(
             for frame in decoder_factory(source):
                 if not frame.source_valid:
                     tracker.track(())
-                    rows.append(
-                        _invalid_frame(recording.recording_id, frame, "source_frame_invalid")
-                    )
+                    rows.append(_invalid_frame(recording_id, frame, "source_frame_invalid"))
                     continue
                 try:
                     inference = detector.infer_frame(frame)
@@ -525,11 +523,9 @@ def _extract_frames(
                     }:
                         raise ExtractionBatchError("execution.failed") from None
                     tracker.track(())
-                    rows.append(
-                        _invalid_frame(recording.recording_id, frame, "task_inference_failed")
-                    )
+                    rows.append(_invalid_frame(recording_id, frame, "task_inference_failed"))
                 else:
-                    rows.append(_valid_frame(recording.recording_id, frame, inference, tracker))
+                    rows.append(_valid_frame(recording_id, frame, inference, tracker))
         return LandmarkFramesTableV1(
             schema_version="landmark-frames-table/1",
             rows=tuple(rows),
@@ -538,6 +534,37 @@ def _extract_frames(
         raise
     except (ExtractionRuntimeError, OSError, RuntimeError, TypeError, ValueError):
         raise ExtractionBatchError("execution.failed") from None
+
+
+def extract_media_landmarks(
+    recording_id: str,
+    source: str | Path,
+    *,
+    assets: VerifiedModelAssets,
+    config: ExtractionConfigInput,
+    decoder_factory: DecoderFactory = iter_decoded_frames,
+    runtime_factory: RuntimeFactory = MediaPipeVideoRuntime,
+    tracker_factory: TrackerFactory = HandIdentityTracker,
+) -> LandmarkFramesTableV1:
+    """Run the existing extractor for one already-authorized media object.
+
+    Authorization, lineage, and source-byte verification remain the caller's
+    responsibility.  This small entry point lets licensed public data reuse the
+    exact participant extraction implementation without manufacturing consent or
+    session records.
+    """
+
+    checked_config = _validate_config(config)
+    tracker = tracker_factory(_tracking_config(checked_config))
+    return _extract_frames(
+        recording_id,
+        Path(source),
+        assets,
+        _runtime_config(checked_config),
+        tracker,
+        decoder_factory,
+        runtime_factory,
+    )
 
 
 def _source_media_path(recording: RecordingRowV1, raw_root: Path) -> Path:
@@ -1056,7 +1083,7 @@ def extract_raw_dataset(
                 source = _source_media_path(recording, raw_root)
                 source_identity = _verify_source_media_bytes(recording, source, raw_root)
                 table = _extract_frames(
-                    recording,
+                    recording.recording_id,
                     source,
                     assets,
                     runtime_config,
@@ -1149,6 +1176,7 @@ __all__ = [
     "TrackerFactory",
     "ValidatedLandmarkExtractionBundle",
     "VideoInferenceRuntime",
+    "extract_media_landmarks",
     "extract_raw_dataset",
     "validate_landmark_extraction_bundle",
 ]
