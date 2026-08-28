@@ -8,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from signlab import cli
-from signlab.datasets import popsign, public_corpus
+from signlab.datasets import popsign, public_corpus, public_split
 
 
 @pytest.fixture
@@ -270,6 +270,59 @@ def test_build_public_corpus_delegates_and_reports_aggregate_progress(
     assert "Attempted videos: 2/750." in trainable.output
 
 
+def test_freeze_public_corpus_split_delegates_and_reports_only_aggregates(
+    runner: CliRunner,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest = tmp_path / "private-manifest.json"
+    source_root = tmp_path / "private-source"
+    output = tmp_path / "private-output"
+    calls: list[tuple[Path, Path, Path]] = []
+
+    def freeze(
+        manifest_path: Path,
+        *,
+        source_root: Path,
+        output_root: Path,
+        progress: Callable[[int, int], None],
+    ) -> object:
+        calls.append((manifest_path, source_root, output_root))
+        progress(1, 750)
+        progress(750, 750)
+        return SimpleNamespace(
+            split_sha256="sha256:" + "f" * 64,
+            attempt_count=750,
+            pass_count=582,
+            warning_count=111,
+            quarantine_count=46,
+            no_window_count=11,
+            selected_count=80,
+        )
+
+    monkeypatch.setattr(public_split, "freeze_public_corpus_split", freeze)
+    result = runner.invoke(
+        cli.app,
+        [
+            "data",
+            "freeze-public-corpus-split",
+            str(manifest),
+            "--source-root",
+            str(source_root),
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert calls == [(manifest, source_root, output)]
+    assert "Retained landmark replay: 1/750." in result.output
+    assert "Retained landmark replay: 750/750." in result.output
+    assert "Selected usable clips: 80/80." in result.output
+    assert "Partitions: 50 train, 15 validation, 15 test." in result.output
+    assert str(tmp_path) not in result.output
+
+
 @pytest.mark.parametrize(
     ("command", "expected"),
     [
@@ -321,6 +374,18 @@ def test_build_public_corpus_delegates_and_reports_aggregate_progress(
             ],
             "Public corpus build failed.",
         ),
+        (
+            [
+                "data",
+                "freeze-public-corpus-split",
+                "private-manifest.json",
+                "--source-root",
+                "private-source",
+                "--output",
+                "private-output",
+            ],
+            "Public corpus split freeze failed.",
+        ),
     ],
 )
 def test_external_dataset_commands_redact_private_failures(
@@ -339,6 +404,7 @@ def test_external_dataset_commands_redact_private_failures(
     monkeypatch.setattr(popsign, "import_popsign_v1_archives", fail)
     monkeypatch.setattr(popsign, "validate_external_dataset_bundle", fail)
     monkeypatch.setattr(public_corpus, "build_public_corpus", fail)
+    monkeypatch.setattr(public_split, "freeze_public_corpus_split", fail)
 
     result = runner.invoke(cli.app, command)
 

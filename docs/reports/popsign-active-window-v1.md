@@ -8,8 +8,9 @@ Every split/gesture group has more distinct usable signers than the required 10 
 3 validation, or 3 test clips.
 
 This result resolves the seven-clip shortfall reported by `#79`. It does not claim model
-performance and does not overwrite the immutable `#79` corpus. The exact 80-clip corpus
-and leakage-resistant split manifest remain downstream artifacts.
+performance and does not overwrite the immutable `#79` corpus. The downstream exact
+80-sample result is recorded separately in
+[`popsign-frozen-smoke-split-v1.md`](popsign-frozen-smoke-split-v1.md).
 
 ## Frozen rule
 

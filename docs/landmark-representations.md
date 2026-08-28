@@ -139,8 +139,9 @@ observations uses mean zero and scale one; a constant channel uses scale one. Th
 statistics artifact records the verified split-manifest digest and sorted
 training-sequence identities, and standardized outputs bind its digest.
 
-Story #25 creates the authoritative train/validation/test splits. Story #22 verifies
-caller-supplied split evidence; it does not invent or revise split membership.
+Story #25 now freezes the authoritative PopSign smoke train/validation/test membership.
+The participant-backed `SplitManifestV1` remains a separate governed contract. Story
+#22 verifies caller-supplied split evidence; it does not invent or revise membership.
 
 ## Cache behavior
 

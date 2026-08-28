@@ -494,6 +494,55 @@ def build_public_corpus_command(
     typer.echo("Claim scope: licensed isolated public data only.")
 
 
+@app.command("freeze-public-corpus-split")
+def freeze_public_corpus_split_command(
+    manifest: Annotated[
+        Path,
+        typer.Argument(help="External-dataset-manifest/1 JSON document."),
+    ],
+    source_root: Annotated[
+        Path,
+        typer.Option(
+            "--source-root",
+            help="Immutable #79 corpus root containing the 750 retained landmarks.",
+        ),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option("--output", help="New exact-80 public split directory."),
+    ],
+) -> None:
+    """Freeze the exact PopSign split from retained landmarks without MediaPipe."""
+
+    from signlab.datasets.public_split import freeze_public_corpus_split
+
+    def show_progress(index: int, total: int) -> None:
+        if index == 1 or index % 50 == 0 or index == total:
+            typer.echo(f"Retained landmark replay: {index}/{total}.")
+
+    try:
+        result = freeze_public_corpus_split(
+            manifest,
+            source_root=source_root,
+            output_root=output,
+            progress=show_progress,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Public corpus split freeze failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo("Public corpus split: frozen and verified.")
+    typer.echo(f"Attempt landmarks: {result.attempt_count} verified.")
+    typer.echo(
+        "Window and quality: "
+        f"{result.pass_count} pass, {result.warning_count} warning, "
+        f"{result.quarantine_count} quarantine, {result.no_window_count} no window."
+    )
+    typer.echo(f"Selected usable clips: {result.selected_count}/80.")
+    typer.echo("Partitions: 50 train, 15 validation, 15 test.")
+    typer.echo(f"Public split SHA-256: {result.split_sha256}")
+    typer.echo("Claim scope: licensed isolated public data only.")
+
+
 def _echo_landmark_extraction_summary(
     *,
     status: str,
