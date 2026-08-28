@@ -1,0 +1,112 @@
+{
+  "body_relative": {
+    "center": "shoulder_midpoint",
+    "coordinate_space": "image_xy",
+    "missing_anchor_rule": "mask_body_keep_hand_local",
+    "palm_landmarks": [
+      0,
+      5,
+      9,
+      17
+    ],
+    "scale": "shoulder_width_xy_euclidean",
+    "source_mirror_rule": "undo_image_x_when_source_mirrored",
+    "trajectory_points": [
+      "wrist",
+      "palm_centroid"
+    ],
+    "zero_scale_rule": "mask_body_features"
+  },
+  "compatible_runtimes": [
+    "python",
+    "typescript"
+  ],
+  "feature_order": [
+    "hand_0.body.wrist.x",
+    "hand_0.body.wrist.y",
+    "hand_0.body.palm.x",
+    "hand_0.body.palm.y",
+    "hand_1.body.wrist.x",
+    "hand_1.body.wrist.y",
+    "hand_1.body.palm.x",
+    "hand_1.body.palm.y"
+  ],
+  "hand_local": {
+    "anatomical_canonicalization": "swap_vendor_label_when_not_mirrored_then_reflect_left_hand_x",
+    "center": "wrist_landmark_0",
+    "coordinate_space": "hand_world_xyz",
+    "landmark_order": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "scale": "wrist_to_middle_mcp_landmark_9_euclidean",
+    "source_mirror_rule": "undo_world_x_when_source_mirrored",
+    "zero_scale_rule": "mask_hand_features"
+  },
+  "hand_slots": [
+    "hand_0",
+    "hand_1"
+  ],
+  "handedness_source": "mediapipe_vendor_report_corrected_by_source_mirror_state",
+  "interchange_values": "signed_integer_divided_by_quantization_scale",
+  "learned_statistics": {
+    "masked_value_rule": "exclude_from_fit",
+    "mode": "none",
+    "partition_evidence": "explicit_train_membership_required",
+    "zero_count_rule": "mean_zero_scale_one",
+    "zero_variance_rule": "scale_one"
+  },
+  "optional": {
+    "include_acceleration": false,
+    "include_joint_angles": false,
+    "include_tip_distances": false,
+    "include_velocity": false,
+    "joint_angle_rule": "five_registered_pip_flexion_angles_radians/1",
+    "tip_distance_rule": "five_registered_wrist_to_fingertip_distances/1"
+  },
+  "padding": {
+    "long_sequence_rule": "uniform_endpoint_preserving_index_selection/1",
+    "padding_mask_rule": "all_feature_masks_false",
+    "padding_side": "right",
+    "padding_timestamp_rule": "continue_nominal_grid",
+    "padding_value_q": 0,
+    "target_frame_count": 64
+  },
+  "plan_id": "body_relative_64_frames",
+  "quantization_rule": "round_half_away_from_zero/1",
+  "quantization_scale": 1000000,
+  "representation": "body_relative",
+  "schema_version": "landmark-feature-plan/1",
+  "swap_rule": "preserve_slots_never_repair",
+  "temporal": {
+    "clock": "relative_timestamp_us",
+    "derivative_application_order": "resample_then_derive_then_select_then_pad/1",
+    "derivative_rule": "backward_elapsed_time_finite_difference/1",
+    "extrapolation_allowed": false,
+    "forward_fill_allowed": false,
+    "grid_rule": "nominal_elapsed_time_append_final/1",
+    "interpolation": "quality_report_approved_linear_coordinates_only",
+    "target_rate_denominator": 1,
+    "target_rate_numerator": 30
+  },
+  "version": "1.0.0"
+}

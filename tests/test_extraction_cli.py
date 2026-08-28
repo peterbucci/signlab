@@ -258,13 +258,14 @@ def test_validate_extraction_redacts_batch_errors(
     assert "Traceback" not in result.output
 
 
-def test_dataset_resource_validation_includes_extraction_resources(
+def test_dataset_resource_validation_includes_extraction_and_feature_resources(
     runner: CliRunner,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from signlab.datasets import external_resources, ingest_resources
     from signlab.datasets import resources as dataset_resources
     from signlab.extraction import resources as extraction_resources
+    from signlab.features import resources as feature_resources
     from signlab.quality import resources as quality_resources
 
     calls: list[str] = []
@@ -293,13 +294,18 @@ def test_dataset_resource_validation_includes_extraction_resources(
         "validate_packaged_quality_resources",
         lambda: calls.append("quality"),
     )
+    monkeypatch.setattr(
+        feature_resources,
+        "validate_packaged_feature_resources",
+        lambda: calls.append("feature"),
+    )
 
     result = runner.invoke(cli.app, ["data", "validate-resources"])
 
     assert result.exit_code == 0
-    assert calls == ["dataset", "external", "ingest", "extraction", "quality"]
+    assert calls == ["dataset", "external", "ingest", "extraction", "quality", "feature"]
     assert result.output.strip() == (
-        "Packaged dataset, external, ingest, extraction, and quality resources are valid."
+        "Packaged dataset, external, ingest, extraction, quality, and feature resources are valid."
     )
 
 

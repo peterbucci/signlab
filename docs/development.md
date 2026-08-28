@@ -48,6 +48,8 @@ uv sync --locked --all-groups --all-extras
 uv run pre-commit install
 uv run signlab --help
 uv run python scripts/generate_dvc_pipeline.py --check
+uv run python scripts/generate_feature_resources.py --check
+uv run python scripts/generate_feature_goldens.py --check
 uv run dvc repro --force --no-run-cache
 ```
 
@@ -61,6 +63,8 @@ uv run mypy
 uv run pytest
 uv run python scripts/check_repository_hygiene.py
 uv run python scripts/generate_dvc_pipeline.py --check
+uv run python scripts/generate_feature_resources.py --check
+uv run python scripts/generate_feature_goldens.py --check
 uv build --no-build-isolation
 uv run python scripts/verify_distribution.py dist
 ```
@@ -136,6 +140,19 @@ uv run python scripts/generate_quality_resources.py
 That generator owns the quality policy and report JSON Schemas plus the packaged
 default policy. Quality outputs are report manifests, not public fixtures or feature
 artifacts; real sequence reports remain consent-bound private research metadata.
+
+After changing a portable-feature contract or a default representation plan, run:
+
+```shell
+uv run python scripts/generate_feature_resources.py
+uv run python scripts/generate_feature_goldens.py
+```
+
+The resource generator owns the four feature JSON Schemas and the hand-local,
+body-relative, and combined default plans. The golden generator owns the
+synthetic cross-runtime expected value arrays and hashes. Neither processes public
+or participant media, fits statistics, populates the feature cache, or modifies DVC
+state.
 
 All generators are deterministic. The test suite, `signlab contracts
 validate-resources`, `signlab data validate-resources`, and `signlab governance

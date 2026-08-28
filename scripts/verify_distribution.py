@@ -105,6 +105,15 @@ EXPECTED_EXTRACTION_RESOURCES = {
     "schemas/landmark-frames-table-1.schema.json",
     "schemas/mediapipe-extraction-config-1.schema.json",
 }
+EXPECTED_FEATURE_RESOURCES = {
+    "config/body-relative-64-1.default.json",
+    "config/combined-64-1.default.json",
+    "config/hand-local-64-1.default.json",
+    "schemas/feature-cache-key-1.schema.json",
+    "schemas/feature-statistics-1.schema.json",
+    "schemas/landmark-feature-plan-1.schema.json",
+    "schemas/portable-feature-sequence-1.schema.json",
+}
 EXPECTED_QUALITY_RESOURCES = {
     "config/landmark-quality-policy-1.default.json",
     "schemas/landmark-quality-manifest-1.schema.json",
@@ -306,6 +315,17 @@ def _inspect_wheel(wheel: Path) -> tuple[str, ...]:
             expected_extraction_members
         ):
             errors.append("wheel does not contain the exact extraction resource set")
+        feature_prefix = "signlab/resources/features/"
+        feature_members = [
+            name.removeprefix(feature_prefix)
+            for name in names
+            if name.startswith(feature_prefix) and not name.endswith("/")
+        ]
+        expected_feature_members = EXPECTED_FEATURE_RESOURCES | {"__init__.py"}
+        if set(feature_members) != expected_feature_members or len(feature_members) != len(
+            expected_feature_members
+        ):
+            errors.append("wheel does not contain the exact feature resource set")
         quality_prefix = "signlab/resources/quality/"
         quality_members = [
             name.removeprefix(quality_prefix)
@@ -412,6 +432,17 @@ def _inspect_sdist(sdist: Path) -> tuple[str, ...]:
             expected_extraction_members
         ):
             errors.append("source distribution does not contain the exact extraction resource set")
+        feature_prefix = f"{package_prefix}resources/features/"
+        feature_members = [
+            member.name.removeprefix(feature_prefix)
+            for member in members
+            if member.name.startswith(feature_prefix)
+        ]
+        expected_feature_members = EXPECTED_FEATURE_RESOURCES | {"__init__.py"}
+        if set(feature_members) != expected_feature_members or len(feature_members) != len(
+            expected_feature_members
+        ):
+            errors.append("source distribution does not contain the exact feature resource set")
         quality_prefix = f"{package_prefix}resources/quality/"
         quality_members = [
             member.name.removeprefix(quality_prefix)

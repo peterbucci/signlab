@@ -1,0 +1,80 @@
+{
+  "$comment": "This JSON Schema enforces portable landmark-feature structure. SignLab's strict feature validators remain authoritative for canonical hashes, registered feature ordering, cross-runtime quantization, fixed shapes and masks, training-only statistics, and cache-key bindings.",
+  "$id": "https://signlab.dev/schemas/feature-cache-key-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Storage-independent identity of one fully resolved feature derivation.",
+  "properties": {
+    "cache_key_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Cache Key Sha256",
+      "type": "string"
+    },
+    "extraction_config_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Extraction Config Sha256",
+      "type": "string"
+    },
+    "feature_plan_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Feature Plan Sha256",
+      "type": "string"
+    },
+    "quality_policy_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Quality Policy Sha256",
+      "type": "string"
+    },
+    "quality_report_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Quality Report Sha256",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "feature-cache-key/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_landmarks_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Source Landmarks Sha256",
+      "type": "string"
+    },
+    "source_media_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Source Media Sha256",
+      "type": "string"
+    },
+    "source_recording_id": {
+      "pattern": "^recording_[0-9a-f]{32}$",
+      "title": "Source Recording Id",
+      "type": "string"
+    },
+    "statistics_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Statistics Sha256"
+    }
+  },
+  "required": [
+    "schema_version",
+    "source_recording_id",
+    "source_media_sha256",
+    "source_landmarks_sha256",
+    "extraction_config_sha256",
+    "quality_policy_sha256",
+    "quality_report_sha256",
+    "feature_plan_sha256",
+    "statistics_sha256",
+    "cache_key_sha256"
+  ],
+  "title": "FeatureCacheKeyV1",
+  "type": "object"
+}

@@ -68,6 +68,20 @@ The quality bundle contains reports only. It preserves the source landmark masks
 Parquet bytes and does not materialize Story #22 feature representations. See
 [landmark quality policy](landmark-quality.md).
 
+Four feature-stage contracts derive model inputs without rewriting raw landmarks:
+
+| Contract | Identity and responsibility |
+| --- | --- |
+| `landmark-feature-plan/1` | Exact representation, ordered channels, coordinate spaces, normalization, mirror and handedness behavior, timing, padding, quantization, optional geometry/kinematics, masks, and train-only statistics policy |
+| `portable-feature-sequence/1` | Fixed-shape quantized values, separate observation/interpolation/availability/padding masks, source-grid selection, and complete upstream hash bindings |
+| `feature-statistics/1` | Masked z-score statistics bound to the verified split-manifest digest plus sorted identities of the explicit training sequences used to fit them |
+| `feature-cache-key/1` | Storage-independent identity over source media/landmarks, extraction, quality, feature plan, and optional statistics |
+
+These feature contracts define an operation that a later experiment story will
+register beneath the retained `preprocessing-plan/1`; they do not change that
+published schema or create split membership. See
+[portable landmark representations](landmark-representations.md).
+
 `assert_model_compatible(...)` validates the complete chain. The narrower
 `assert_split_compatible(...)`, `assert_resolved_configuration_compatible(...)`,
 and `assert_run_compatible(...)` checks are available at earlier pipeline stages.
@@ -180,6 +194,10 @@ before Pydantic validation.
 | Sequence quality report | `sequence-quality-report/1` | `/1` | Never |
 | Dataset quality report | `dataset-quality-report/1` | `/1` | Never |
 | Landmark quality manifest | `landmark-quality-manifest/1` | `/1` | Never |
+| Landmark feature plan | `landmark-feature-plan/1` | `/1` | Never |
+| Portable feature sequence | `portable-feature-sequence/1` | `/1` | Never |
+| Feature statistics | `feature-statistics/1` | `/1` | Never |
+| Feature cache key | `feature-cache-key/1` | `/1` | Never |
 | Split manifest | `split-manifest/1` | `/1` | Never |
 | Preprocessing plan | `preprocessing-plan/1` | `/1` | Never |
 | Resolved configuration | `resolved-configuration/1` | `/1` | Never |

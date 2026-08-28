@@ -1,0 +1,115 @@
+{
+  "$comment": "This JSON Schema enforces portable landmark-feature structure. SignLab's strict feature validators remain authoritative for canonical hashes, registered feature ordering, cross-runtime quantization, fixed shapes and masks, training-only statistics, and cache-key bindings.",
+  "$id": "https://signlab.dev/schemas/feature-statistics-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Masked z-score statistics fitted only from identified training features.",
+  "properties": {
+    "feature_names": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Feature Names",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "feature_plan_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Feature Plan Sha256",
+      "type": "string"
+    },
+    "mean_q": {
+      "items": {
+        "maximum": 9007199254740991,
+        "minimum": -9007199254740991,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Mean Q",
+      "type": "array"
+    },
+    "observation_count": {
+      "items": {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Observation Count",
+      "type": "array"
+    },
+    "quantization_scale": {
+      "const": 1000000,
+      "title": "Quantization Scale",
+      "type": "integer"
+    },
+    "schema_version": {
+      "const": "feature-statistics/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "split_manifest_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Split Manifest Sha256",
+      "type": "string"
+    },
+    "standard_deviation_q": {
+      "items": {
+        "exclusiveMinimum": 0,
+        "maximum": 9007199254740991,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Standard Deviation Q",
+      "type": "array"
+    },
+    "statistics_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Statistics Id",
+      "type": "string"
+    },
+    "statistics_sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Statistics Sha256",
+      "type": "string"
+    },
+    "training_sequence_sha256": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Training Sequence Sha256",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "statistics_id",
+    "version",
+    "feature_plan_sha256",
+    "split_manifest_sha256",
+    "feature_names",
+    "quantization_scale",
+    "training_sequence_sha256",
+    "observation_count",
+    "mean_q",
+    "standard_deviation_q",
+    "statistics_sha256"
+  ],
+  "title": "FeatureStatisticsV1",
+  "type": "object"
+}

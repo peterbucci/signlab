@@ -1,0 +1,487 @@
+{
+  "$comment": "This JSON Schema enforces portable landmark-feature structure. SignLab's strict feature validators remain authoritative for canonical hashes, registered feature ordering, cross-runtime quantization, fixed shapes and masks, training-only statistics, and cache-key bindings.",
+  "$defs": {
+    "BodyRelativeRuleV1": {
+      "additionalProperties": false,
+      "description": "Registered image-space wrist and palm trajectory normalization.",
+      "properties": {
+        "center": {
+          "const": "shoulder_midpoint",
+          "title": "Center",
+          "type": "string"
+        },
+        "coordinate_space": {
+          "const": "image_xy",
+          "title": "Coordinate Space",
+          "type": "string"
+        },
+        "missing_anchor_rule": {
+          "const": "mask_body_keep_hand_local",
+          "title": "Missing Anchor Rule",
+          "type": "string"
+        },
+        "palm_landmarks": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "const": 0,
+              "type": "integer"
+            },
+            {
+              "const": 5,
+              "type": "integer"
+            },
+            {
+              "const": 9,
+              "type": "integer"
+            },
+            {
+              "const": 17,
+              "type": "integer"
+            }
+          ],
+          "title": "Palm Landmarks",
+          "type": "array"
+        },
+        "scale": {
+          "const": "shoulder_width_xy_euclidean",
+          "title": "Scale",
+          "type": "string"
+        },
+        "source_mirror_rule": {
+          "const": "undo_image_x_when_source_mirrored",
+          "title": "Source Mirror Rule",
+          "type": "string"
+        },
+        "trajectory_points": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "const": "wrist",
+              "type": "string"
+            },
+            {
+              "const": "palm_centroid",
+              "type": "string"
+            }
+          ],
+          "title": "Trajectory Points",
+          "type": "array"
+        },
+        "zero_scale_rule": {
+          "const": "mask_body_features",
+          "title": "Zero Scale Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "coordinate_space",
+        "trajectory_points",
+        "palm_landmarks",
+        "center",
+        "scale",
+        "source_mirror_rule",
+        "missing_anchor_rule",
+        "zero_scale_rule"
+      ],
+      "title": "BodyRelativeRuleV1",
+      "type": "object"
+    },
+    "HandLocalRuleV1": {
+      "additionalProperties": false,
+      "description": "Registered hand-shape normalization using only hand-world coordinates.",
+      "properties": {
+        "anatomical_canonicalization": {
+          "const": "swap_vendor_label_when_not_mirrored_then_reflect_left_hand_x",
+          "title": "Anatomical Canonicalization",
+          "type": "string"
+        },
+        "center": {
+          "const": "wrist_landmark_0",
+          "title": "Center",
+          "type": "string"
+        },
+        "coordinate_space": {
+          "const": "hand_world_xyz",
+          "title": "Coordinate Space",
+          "type": "string"
+        },
+        "landmark_order": {
+          "items": {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxItems": 21,
+          "minItems": 21,
+          "title": "Landmark Order",
+          "type": "array"
+        },
+        "scale": {
+          "const": "wrist_to_middle_mcp_landmark_9_euclidean",
+          "title": "Scale",
+          "type": "string"
+        },
+        "source_mirror_rule": {
+          "const": "undo_world_x_when_source_mirrored",
+          "title": "Source Mirror Rule",
+          "type": "string"
+        },
+        "zero_scale_rule": {
+          "const": "mask_hand_features",
+          "title": "Zero Scale Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "coordinate_space",
+        "landmark_order",
+        "center",
+        "scale",
+        "source_mirror_rule",
+        "anatomical_canonicalization",
+        "zero_scale_rule"
+      ],
+      "title": "HandLocalRuleV1",
+      "type": "object"
+    },
+    "LearnedStatisticsRuleV1": {
+      "additionalProperties": false,
+      "description": "Train-only masked feature-standardization policy.",
+      "properties": {
+        "masked_value_rule": {
+          "const": "exclude_from_fit",
+          "title": "Masked Value Rule",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "none",
+            "train_only_masked_zscore/1"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "partition_evidence": {
+          "const": "explicit_train_membership_required",
+          "title": "Partition Evidence",
+          "type": "string"
+        },
+        "zero_count_rule": {
+          "const": "mean_zero_scale_one",
+          "title": "Zero Count Rule",
+          "type": "string"
+        },
+        "zero_variance_rule": {
+          "const": "scale_one",
+          "title": "Zero Variance Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "partition_evidence",
+        "masked_value_rule",
+        "zero_count_rule",
+        "zero_variance_rule"
+      ],
+      "title": "LearnedStatisticsRuleV1",
+      "type": "object"
+    },
+    "OptionalFeatureRuleV1": {
+      "additionalProperties": false,
+      "description": "Small registered set of optional kinematic and geometric features.",
+      "properties": {
+        "include_acceleration": {
+          "title": "Include Acceleration",
+          "type": "boolean"
+        },
+        "include_joint_angles": {
+          "title": "Include Joint Angles",
+          "type": "boolean"
+        },
+        "include_tip_distances": {
+          "title": "Include Tip Distances",
+          "type": "boolean"
+        },
+        "include_velocity": {
+          "title": "Include Velocity",
+          "type": "boolean"
+        },
+        "joint_angle_rule": {
+          "const": "five_registered_pip_flexion_angles_radians/1",
+          "title": "Joint Angle Rule",
+          "type": "string"
+        },
+        "tip_distance_rule": {
+          "const": "five_registered_wrist_to_fingertip_distances/1",
+          "title": "Tip Distance Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "include_velocity",
+        "include_acceleration",
+        "include_joint_angles",
+        "include_tip_distances",
+        "joint_angle_rule",
+        "tip_distance_rule"
+      ],
+      "title": "OptionalFeatureRuleV1",
+      "type": "object"
+    },
+    "PaddingFeatureRuleV1": {
+      "additionalProperties": false,
+      "description": "Fixed-shape selection and neutral right-padding rules.",
+      "properties": {
+        "long_sequence_rule": {
+          "const": "uniform_endpoint_preserving_index_selection/1",
+          "title": "Long Sequence Rule",
+          "type": "string"
+        },
+        "padding_mask_rule": {
+          "const": "all_feature_masks_false",
+          "title": "Padding Mask Rule",
+          "type": "string"
+        },
+        "padding_side": {
+          "const": "right",
+          "title": "Padding Side",
+          "type": "string"
+        },
+        "padding_timestamp_rule": {
+          "const": "continue_nominal_grid",
+          "title": "Padding Timestamp Rule",
+          "type": "string"
+        },
+        "padding_value_q": {
+          "const": 0,
+          "title": "Padding Value Q",
+          "type": "integer"
+        },
+        "target_frame_count": {
+          "exclusiveMinimum": 0,
+          "ge": 2,
+          "le": 4096,
+          "maximum": 9007199254740991,
+          "title": "Target Frame Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "target_frame_count",
+        "long_sequence_rule",
+        "padding_side",
+        "padding_value_q",
+        "padding_mask_rule",
+        "padding_timestamp_rule"
+      ],
+      "title": "PaddingFeatureRuleV1",
+      "type": "object"
+    },
+    "TemporalFeatureRuleV1": {
+      "additionalProperties": false,
+      "description": "Elapsed-time resampling rules inherited from landmark quality evidence.",
+      "properties": {
+        "clock": {
+          "const": "relative_timestamp_us",
+          "title": "Clock",
+          "type": "string"
+        },
+        "derivative_application_order": {
+          "const": "resample_then_derive_then_select_then_pad/1",
+          "title": "Derivative Application Order",
+          "type": "string"
+        },
+        "derivative_rule": {
+          "const": "backward_elapsed_time_finite_difference/1",
+          "title": "Derivative Rule",
+          "type": "string"
+        },
+        "extrapolation_allowed": {
+          "const": false,
+          "title": "Extrapolation Allowed",
+          "type": "boolean"
+        },
+        "forward_fill_allowed": {
+          "const": false,
+          "title": "Forward Fill Allowed",
+          "type": "boolean"
+        },
+        "grid_rule": {
+          "const": "nominal_elapsed_time_append_final/1",
+          "title": "Grid Rule",
+          "type": "string"
+        },
+        "interpolation": {
+          "const": "quality_report_approved_linear_coordinates_only",
+          "title": "Interpolation",
+          "type": "string"
+        },
+        "target_rate_denominator": {
+          "const": 1,
+          "title": "Target Rate Denominator",
+          "type": "integer"
+        },
+        "target_rate_numerator": {
+          "const": 30,
+          "title": "Target Rate Numerator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "clock",
+        "grid_rule",
+        "target_rate_numerator",
+        "target_rate_denominator",
+        "interpolation",
+        "extrapolation_allowed",
+        "forward_fill_allowed",
+        "derivative_rule",
+        "derivative_application_order"
+      ],
+      "title": "TemporalFeatureRuleV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/landmark-feature-plan-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Exact cross-runtime definition of one derived landmark representation.",
+  "properties": {
+    "body_relative": {
+      "$ref": "#/$defs/BodyRelativeRuleV1"
+    },
+    "compatible_runtimes": {
+      "items": {
+        "enum": [
+          "python",
+          "typescript"
+        ],
+        "type": "string"
+      },
+      "minItems": 2,
+      "title": "Compatible Runtimes",
+      "type": "array"
+    },
+    "feature_order": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Feature Order",
+      "type": "array",
+      "uniqueItems": true
+    },
+    "hand_local": {
+      "$ref": "#/$defs/HandLocalRuleV1"
+    },
+    "hand_slots": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "const": "hand_0",
+          "type": "string"
+        },
+        {
+          "const": "hand_1",
+          "type": "string"
+        }
+      ],
+      "title": "Hand Slots",
+      "type": "array"
+    },
+    "handedness_source": {
+      "const": "mediapipe_vendor_report_corrected_by_source_mirror_state",
+      "title": "Handedness Source",
+      "type": "string"
+    },
+    "interchange_values": {
+      "const": "signed_integer_divided_by_quantization_scale",
+      "title": "Interchange Values",
+      "type": "string"
+    },
+    "learned_statistics": {
+      "$ref": "#/$defs/LearnedStatisticsRuleV1"
+    },
+    "optional": {
+      "$ref": "#/$defs/OptionalFeatureRuleV1"
+    },
+    "padding": {
+      "$ref": "#/$defs/PaddingFeatureRuleV1"
+    },
+    "plan_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Plan Id",
+      "type": "string"
+    },
+    "quantization_rule": {
+      "const": "round_half_away_from_zero/1",
+      "title": "Quantization Rule",
+      "type": "string"
+    },
+    "quantization_scale": {
+      "const": 1000000,
+      "title": "Quantization Scale",
+      "type": "integer"
+    },
+    "representation": {
+      "enum": [
+        "hand_local",
+        "body_relative",
+        "combined"
+      ],
+      "title": "Representation",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "landmark-feature-plan/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "swap_rule": {
+      "const": "preserve_slots_never_repair",
+      "title": "Swap Rule",
+      "type": "string"
+    },
+    "temporal": {
+      "$ref": "#/$defs/TemporalFeatureRuleV1"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "plan_id",
+    "version",
+    "representation",
+    "compatible_runtimes",
+    "hand_slots",
+    "handedness_source",
+    "swap_rule",
+    "hand_local",
+    "body_relative",
+    "temporal",
+    "padding",
+    "optional",
+    "learned_statistics",
+    "quantization_scale",
+    "quantization_rule",
+    "interchange_values",
+    "feature_order"
+  ],
+  "title": "LandmarkFeaturePlanV1",
+  "type": "object"
+}

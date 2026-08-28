@@ -220,5 +220,5 @@ def test_dataset_resource_command_validates_packaged_review_artifacts(
 
     assert result.exit_code == 0
     assert result.output.strip() == (
-        "Packaged dataset, external, ingest, extraction, and quality resources are valid."
+        "Packaged dataset, external, ingest, extraction, quality, and feature resources are valid."
     )
