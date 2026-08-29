@@ -179,8 +179,9 @@ three exact representation variants, optional geometry and elapsed-time kinemati
 masked training-only statistics, and content-addressed cache objects. Licensed
 PopSign execution now produces one deterministic, leakage-checked 80-sample public
 smoke split from the verified retained landmark inventory without rerunning MediaPipe.
-A responsive React/Vite shell now exposes the planned public routes without a backend;
-camera access, replay, feedback storage, and model inference remain explicitly
+A responsive React/Vite shell now exposes the planned public routes without a backend
+and includes a dormant MediaPipe landmark-worker boundary; camera access, model-bundle
+delivery, replay, feedback storage, and gesture inference remain explicitly
 unconnected. A minimal local MLflow ledger can now log, query, and byte-verify one
 portable baseline result without a server or custom dashboard. The first frozen
 signer-disjoint benchmark now compares majority, seeded stratified-random, and
