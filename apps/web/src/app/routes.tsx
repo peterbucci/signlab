@@ -168,7 +168,8 @@ export function OverviewPage() {
             movement or uncertainty for a result.
           </p>
           <StatusBanner>
-            Browser interface scaffold: camera and model inference are not connected yet.
+            Browser interface in progress: local camera preview is available; model inference is not
+            connected yet.
           </StatusBanner>
         </div>
 
