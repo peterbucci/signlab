@@ -1,5 +1,3 @@
-import { supportsLandmarkWorkerRuntime } from "../landmarks/LandmarkWorkerClient";
-
 export interface StaticPageDefinition {
   path: string;
   label: string;
@@ -12,30 +10,19 @@ export interface StaticPageDefinition {
   note?: string;
 }
 
-const landmarkRuntimeSupport = supportsLandmarkWorkerRuntime()
-  ? "This browser exposes the Worker, ImageBitmap, OffscreenCanvas, WebAssembly, and SIMD capabilities needed by the later demo."
-  : "This browser does not expose every Worker, ImageBitmap, OffscreenCanvas, WebAssembly, and SIMD capability needed by the later demo.";
+export const livePageDefinition = {
+  path: "/live",
+  label: "Live demo",
+  eyebrow: "Local camera preview",
+  heading: "Live recognition",
+  summary: "Start a private camera preview when you are ready. Recognition is not connected yet.",
+  status: "Camera is off. Nothing is being captured.",
+  detailsTitle: "Camera privacy",
+  details: [],
+  note: "These English labels are project prompts, not a validated claim about ASL vocabulary.",
+} as const satisfies StaticPageDefinition;
 
 export const staticPages = [
-  {
-    path: "/live",
-    label: "Live demo",
-    eyebrow: "Browser demo",
-    heading: "Live recognition",
-    summary:
-      "This page will eventually recognize one completed gesture event at a time from five project prompts: Hello, No, Please, Thank you, and Yes.",
-    status:
-      "Landmark extraction is implemented off the UI thread but is not active on this page yet. No camera permission is requested, no frame is captured, and no model bundle is loaded.",
-    detailsTitle: "Current worker boundary",
-    details: [
-      "Once supplied with already-verified model bytes, MediaPipe initializes once inside a worker.",
-      "The worker returns typed hand and body landmarks and keeps only the newest waiting frame.",
-      "Processed or replaced frames are released, and image data is not logged.",
-      landmarkRuntimeSupport,
-      "Camera controls and gesture recognition remain separate follow-up work.",
-    ],
-    note: "These English labels are project prompts, not a validated claim about ASL vocabulary.",
-  },
   {
     path: "/replay",
     label: "Replay",
@@ -109,12 +96,12 @@ export const staticPages = [
     summary:
       "The completed browser demo is intended to process camera frames on the user’s device. Raw video will not be uploaded or stored by default.",
     status:
-      "This scaffold does not request camera access, store feedback, run inference, or include analytics.",
+      "The live route requests camera access only after an explicit start action. The app does not store feedback, run inference, or include analytics.",
     detailsTitle: "Current privacy facts",
     details: [
       "This page loads only static application files.",
       "There is no application server or user account.",
-      "Future camera and storage behavior must pass separate review gates.",
+      "The live preview remains on-device and releases its camera when stopped or interrupted.",
     ],
   },
   {
@@ -139,5 +126,6 @@ export const staticPages = [
 
 export const navigationItems = [
   { path: "/", label: "Overview" },
+  { path: livePageDefinition.path, label: livePageDefinition.label },
   ...staticPages.map(({ path, label }) => ({ path, label })),
 ] as const;
