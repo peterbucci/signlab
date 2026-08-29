@@ -21,12 +21,21 @@ def test_distribution_metadata_is_complete() -> None:
                 "alembic",
                 "dvc",
                 "dvc-s3",
+                "keras",
                 "mlflow-skinny",
+                "onnx",
+                "onnxruntime",
                 "scikit-learn",
                 "sqlalchemy",
+                "tensorflow",
+                "tf2onnx",
             )
         )
         and "extra ==" not in requirement.casefold()
         for requirement in requirements
     )
-    assert set(package_metadata.get_all("Provides-Extra") or ()) == {"experiments", "extraction"}
+    assert set(package_metadata.get_all("Provides-Extra") or ()) == {
+        "experiments",
+        "extraction",
+        "legacy-compatibility",
+    }
