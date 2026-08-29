@@ -1,3 +1,5 @@
+import { supportsLandmarkWorkerRuntime } from "../landmarks/LandmarkWorkerClient";
+
 export interface StaticPageDefinition {
   path: string;
   label: string;
@@ -10,6 +12,10 @@ export interface StaticPageDefinition {
   note?: string;
 }
 
+const landmarkRuntimeSupport = supportsLandmarkWorkerRuntime()
+  ? "This browser exposes the Worker, ImageBitmap, OffscreenCanvas, WebAssembly, and SIMD capabilities needed by the later demo."
+  : "This browser does not expose every Worker, ImageBitmap, OffscreenCanvas, WebAssembly, and SIMD capability needed by the later demo.";
+
 export const staticPages = [
   {
     path: "/live",
@@ -19,12 +25,14 @@ export const staticPages = [
     summary:
       "This page will eventually recognize one completed gesture event at a time from five project prompts: Hello, No, Please, Thank you, and Yes.",
     status:
-      "Not available in this scaffold. No camera permission is requested, no frames are processed, and no model is loaded.",
-    detailsTitle: "Planned boundary",
+      "Landmark extraction is implemented off the UI thread but is not active on this page yet. No camera permission is requested, no frame is captured, and no model bundle is loaded.",
+    detailsTitle: "Current worker boundary",
     details: [
-      "Inference will run on the user’s device.",
-      "The system may abstain when evidence is uncertain.",
-      "Only five predefined prompts are in scope.",
+      "Once supplied with already-verified model bytes, MediaPipe initializes once inside a worker.",
+      "The worker returns typed hand and body landmarks and keeps only the newest waiting frame.",
+      "Processed or replaced frames are released, and image data is not logged.",
+      landmarkRuntimeSupport,
+      "Camera controls and gesture recognition remain separate follow-up work.",
     ],
     note: "These English labels are project prompts, not a validated claim about ASL vocabulary.",
   },

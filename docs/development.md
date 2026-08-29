@@ -92,6 +92,10 @@ static host without rewrite rules. Story #38 provides the responsive, honest she
 only: it does not request camera access, load a model, process replay inputs, save
 feedback, or call a backend.
 
+The normal web checks also compile and test the dormant landmark worker. MediaPipe
+`.task` models remain external to Git, and neither task starts until a later boundary
+supplies verified model buffers and frames.
+
 ## Local experiment ledger
 
 Install the optional tracker and run its single end-to-end proof with:

@@ -54,9 +54,13 @@ Static model-bundle files
   -> expose readiness or a clear failure to the route UI
 ```
 
-The immutable bundle, workers, MediaPipe Tasks, ONNX Runtime Web, cache policy, and
-Python/TypeScript parity fixtures are not part of the shell. No browser model is
-usable until those later gates are complete.
+The shell now contains a dormant `@mediapipe/tasks-vision@1.0.1` landmark worker.
+It initializes one hand/pose task pair from externally verified buffers, returns
+typed timestamps, two-hand slots, six body anchors, validity, and confidence, keeps
+only the newest waiting frame, emits sanitized timing/drop/failure measurements, and
+releases replaced or processed images and task resources. Bundle verification and
+loading, camera and replay producers, ONNX inference, event detection, and route
+lifecycle controls remain separate gates; no browser model is usable yet.
 
 The [licensed external-data boundary](external-datasets.md) is intentionally
 separate from participant ingest. It registers source, license, attribution,
