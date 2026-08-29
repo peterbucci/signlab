@@ -613,13 +613,14 @@ def _public_markdown(report: Mapping[str, Any]) -> bytes:
         lines.append(f"| {disposition} | {values['support']} | {values['errors']} |")
     signers_with_errors = sum(int(row["errors"] > 0) for row in by_signer)
     maximum_errors = max((int(row["errors"]) for row in by_signer), default=0)
+    error_word = "error" if maximum_errors == 1 else "errors"
     lines.extend(
         [
             "",
             (
                 f"Signer grouping: {len(by_signer)} held-out signers; "
                 f"{signers_with_errors} had at least one error; the maximum was "
-                f"{maximum_errors} errors for one signer. No source identifier is "
+                f"{maximum_errors} {error_word} for one signer. No source identifier is "
                 "published."
             ),
             "",

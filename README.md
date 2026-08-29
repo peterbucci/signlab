@@ -182,8 +182,15 @@ smoke split from the verified retained landmark inventory without rerunning Medi
 A responsive React/Vite shell now exposes the planned public routes without a backend;
 camera access, replay, feedback storage, and model inference remain explicitly
 unconnected. A minimal local MLflow ledger can now log, query, and byte-verify one
-portable baseline result without a server or custom dashboard. Baseline training and
-evaluation remain the next research bridge.
+portable baseline result without a server or custom dashboard. The first frozen
+signer-disjoint benchmark now compares majority, seeded stratified-random, and
+train-only multinomial-logistic references from one checked-in configuration. The
+selected logistic reference reached 0.725 test macro-F1 and 0.733 balanced accuracy
+on the deliberately small 15-clip final test; the full
+[reference report](docs/reports/popsign-reference-baselines-v1.md) publishes the
+per-class failures, CPU latency, exact identities, and limits rather than treating
+this smoke result as a product claim. Neural and continuous-event evaluation remain
+future work.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
 until the remaining licensed-corpus and grouped-evaluation foundations are complete.
