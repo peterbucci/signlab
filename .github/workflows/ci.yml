@@ -160,6 +160,47 @@ jobs:
       - name: Prove checkout stayed clean
         run: uv run --locked python scripts/check_repository_hygiene.py --require-clean
 
+  web:
+    name: Static web application
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test every route
+        run: npm test
+
+      - name: Build for a root domain
+        run: npm run build
+
+      - name: Build for a configured subpath
+        run: npm run build:subpath
+
   secrets:
     name: Full-history secret scan
     runs-on: ubuntu-24.04

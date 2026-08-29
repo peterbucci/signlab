@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -35,8 +36,24 @@ def test_ci_uses_immutable_actions_and_required_cross_platform_gates() -> None:
         "uv build --no-build-isolation",
         "scripts/verify_distribution.py dist",
         "gitleaks/gitleaks-action@",
+        "npm ci --no-audit --no-fund",
+        "npm run build:subpath",
     ):
         assert command in workflow
+
+
+def test_static_web_runtime_and_lock_are_pinned() -> None:
+    package = json.loads(_read("apps/web/package.json"))
+    package_lock = json.loads(_read("apps/web/package-lock.json"))
+    dependabot = _read(".github/dependabot.yml")
+
+    assert _read(".node-version").strip() == "24.20.0"
+    assert package["packageManager"] == "npm@11.19.0"
+    assert package["engines"]["node"] == "24.20.0"
+    assert package_lock["lockfileVersion"] == 3
+    assert package_lock["packages"][""]["engines"]["node"] == "24.20.0"
+    assert "package-ecosystem: npm" in dependabot
+    assert "directory: /apps/web" in dependabot
 
 
 def test_private_and_generated_artifacts_are_ignored() -> None:
