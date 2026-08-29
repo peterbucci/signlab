@@ -67,6 +67,15 @@ uv build --no-build-isolation
 uv run python scripts/verify_distribution.py dist
 ```
 
+The static browser shell is a separate locked application and does not require the
+Python process to run:
+
+```shell
+cd apps/web
+npm ci --no-audit --no-fund
+npm run dev
+```
+
 See [docs/development.md](docs/development.md) for directory ownership, dependency
 updates, generated-file policy, and the Python-version decision.
 
@@ -170,7 +179,10 @@ three exact representation variants, optional geometry and elapsed-time kinemati
 masked training-only statistics, and content-addressed cache objects. Licensed
 PopSign execution now produces one deterministic, leakage-checked 80-sample public
 smoke split from the verified retained landmark inventory without rerunning MediaPipe.
-Baseline experiment loading and evaluation remain the next bridge.
+A responsive React/Vite shell now exposes the planned public routes without a backend;
+camera access, replay, feedback storage, and model inference remain explicitly
+unconnected. Baseline experiment loading and evaluation remain the next research
+bridge.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
 until the remaining licensed-corpus and grouped-evaluation foundations are complete.

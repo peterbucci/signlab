@@ -5,6 +5,7 @@
 | Path | Owner | Responsibility |
 | --- | --- | --- |
 | `src/signlab/` | Python application | Importable domain, application, and adapter code; no private data |
+| `apps/web/` | Public browser application | Static React/Vite shell and, after later review gates, on-device inference |
 | `tests/` | Verification | Fast unit/integration tests and tiny public fixtures |
 | `docs/` | Evidence and decisions | Architecture, protocols, cards, audits, and tutorials |
 | `configs/` | Portable inputs | Reviewed versioned configuration; never resolved local state |
@@ -40,6 +41,11 @@ workflow installs all extras so Linux and Windows exercise that boundary; consum
 that do not extract video can install the base wheel. The future browser runtime is
 separately pinned to `@mediapipe/tasks-vision@1.0.1` by the extraction contract.
 
+The browser application is an independent npm project under `apps/web/`. Node.js
+24.20.0 LTS and npm 11.19.0 are pinned through `.node-version`, `package.json`, and the
+committed npm lockfile. It does not share dependencies or runtime state with the
+Python research pipeline.
+
 ## Canonical workflow
 
 ```shell
@@ -52,6 +58,33 @@ uv run python scripts/generate_feature_resources.py --check
 uv run python scripts/generate_feature_goldens.py --check
 uv run dvc repro --force --no-run-cache
 ```
+
+## Static browser application
+
+Install and run the browser shell without starting Python or an application server:
+
+```shell
+cd apps/web
+npm ci --no-audit --no-fund
+npm run dev
+```
+
+Before a pull request, run the web checks from that same directory:
+
+```shell
+npm run format:check
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run build:subpath
+```
+
+The two builds prove the static files can be published at a root domain or a
+configured `/signlab/` subpath. Hash-based routes keep every page usable on a plain
+static host without rewrite rules. Story #38 provides the responsive, honest shell
+only: it does not request camera access, load a model, process replay inputs, save
+feedback, or call a backend.
 
 Before a pull request:
 

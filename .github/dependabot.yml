@@ -17,3 +17,12 @@ updates:
       time: "10:30"
       timezone: America/New_York
     open-pull-requests-limit: 5
+
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "11:00"
+      timezone: America/New_York
+    open-pull-requests-limit: 5

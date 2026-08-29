@@ -30,6 +30,34 @@ Story #19 creates the first approved production version, participant-data pointe
 and production lock history will live in a separate protected metadata repository.
 See [data versioning](data-versioning.md).
 
+## Static browser shell
+
+`apps/web/` is a self-contained React, TypeScript, and Vite application. Its current
+release is a responsive static shell with overview, live demo, replay, results,
+methodology, feedback, privacy, and limitations routes. It needs no FastAPI process,
+database, user account, runtime token, local filesystem path, analytics endpoint, or
+development API. Hash-based navigation works on a root domain and on an arbitrary
+configured subpath without server-side route rewrites.
+
+The feature routes describe their intended behavior but deliberately do not imitate
+unfinished features. This shell requests no camera permission, makes no runtime data
+request, loads no model, reads no replay input, and stores no feedback. Those
+capabilities belong to later stories and retain their own evidence gates.
+
+The intended bundle-loading flow is manifest-first:
+
+```text
+Static model-bundle files
+  -> load and validate manifest + schema versions
+  -> verify every declared asset checksum
+  -> start landmark and inference workers from verified bytes
+  -> expose readiness or a clear failure to the route UI
+```
+
+The immutable bundle, workers, MediaPipe Tasks, ONNX Runtime Web, cache policy, and
+Python/TypeScript parity fixtures are not part of the shell. No browser model is
+usable until those later gates are complete.
+
 The [licensed external-data boundary](external-datasets.md) is intentionally
 separate from participant ingest. It registers source, license, attribution,
 sensitivity, use limitations, a reviewed label mapping, and an offline acquisition
