@@ -181,8 +181,9 @@ PopSign execution now produces one deterministic, leakage-checked 80-sample publ
 smoke split from the verified retained landmark inventory without rerunning MediaPipe.
 A responsive React/Vite shell now exposes the planned public routes without a backend;
 camera access, replay, feedback storage, and model inference remain explicitly
-unconnected. Baseline experiment loading and evaluation remain the next research
-bridge.
+unconnected. A minimal local MLflow ledger can now log, query, and byte-verify one
+portable baseline result without a server or custom dashboard. Baseline training and
+evaluation remain the next research bridge.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
 until the remaining licensed-corpus and grouped-evaluation foundations are complete.

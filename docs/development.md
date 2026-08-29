@@ -41,6 +41,11 @@ workflow installs all extras so Linux and Windows exercise that boundary; consum
 that do not extract video can install the base wheel. The future browser runtime is
 separately pinned to `@mediapipe/tasks-vision@1.0.1` by the extraction contract.
 
+The local experiment ledger is a separate optional `experiments` extra. It contains
+the tracking-only MLflow package and exact SQLite support pins, not the MLflow
+server, model registry, dashboard, or training libraries. Importing the SignLab CLI
+does not load MLflow.
+
 The browser application is an independent npm project under `apps/web/`. Node.js
 24.20.0 LTS and npm 11.19.0 are pinned through `.node-version`, `package.json`, and the
 committed npm lockfile. It does not share dependencies or runtime state with the
@@ -85,6 +90,27 @@ configured `/signlab/` subpath. Hash-based routes keep every page usable on a pl
 static host without rewrite rules. Story #38 provides the responsive, honest shell
 only: it does not request camera access, load a model, process replay inputs, save
 feedback, or call a backend.
+
+## Local experiment ledger
+
+Install the optional tracker and run its single end-to-end proof with:
+
+```shell
+uv sync --locked --extra experiments
+uv run --locked --extra experiments pytest tests/test_experiment_tracking.py --no-cov
+```
+
+`log_reference_run()` is the one small interface that the baseline in Story #24
+calls after it has produced a configuration, concise JSON report, confusion matrix,
+and per-example predictions. It records those four files plus a portable lineage
+file, and `verify_reference_run()` finds the run and re-hashes every referenced
+artifact. Training remains outside the tracker.
+
+The sole store setting is `SIGNLAB_MLFLOW_TRACKING_URI`, defaulting to
+`sqlite:///runs/mlflow.sqlite`. Only persistent local SQLite URIs are accepted. The
+adapter derives a local `mlflow-artifacts` directory beside that database, disables
+MLflow telemetry before loading the optional dependency, and never starts a server
+or requires a live service. Both generated locations are ignored by Git.
 
 Before a pull request:
 
