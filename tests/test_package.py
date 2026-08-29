@@ -17,7 +17,14 @@ def test_distribution_metadata_is_complete() -> None:
     requirements = tuple(package_metadata.get_all("Requires-Dist") or ())
     assert not any(
         requirement.casefold().startswith(
-            ("alembic", "dvc", "dvc-s3", "mlflow-skinny", "sqlalchemy")
+            (
+                "alembic",
+                "dvc",
+                "dvc-s3",
+                "mlflow-skinny",
+                "scikit-learn",
+                "sqlalchemy",
+            )
         )
         and "extra ==" not in requirement.casefold()
         for requirement in requirements
