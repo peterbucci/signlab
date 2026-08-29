@@ -41,10 +41,11 @@ workflow installs all extras so Linux and Windows exercise that boundary; consum
 that do not extract video can install the base wheel. The future browser runtime is
 separately pinned to `@mediapipe/tasks-vision@1.0.1` by the extraction contract.
 
-The local experiment ledger is a separate optional `experiments` extra. It contains
-the tracking-only MLflow package and exact SQLite support pins, not the MLflow
-server, model registry, dashboard, or training libraries. Importing the SignLab CLI
-does not load MLflow.
+The local experiment ledger and simple reference models are a separate optional
+`experiments` extra. It contains the tracking-only MLflow package, exact SQLite
+support pins, and scikit-learn for the three Story #24 baselines—not an MLflow
+server, model registry, dashboard, neural-network runtime, or training platform.
+Importing the SignLab CLI does not load MLflow or scikit-learn.
 
 The browser application is an independent npm project under `apps/web/`. Node.js
 24.20.0 LTS and npm 11.19.0 are pinned through `.node-version`, `package.json`, and the
@@ -105,6 +106,24 @@ calls after it has produced a configuration, concise JSON report, confusion matr
 and per-example predictions. It records those four files plus a portable lineage
 file, and `verify_reference_run()` finds the run and re-hashes every referenced
 artifact. Training remains outside the tracker.
+
+Run the frozen reference benchmark with one command after making the licensed
+PopSign split root and external manifest available locally:
+
+```shell
+uv run --locked --extra experiments signlab train reference-baselines \
+  configs/experiments/popsign-reference-baselines-v1.json \
+  --corpus-root <frozen-split-root> \
+  --external-manifest <external-dataset-manifest.json> \
+  --output-root runs/popsign-reference-baselines-v1
+```
+
+The command fits majority-class, seeded stratified-random, and multinomial logistic
+references on train only. Validation macro-F1 chooses between the two predeclared
+logistic `C` values; test features are not read until that choice is sealed. The
+output directory contains the exact configuration, metrics and failure analysis,
+confusion matrices, aliased predictions, and a sanitized Markdown summary. No model
+is exported or promoted by this baseline story.
 
 The sole store setting is `SIGNLAB_MLFLOW_TRACKING_URI`, defaulting to
 `sqlite:///runs/mlflow.sqlite`. Only persistent local SQLite URIs are accepted. The

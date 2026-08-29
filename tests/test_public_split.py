@@ -230,6 +230,33 @@ def test_freeze_is_deterministic_reconciled_and_rejects_contamination(
         "validation": 15,
         "test": 15,
     }
+    opened_paths: list[str] = []
+    resolve_artifact = public_split._resolve_artifact
+
+    def record_artifact(root: Path, path: str) -> Path:
+        opened_paths.append(path)
+        return resolve_artifact(root, path)
+
+    monkeypatch.setattr(public_split, "_resolve_artifact", record_artifact)
+    development_samples = public_split.reconcile_public_corpus_split(
+        first_document,
+        external_manifest_document=b"{}",
+        corpus_root=first_root,
+        partitions=("train", "validation"),
+    )
+    assert len(development_samples) == 65
+    assert opened_paths == [
+        row["feature_path"]
+        for row in json.loads(first_document)["assignments"]
+        if row["partition"] != "test"
+    ]
+    with pytest.raises(public_split.PublicCorpusSplitError, match="partitions are invalid"):
+        public_split.reconcile_public_corpus_split(
+            first_document,
+            external_manifest_document=b"{}",
+            corpus_root=first_root,
+            partitions=(),
+        )
 
     original = json.loads(first_document)
 

@@ -291,10 +291,14 @@ def reconcile_public_corpus_split(
     *,
     external_manifest_document: ExternalManifestInput,
     corpus_root: str | Path,
+    partitions: Sequence[PublicPartition] | None = None,
 ) -> tuple[PublicCorpusSample, ...]:
-    """Verify assignment metadata and every selected feature against their sources."""
+    """Verify all metadata and materialize features from only the requested partitions."""
 
     split = validate_public_corpus_split(document)
+    requested = frozenset(("train", "validation", "test") if partitions is None else partitions)
+    if not requested or not requested <= {"train", "validation", "test"}:
+        raise PublicCorpusSplitError("public split partitions are invalid")
     try:
         manifest = validate_external_dataset_manifest(external_manifest_document)
     except (TypeError, ValueError) as error:
@@ -325,6 +329,8 @@ def reconcile_public_corpus_split(
             row.target_label_id,
         ):
             raise PublicCorpusSplitError("public split assignment metadata does not match")
+        if row.partition not in requested:
+            continue
         try:
             feature = validate_portable_feature_sequence(
                 _resolve_artifact(root, row.feature_path).read_bytes()
