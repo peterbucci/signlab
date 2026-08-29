@@ -195,7 +195,10 @@ uv run --locked signlab data capture-reproduction-snapshot \
 ```
 
 `dvc_experiment_metadata()` exposes the commit, DVC lock/snapshot identities, and
-per-stage hashes as tracker-neutral strings. Story #27 is responsible for recording
-that mapping on an actual experiment run together with dataset, split,
-preprocessing, environment, seed, hardware, metrics, and artifact metadata. Story
-#14 does not select or integrate the tracker.
+per-stage hashes as tracker-neutral strings for a run actually governed by that DVC
+snapshot. The minimal Story #27 ledger records the explicit corpus, split, feature,
+configuration, code, environment, seed, hardware, metric, and artifact identities
+used by the licensed public baseline. It deliberately does not claim that the
+fixture-only DVC snapshot governs that separate corpus. A future DVC-backed run must
+carry the tracker-neutral DVC mapping in its portable configuration/report before
+logging it. Story #14 does not select or integrate the tracker.
