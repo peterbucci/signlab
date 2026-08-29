@@ -189,8 +189,12 @@ selected logistic reference reached 0.725 test macro-F1 and 0.733 balanced accur
 on the deliberately small 15-clip final test; the full
 [reference report](docs/reports/popsign-reference-baselines-v1.md) publishes the
 per-class failures, CPU latency, exact identities, and limits rather than treating
-this smoke result as a product claim. Neural and continuous-event evaluation remain
-future work.
+this smoke result as a product claim. A bounded
+[Keras/ONNX compatibility run](docs/reports/popsign-legacy-gru-compatibility-v1.md)
+now proves that the recovered two-layer GRU can train on the current 64-by-134 feature
+contract and preserve all 15 validation outputs through fixed-shape ONNX Runtime CPU
+inference; its perfect tiny-set validation score is explicitly not a model-quality
+claim. Continuous-event evaluation remains future work.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
 until the remaining licensed-corpus and grouped-evaluation foundations are complete.
