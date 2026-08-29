@@ -131,6 +131,22 @@ adapter derives a local `mlflow-artifacts` directory beside that database, disab
 MLflow telemetry before loading the optional dependency, and never starts a server
 or requires a live service. Both generated locations are ignored by Git.
 
+Run the bounded legacy-GRU compatibility check separately from normal development:
+
+```shell
+uv run --locked --extra legacy-compatibility signlab train legacy-gru-compatibility \
+  configs/experiments/popsign-legacy-gru-compatibility-v1.json \
+  --corpus-root <frozen-split-root> \
+  --external-manifest <external-dataset-manifest.json> \
+  --output-root runs/popsign-legacy-gru-compatibility-v1
+```
+
+This command performs exactly one Keras fit on the 50 training clips, evaluates the
+15 validation clips, exports a fixed `1 x 64 x 134` ONNX model, and checks every
+validation output with ONNX Runtime on CPU. It never requests the final-test
+partition. The run is compatibility evidence only; it is not a framework benchmark,
+model sweep, or production-quality claim.
+
 Before a pull request:
 
 ```shell

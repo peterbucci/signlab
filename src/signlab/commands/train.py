@@ -16,6 +16,66 @@ from signlab.contracts.taxonomy import (
 app = create_group(help_text="Run reproducible training experiments from validated configurations.")
 
 
+@app.command("legacy-gru-compatibility")
+def legacy_gru_compatibility_command(
+    config_path: Annotated[
+        Path,
+        typer.Argument(help="Checked-in legacy-GRU compatibility configuration JSON."),
+    ],
+    corpus_root: Annotated[
+        Path,
+        typer.Option(help="Frozen public-split root containing portable features."),
+    ],
+    external_manifest: Annotated[
+        Path,
+        typer.Option(help="Authorized external-dataset manifest for identity checks."),
+    ],
+    output_root: Annotated[
+        Path,
+        typer.Option(help="New ignored directory for local compatibility artifacts."),
+    ],
+    public_report: Annotated[
+        Path | None,
+        typer.Option(help="Optional new path for the sanitized Markdown report."),
+    ] = None,
+    tracking_uri: Annotated[
+        str | None,
+        typer.Option(help="Optional persistent local SQLite MLflow URI."),
+    ] = None,
+) -> None:
+    """Train the frozen Keras GRU once and prove fixed-shape ONNX parity."""
+
+    try:
+        from signlab.experiments.legacy_gru import (
+            LegacyGruCompatibilityError,
+            run_legacy_gru_compatibility,
+        )
+        from signlab.experiments.tracking import ExperimentTrackingError
+    except (ImportError, ModuleNotFoundError) as error:
+        typer.echo(
+            "Legacy GRU compatibility run failed: install the SignLab legacy-compatibility extra",
+            err=True,
+        )
+        raise typer.Exit(code=1) from error
+    try:
+        result = run_legacy_gru_compatibility(
+            config_path,
+            corpus_root=corpus_root,
+            external_manifest_path=external_manifest,
+            output_root=output_root,
+            public_report_path=public_report,
+            tracking_uri=tracking_uri,
+        )
+    except (LegacyGruCompatibilityError, ExperimentTrackingError) as error:
+        typer.echo(f"Legacy GRU compatibility run failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        "Legacy GRU compatibility verified: "
+        f"validation macro-F1 {result.validation_macro_f1:.3f}; "
+        f"ledger run {result.tracking.run_id}."
+    )
+
+
 @app.command("reference-baselines")
 def reference_baselines_command(
     config_path: Annotated[
