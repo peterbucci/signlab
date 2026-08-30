@@ -1,0 +1,498 @@
+{
+  "$comment": "Structure-only interoperability schema. SignLab validation remains authoritative for canonical bytes, hashes, inventory, and cross-component identities.",
+  "$defs": {
+    "ArtifactRefV1": {
+      "additionalProperties": false,
+      "description": "Exact bytes plus a portable location; the location is never the identity.",
+      "properties": {
+        "artifact_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Artifact Id",
+          "type": "string"
+        },
+        "locator": {
+          "discriminator": {
+            "mapping": {
+              "artifact_uri": "#/$defs/ArtifactUriLocatorV1",
+              "workspace_relative": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkspaceRelativeLocatorV1"
+            },
+            {
+              "$ref": "#/$defs/ArtifactUriLocatorV1"
+            }
+          ],
+          "title": "Locator"
+        },
+        "media_type": {
+          "maxLength": 127,
+          "minLength": 3,
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$",
+          "title": "Media Type",
+          "type": "string"
+        },
+        "role": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "artifact-reference/1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "artifact_id",
+        "role",
+        "media_type",
+        "sha256",
+        "size_bytes",
+        "locator"
+      ],
+      "title": "ArtifactRefV1",
+      "type": "object"
+    },
+    "ArtifactUriLocatorV1": {
+      "additionalProperties": false,
+      "description": "A storage-independent logical URI resolved by a future artifact adapter.",
+      "properties": {
+        "kind": {
+          "const": "artifact_uri",
+          "title": "Kind",
+          "type": "string"
+        },
+        "uri": {
+          "maxLength": 1024,
+          "minLength": 12,
+          "pattern": "^signlab://[a-z][a-z0-9-]{0,63}(/[a-z][a-z0-9._-]{0,127})+$",
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "uri"
+      ],
+      "title": "ArtifactUriLocatorV1",
+      "type": "object"
+    },
+    "CandidateLineageV1": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "maxLength": 128,
+          "minLength": 3,
+          "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "candidate_version": {
+          "maxLength": 64,
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+          "title": "Candidate Version",
+          "type": "string"
+        },
+        "champion_status": {
+          "const": "none_blocked",
+          "title": "Champion Status",
+          "type": "string"
+        },
+        "configuration_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Configuration Sha256",
+          "type": "string"
+        },
+        "corpus_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Corpus Sha256",
+          "type": "string"
+        },
+        "derivative_set_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Derivative Set Sha256",
+          "type": "string"
+        },
+        "dossier_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Dossier Sha256",
+          "type": "string"
+        },
+        "external_dataset_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "External Dataset Sha256",
+          "type": "string"
+        },
+        "input_feature_plan_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Input Feature Plan Sha256",
+          "type": "string"
+        },
+        "metric_claim": {
+          "const": "development_only",
+          "title": "Metric Claim",
+          "type": "string"
+        },
+        "nomination_report_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Nomination Report Sha256",
+          "type": "string"
+        },
+        "nomination_scope": {
+          "const": "portable_export_only",
+          "title": "Nomination Scope",
+          "type": "string"
+        },
+        "research_checkpoint_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Research Checkpoint Sha256",
+          "type": "string"
+        },
+        "source_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Source Commit",
+          "type": "string"
+        },
+        "source_feature_plan_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Source Feature Plan Sha256",
+          "type": "string"
+        },
+        "source_run_id": {
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Source Run Id",
+          "type": "string"
+        },
+        "split_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Split Sha256",
+          "type": "string"
+        },
+        "taxonomy_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Taxonomy Sha256",
+          "type": "string"
+        },
+        "test_status": {
+          "const": "sealed_not_loaded",
+          "title": "Test Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "candidate_version",
+        "nomination_scope",
+        "champion_status",
+        "metric_claim",
+        "test_status",
+        "source_run_id",
+        "source_commit",
+        "nomination_report_sha256",
+        "dossier_sha256",
+        "research_checkpoint_sha256",
+        "configuration_sha256",
+        "corpus_sha256",
+        "derivative_set_sha256",
+        "external_dataset_sha256",
+        "split_sha256",
+        "input_feature_plan_sha256",
+        "source_feature_plan_sha256",
+        "taxonomy_sha256"
+      ],
+      "title": "CandidateLineageV1",
+      "type": "object"
+    },
+    "ComponentIdentitiesV1": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_policy_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Decision Policy Sha256",
+          "type": "string"
+        },
+        "feature_plan_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Feature Plan Sha256",
+          "type": "string"
+        },
+        "landmarker_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Landmarker Sha256",
+          "type": "string"
+        },
+        "quality_policy_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Quality Policy Sha256",
+          "type": "string"
+        },
+        "segmenter_sha256": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Segmenter Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "landmarker_sha256",
+        "quality_policy_sha256",
+        "feature_plan_sha256",
+        "segmenter_sha256",
+        "decision_policy_sha256"
+      ],
+      "title": "ComponentIdentitiesV1",
+      "type": "object"
+    },
+    "LicenseRecordV1": {
+      "additionalProperties": false,
+      "properties": {
+        "distribution": {
+          "enum": [
+            "redistributable",
+            "redistributable_with_attribution",
+            "local_evaluation_only"
+          ],
+          "title": "Distribution",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "mediapipe",
+            "popsign_source_data",
+            "signlab_code",
+            "trained_model"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "spdx": {
+          "enum": [
+            "Apache-2.0",
+            "CC-BY-4.0",
+            "MIT",
+            "NOASSERTION"
+          ],
+          "title": "Spdx",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope",
+        "spdx",
+        "distribution"
+      ],
+      "title": "LicenseRecordV1",
+      "type": "object"
+    },
+    "OnnxContractV1": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "onnx",
+          "title": "Format",
+          "type": "string"
+        },
+        "input_dtype": {
+          "const": "float32",
+          "title": "Input Dtype",
+          "type": "string"
+        },
+        "input_name": {
+          "const": "input",
+          "title": "Input Name",
+          "type": "string"
+        },
+        "input_semantics": {
+          "const": "hand_local_feature_sequence",
+          "title": "Input Semantics",
+          "type": "string"
+        },
+        "input_shape": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "const": 1,
+              "type": "integer"
+            },
+            {
+              "const": 64,
+              "type": "integer"
+            },
+            {
+              "const": 126,
+              "type": "integer"
+            }
+          ],
+          "title": "Input Shape",
+          "type": "array"
+        },
+        "opset": {
+          "const": 18,
+          "title": "Opset",
+          "type": "integer"
+        },
+        "output_dtype": {
+          "const": "float32",
+          "title": "Output Dtype",
+          "type": "string"
+        },
+        "output_name": {
+          "const": "probabilities",
+          "title": "Output Name",
+          "type": "string"
+        },
+        "output_semantics": {
+          "const": "uncalibrated_class_probabilities",
+          "title": "Output Semantics",
+          "type": "string"
+        },
+        "output_shape": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "const": 1,
+              "type": "integer"
+            },
+            {
+              "const": 6,
+              "type": "integer"
+            }
+          ],
+          "title": "Output Shape",
+          "type": "array"
+        }
+      },
+      "required": [
+        "format",
+        "opset",
+        "input_name",
+        "input_shape",
+        "input_dtype",
+        "input_semantics",
+        "output_name",
+        "output_shape",
+        "output_dtype",
+        "output_semantics"
+      ],
+      "title": "OnnxContractV1",
+      "type": "object"
+    },
+    "WorkspaceRelativeLocatorV1": {
+      "additionalProperties": false,
+      "description": "A normalized path interpreted only relative to an explicit workspace root.",
+      "properties": {
+        "kind": {
+          "const": "workspace_relative",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*(/[A-Za-z0-9][A-Za-z0-9._-]*)*$",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "WorkspaceRelativeLocatorV1",
+      "type": "object"
+    }
+  },
+  "$id": "https://signlab.dev/schemas/browser-model-bundle-manifest-1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "assets": {
+      "items": {
+        "$ref": "#/$defs/ArtifactRefV1"
+      },
+      "maxItems": 8,
+      "minItems": 8,
+      "title": "Assets",
+      "type": "array"
+    },
+    "bundle_id": {
+      "maxLength": 128,
+      "minLength": 3,
+      "pattern": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$",
+      "title": "Bundle Id",
+      "type": "string"
+    },
+    "candidate": {
+      "$ref": "#/$defs/CandidateLineageV1"
+    },
+    "components": {
+      "$ref": "#/$defs/ComponentIdentitiesV1"
+    },
+    "format": {
+      "const": "browser-model-bundle/1",
+      "title": "Format",
+      "type": "string"
+    },
+    "labels": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 6,
+      "minItems": 6,
+      "title": "Labels",
+      "type": "array"
+    },
+    "licenses": {
+      "items": {
+        "$ref": "#/$defs/LicenseRecordV1"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "title": "Licenses",
+      "type": "array"
+    },
+    "onnx": {
+      "$ref": "#/$defs/OnnxContractV1"
+    },
+    "version": {
+      "maxLength": 64,
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "bundle_id",
+    "version",
+    "candidate",
+    "components",
+    "onnx",
+    "labels",
+    "licenses",
+    "assets"
+  ],
+  "title": "BrowserModelBundleManifestV1",
+  "type": "object"
+}
