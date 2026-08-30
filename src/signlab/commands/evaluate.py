@@ -239,3 +239,35 @@ def continuous_replay_command(
         f"{counts['temporal_matches']}/{counts['truths']} accepted target decisions matched; "
         "test sealed."
     )
+
+
+@app.command("candidate-nomination")
+def candidate_nomination_command(
+    dossier_path: Annotated[Path, typer.Argument(help="Canonical candidate dossier.")],
+    checkpoint_path: Annotated[Path, typer.Argument(help="Local research checkpoint.")],
+    repository_root: Annotated[Path, typer.Argument(help="Repository evidence root.")],
+    report: Annotated[Path, typer.Option(help="New canonical nomination report path.")],
+) -> None:
+    """Nominate one checkpoint for portable export while blocking champion use."""
+
+    from signlab.candidate_nomination import CandidateNominationError, run_candidate_nomination
+
+    try:
+        result = run_candidate_nomination(dossier_path, repository_root, checkpoint_path, report)
+    except CandidateNominationError as error:
+        typer.echo(f"Candidate nomination failed: {error.code}.", err=True)
+        raise typer.Exit(code=1) from error
+    if result["candidate_status"] != "nominated_for_portable_export":
+        failed = sum(
+            gate["status"] == "fail"
+            for gate in cast(list[dict[str, str]], result["development_gates"])
+        )
+        typer.echo(
+            f"Development candidate nomination blocked by {failed} gate(s); "
+            "champion activation remains blocked.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+    typer.echo(
+        "Development candidate nominated for portable export; champion activation remains blocked."
+    )
