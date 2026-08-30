@@ -16,3 +16,9 @@ the frozen five-target reference benchmark. It binds the corpus, external manife
 split, feature plan, taxonomy, seed, two logistic-regression `C` candidates, and
 latency procedure. Dataset and output paths remain command-line inputs because they
 are local state, not part of the experiment identity.
+
+`experiments/popsign-sequence-baselines-v1.json` freezes the one-seed engineering
+feasibility comparison between a small GRU and a similarly sized causal residual
+TCN. It fixes the same train/validation inputs, model shapes, training budget,
+checkpoint rule, metrics, and CPU-latency procedure; it does not authorize test
+access, tuning, or model selection.

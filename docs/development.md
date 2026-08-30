@@ -43,9 +43,10 @@ separately pinned to `@mediapipe/tasks-vision@1.0.1` by the extraction contract.
 
 The local experiment ledger and simple reference models are a separate optional
 `experiments` extra. It contains the tracking-only MLflow package, exact SQLite
-support pins, and scikit-learn for the three Story #24 baselines—not an MLflow
-server, model registry, dashboard, neural-network runtime, or training platform.
-Importing the SignLab CLI does not load MLflow or scikit-learn.
+support pins, scikit-learn for the three Story #24 baselines, and pinned Keras with
+TensorFlow for bounded sequence experiments—not an MLflow server, model registry,
+dashboard, or training platform. Importing the SignLab CLI does not load these
+optional experiment dependencies.
 
 The browser application is an independent npm project under `apps/web/`. Node.js
 24.20.0 LTS and npm 11.19.0 are pinned through `.node-version`, `package.json`, and the
@@ -129,6 +130,21 @@ logistic `C` values; test features are not read until that choice is sealed. The
 output directory contains the exact configuration, metrics and failure analysis,
 confusion matrices, aliased predictions, and a sanitized Markdown summary. No model
 is exported or promoted by this baseline story.
+
+Run the fixed GRU/TCN feasibility comparison with the same local development inputs:
+
+```shell
+uv run --locked --extra experiments signlab train sequence-baselines \
+  configs/experiments/popsign-sequence-baselines-v1.json \
+  --corpus-root <frozen-split-root> \
+  --external-manifest <external-dataset-manifest.json> \
+  --output-root runs/popsign-sequence-baselines-v1
+```
+
+This command performs exactly two Keras fits using one shared protocol, retains and
+reloads only best/last checkpoints, and reports descriptive validation behavior,
+serialized sizes, fit time, and CPU latency. It never requests test features and
+does not select a winning architecture. ONNX export remains outside this comparison.
 
 The sole store setting is `SIGNLAB_MLFLOW_TRACKING_URI`, defaulting to
 `sqlite:///runs/mlflow.sqlite`. Only persistent local SQLite URIs are accepted. The
