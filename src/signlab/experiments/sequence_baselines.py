@@ -650,6 +650,8 @@ def _public_markdown(report: Mapping[str, Any]) -> bytes:
             )
     lines.extend(["", "## Concrete validation failures", ""])
     for name in MODEL_NAMES:
+        if lines[-1]:
+            lines.append("")
         failures = models[name]["failure_analysis"]
         if failures["observed_error_count"] == 0:
             lines.append(f"- {name.upper()}: zero observed errors.")

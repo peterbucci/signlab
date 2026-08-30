@@ -197,7 +197,13 @@ this smoke result as a product claim. A bounded
 now proves that the recovered two-layer GRU can train on the current 64-by-134 feature
 contract and preserve all 15 validation outputs through fixed-shape ONNX Runtime CPU
 inference; its perfect tiny-set validation score is explicitly not a model-quality
-claim. Continuous-event evaluation remains future work.
+claim. A subsequent fixed
+[GRU/TCN feasibility run](docs/reports/popsign-sequence-baselines-v1.md) now confirms
+that one small forward GRU and one similarly sized causal residual TCN can train,
+checkpoint, reload, and run on the same sequence contract under one shared protocol.
+All four bounded checkpoints reloaded successfully; test features stayed sealed, and
+the 15-clip validation observations do not select a model-quality winner.
+Continuous-event evaluation remains future work.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
 until the remaining licensed-corpus and grouped-evaluation foundations are complete.
