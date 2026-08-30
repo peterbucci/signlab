@@ -48,6 +48,7 @@ mlruns/
 *.a
 *.avi
 *.onnx
+!tests/fixtures/public/parity/candidate-runtime-v1.onnx
 *.keras
 *.h5
 *.hdf5
