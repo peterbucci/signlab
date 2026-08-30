@@ -1,0 +1,68 @@
+name: Synthetic reference experiment
+
+on:
+  schedule:
+    - cron: "17 7 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: reference-experiment-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+  UV_NO_PROGRESS: "1"
+
+jobs:
+  reference-experiment:
+    name: ${{ matrix.name }} synthetic reference experiment
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-24.04
+            timeout_minutes: 20
+            artifact_suffix: linux
+          - name: Windows
+            os: windows-latest
+            timeout_minutes: 25
+            artifact_suffix: windows
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.timeout_minutes }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          version: 0.12.6
+
+      - name: Install pinned Python
+        run: uv python install
+
+      - name: Validate lockfile
+        run: uv lock --check
+
+      - name: Install locked experiment dependencies
+        run: >-
+          uv sync --locked --no-default-groups
+          --extra experiments --extra portable-export
+
+      - name: Run and verify the 180-second reference experiment
+        run: uv run --locked --no-sync signlab train reference-experiment
+
+      - name: Upload sanitized reference artifact pack
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reference-experiment-${{ matrix.artifact_suffix }}
+          path: runs/reference-experiment-v1/
+          if-no-files-found: error
+          retention-days: 14
