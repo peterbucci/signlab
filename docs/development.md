@@ -183,6 +183,20 @@ validation output with ONNX Runtime on CPU. It never requests the final-test
 partition. The run is compatibility evidence only; it is not a framework benchmark,
 model sweep, or production-quality claim.
 
+Export the separately nominated development candidate without retraining it:
+
+```shell
+uv run --locked --extra portable-export signlab export browser-bundle \
+  configs/evaluation/popsign-tcn-portable-export-candidate-v1.json \
+  docs/reports/popsign-tcn-portable-export-nomination-v1.json \
+  runs/popsign-constructed-calibration-v1/model.keras \
+  --repository-root . \
+  --output-root runs/popsign-tcn-browser-candidate-v1
+```
+
+The output is a checksum-validated, CPU-smoked local-evaluation bundle. Its model
+license remains `NOASSERTION`; do not commit or distribute the generated ONNX file.
+
 Before a pull request:
 
 ```shell

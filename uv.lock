@@ -2452,6 +2452,13 @@ legacy-compatibility = [
     { name = "tensorflow" },
     { name = "tf2onnx" },
 ]
+portable-export = [
+    { name = "keras" },
+    { name = "onnx" },
+    { name = "onnxruntime" },
+    { name = "tensorflow" },
+    { name = "tf2onnx" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -2477,11 +2484,14 @@ requires-dist = [
     { name = "jsonschema", specifier = ">=4.26,<5" },
     { name = "keras", marker = "extra == 'experiments'", specifier = "==3.15.1" },
     { name = "keras", marker = "extra == 'legacy-compatibility'", specifier = "==3.15.1" },
+    { name = "keras", marker = "extra == 'portable-export'", specifier = "==3.15.1" },
     { name = "mediapipe", marker = "extra == 'extraction'", specifier = "==1.0.1" },
     { name = "mlflow-skinny", marker = "extra == 'experiments'", specifier = "==3.15.2" },
     { name = "mlflow-skinny", marker = "extra == 'legacy-compatibility'", specifier = "==3.15.2" },
     { name = "onnx", marker = "extra == 'legacy-compatibility'", specifier = "==1.22.0" },
+    { name = "onnx", marker = "extra == 'portable-export'", specifier = "==1.22.0" },
     { name = "onnxruntime", marker = "extra == 'legacy-compatibility'", specifier = "==1.29.0" },
+    { name = "onnxruntime", marker = "extra == 'portable-export'", specifier = "==1.29.0" },
     { name = "pyarrow", specifier = "==25.0.1" },
     { name = "pydantic", specifier = ">=2.13.4,<2.14" },
     { name = "pyyaml", specifier = "==6.0.3" },
@@ -2492,11 +2502,13 @@ requires-dist = [
     { name = "sqlalchemy", marker = "extra == 'legacy-compatibility'", specifier = "==2.0.52" },
     { name = "tensorflow", marker = "extra == 'experiments'", specifier = "==2.21.0" },
     { name = "tensorflow", marker = "extra == 'legacy-compatibility'", specifier = "==2.21.0" },
+    { name = "tensorflow", marker = "extra == 'portable-export'", specifier = "==2.21.0" },
     { name = "tf2onnx", marker = "extra == 'legacy-compatibility'", specifier = "==1.17.0" },
+    { name = "tf2onnx", marker = "extra == 'portable-export'", specifier = "==1.17.0" },
     { name = "typer", specifier = ">=0.27.1,<0.28" },
     { name = "tzdata", specifier = "==2026.3" },
 ]
-provides-extras = ["experiments", "extraction", "legacy-compatibility"]
+provides-extras = ["experiments", "extraction", "legacy-compatibility", "portable-export"]
 
 [package.metadata.requires-dev]
 dev = [
