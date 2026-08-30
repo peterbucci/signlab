@@ -190,20 +190,34 @@ and every downstream descendant of consent-bound assets, including shared datase
 runs, models, reports, demos, caches, and backups. It emits a dry-run plan only;
 external deletion requires future authorized store adapters and attestations.
 
-The model bundle will eventually contain:
+The immutable `browser-model-bundle/1` candidate envelope contains:
 
 ```text
+manifest.json
 model.onnx
-labels.json
-input-schema.json
-preprocess.json
+landmarker.json
+quality-policy.json
+feature-plan.json
 segmenter.json
 decision-policy.json
-calibration.json
-manifest.json
 model-card.md
 golden/
+  smoke.json
 ```
+
+The canonical manifest carries the fixed `1×64×126` float32 input, six-class
+probability output, exact label order, development-only candidate lineage, licenses,
+and a sorted byte-count/SHA-256 inventory. Its domain-separated digest therefore
+identifies every asset transitively. The landmarker document already pins the browser
+package and both shared MediaPipe task hashes and sizes; task bytes are not duplicated
+inside each bundle. The decision policy remains authoritative for calibration and
+abstention.
+
+Version `/1` never migrates silently. Unknown versions fail closed, changed assets
+produce a new bundle digest, and changed required roles or semantics require `/2`.
+The packaged example proves structure only: it is not a valid ONNX model or inference
+claim. Story #35 owns export and runtime smoke validation. Until model-distribution
+terms are reviewed, the trained model remains `NOASSERTION` and local-evaluation-only.
 
 ## Optional platform
 
