@@ -40,3 +40,8 @@ constructed conformance evidence; they are not tuned natural-use parameters.
 `evaluation/constructed-continuous-replay-v1.json` freezes the temporal matcher and
 group-bootstrap mechanics used by the constructed replay scorer. It binds existing
 detector, policy, and model identities but makes no live or natural-session claim.
+
+`evaluation/popsign-tcn-portable-export-candidate-v1.json` freezes the exact #31
+hand-local TCN checkpoint identity, its supporting evidence, and its data and model
+cards. Successful verification nominates that checkpoint for portable export and
+evaluation only; every champion and release gate remains blocked.

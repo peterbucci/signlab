@@ -203,11 +203,15 @@ that one small forward GRU and one similarly sized causal residual TCN can train
 checkpoint, reload, and run on the same sequence contract under one shared protocol.
 All four bounded checkpoints reloaded successfully; test features stayed sealed, and
 the 15-clip validation observations do not select a model-quality winner.
-The next frozen ablation compares the three registered feature views with logistic,
-GRU, and TCN conditions across three signer-grouped development folds: 18 fits in
-total, nine neural. It keeps test sealed and produces no winner, retained checkpoint,
-or export.
-Continuous-event evaluation remains future work.
+The completed signer-grouped ablation supports carrying the hand-local TCN design
+forward, without treating its development metrics as results for a particular
+checkpoint. A separate six-class checkpoint now has bounded constructed calibration
+and continuous-replay scorer evidence. Its
+[dataset card](docs/cards/popsign-five-isolated-smoke-v1.md),
+[model card](docs/cards/popsign-tcn-portable-export-candidate-v1.md), and
+[nomination report](docs/reports/popsign-tcn-portable-export-nomination-v1.json)
+freeze the exact evidence and nominate it for portable export only. No champion or
+natural-use, test, release, or production claim is made.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
 until the remaining licensed-corpus and grouped-evaluation foundations are complete.
