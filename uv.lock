@@ -2431,9 +2431,11 @@ dependencies = [
 [package.optional-dependencies]
 experiments = [
     { name = "alembic" },
+    { name = "keras" },
     { name = "mlflow-skinny" },
     { name = "scikit-learn" },
     { name = "sqlalchemy" },
+    { name = "tensorflow" },
 ]
 extraction = [
     { name = "av" },
@@ -2473,6 +2475,7 @@ requires-dist = [
     { name = "alembic", marker = "extra == 'legacy-compatibility'", specifier = "==1.19.1" },
     { name = "av", marker = "extra == 'extraction'", specifier = "==18.1.0" },
     { name = "jsonschema", specifier = ">=4.26,<5" },
+    { name = "keras", marker = "extra == 'experiments'", specifier = "==3.15.1" },
     { name = "keras", marker = "extra == 'legacy-compatibility'", specifier = "==3.15.1" },
     { name = "mediapipe", marker = "extra == 'extraction'", specifier = "==1.0.1" },
     { name = "mlflow-skinny", marker = "extra == 'experiments'", specifier = "==3.15.2" },
@@ -2487,6 +2490,7 @@ requires-dist = [
     { name = "scikit-learn", marker = "extra == 'legacy-compatibility'", specifier = "==1.9.0" },
     { name = "sqlalchemy", marker = "extra == 'experiments'", specifier = "==2.0.52" },
     { name = "sqlalchemy", marker = "extra == 'legacy-compatibility'", specifier = "==2.0.52" },
+    { name = "tensorflow", marker = "extra == 'experiments'", specifier = "==2.21.0" },
     { name = "tensorflow", marker = "extra == 'legacy-compatibility'", specifier = "==2.21.0" },
     { name = "tf2onnx", marker = "extra == 'legacy-compatibility'", specifier = "==1.17.0" },
     { name = "typer", specifier = ">=0.27.1,<0.28" },
