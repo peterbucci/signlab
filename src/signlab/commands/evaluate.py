@@ -271,3 +271,34 @@ def candidate_nomination_command(
     typer.echo(
         "Development candidate nominated for portable export; champion activation remains blocked."
     )
+
+
+@app.command("native-onnx-parity")
+def native_onnx_parity_command(
+    bundle_root: Annotated[Path, typer.Argument(help="Validated #35 bundle root.")],
+    checkpoint_path: Annotated[Path, typer.Argument(help="Exact native checkpoint.")],
+    config_path: Annotated[Path, typer.Argument(help="Frozen calibration config.")],
+    corpus_root: Annotated[Path, typer.Option(help="Frozen public corpus root.")],
+    external_manifest: Annotated[Path, typer.Option(help="External dataset manifest.")],
+    report: Annotated[Path, typer.Option(help="New sanitized parity report.")],
+) -> None:
+    """Gate candidate use on development-only native/ONNX parity."""
+
+    try:
+        from signlab.model_parity import ModelParityError, run_native_onnx_parity
+    except (ImportError, ModuleNotFoundError) as error:
+        typer.echo("Native/ONNX parity failed: install the portable-export extra.", err=True)
+        raise typer.Exit(code=1) from error
+    try:
+        result = run_native_onnx_parity(
+            bundle_root,
+            checkpoint_path,
+            config_path,
+            corpus_root,
+            external_manifest,
+            report,
+        )
+    except ModelParityError as error:
+        typer.echo(f"Native/ONNX parity failed: {error.code}.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"Native/ONNX parity verified for {result.row_count} development rows; test sealed.")
