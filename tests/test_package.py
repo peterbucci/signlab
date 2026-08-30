@@ -38,4 +38,5 @@ def test_distribution_metadata_is_complete() -> None:
         "experiments",
         "extraction",
         "legacy-compatibility",
+        "portable-export",
     }
