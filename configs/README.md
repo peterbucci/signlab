@@ -22,3 +22,8 @@ feasibility comparison between a small GRU and a similarly sized causal residual
 TCN. It fixes the same train/validation inputs, model shapes, training budget,
 checkpoint rule, metrics, and CPU-latency procedure; it does not authorize test
 access, tuning, or model selection.
+
+`experiments/popsign-representation-ablations-v1.json` freezes three signer-grouped
+development folds and six declared model/representation conditions: 18 total fits,
+including nine neural fits. It compares only hand-local, body-relative, and combined
+views; test access, winner selection, checkpoints, and export are excluded.

@@ -238,11 +238,18 @@ def _compile(model: Any, config: SequenceBaselineConfig, runtime: _Runtime) -> A
     return model
 
 
-def _build_model(name: ModelName, config: SequenceBaselineConfig, runtime: _Runtime) -> Any:
+def _build_graph(
+    name: ModelName,
+    input_width: int,
+    config: SequenceBaselineConfig,
+    runtime: _Runtime,
+) -> Any:
+    """Build the reviewed GRU or TCN graph for one registered input width."""
+
     try:
         layers = runtime.keras.layers
         inputs = runtime.keras.Input(
-            shape=(config.input_frames, config.input_width), dtype="float32", name="input"
+            shape=(config.input_frames, input_width), dtype="float32", name="input"
         )
         if name == "gru":
             values = layers.GRU(
@@ -291,6 +298,11 @@ def _build_model(name: ModelName, config: SequenceBaselineConfig, runtime: _Runt
         raise
     except Exception as error:
         raise SequenceBaselineError(f"the {name} graph could not be built") from error
+    return model
+
+
+def _build_model(name: ModelName, config: SequenceBaselineConfig, runtime: _Runtime) -> Any:
+    model = _build_graph(name, config.input_width, config, runtime)
     if int(model.count_params()) != _EXPECTED_PARAMETERS[name]:
         raise SequenceBaselineError(f"the {name} parameter count drifted")
     return model

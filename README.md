@@ -203,6 +203,10 @@ that one small forward GRU and one similarly sized causal residual TCN can train
 checkpoint, reload, and run on the same sequence contract under one shared protocol.
 All four bounded checkpoints reloaded successfully; test features stayed sealed, and
 the 15-clip validation observations do not select a model-quality winner.
+The next frozen ablation compares the three registered feature views with logistic,
+GRU, and TCN conditions across three signer-grouped development folds: 18 fits in
+total, nine neural. It keeps test sealed and produces no winner, retained checkpoint,
+or export.
 Continuous-event evaluation remains future work.
 The registered DVC graph remains the Story #14 fixture receipt scaffold rather
 than a production extraction runner. No headline model result is considered valid
