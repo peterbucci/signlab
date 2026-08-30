@@ -42,3 +42,8 @@ are conformance evidence only, not natural-use performance.
 `replay/` contains MIT-licensed invented truth intervals and final decisions for one
 mixed and one negative-only session. It proves scoring counts and grouping mechanics;
 its rates and timing values are not measurements of people, models, or runtimes.
+
+`parity/` contains one MIT-licensed, no-person candidate-runtime golden and a tiny
+deterministic ONNX probe. The JSON shares raw synthetic frames, compact expected
+features, masks, decisions, and exact resource identities with Python and TypeScript.
+The ONNX bytes test runtime mechanics only; they are not a trained candidate model.
