@@ -36,3 +36,7 @@ natural-other, continuous-use, promotion, and deployment claims are excluded.
 `evaluation/candidate-event-detector-v1.json` freezes one engineering configuration for
 the frame-by-frame candidate-event state machine. Its thresholds are exercised only by
 constructed conformance evidence; they are not tuned natural-use parameters.
+
+`evaluation/constructed-continuous-replay-v1.json` freezes the temporal matcher and
+group-bootstrap mechanics used by the constructed replay scorer. It binds existing
+detector, policy, and model identities but makes no live or natural-session claim.

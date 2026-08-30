@@ -38,3 +38,7 @@ pose, irregular timing, optional geometry and derivatives, and padding.
 flags, and quantized motion. It exercises candidate-event state transitions without
 including camera, landmark, public-corpus, or participant-derived values. Its metrics
 are conformance evidence only, not natural-use performance.
+
+`replay/` contains MIT-licensed invented truth intervals and final decisions for one
+mixed and one negative-only session. It proves scoring counts and grouping mechanics;
+its rates and timing values are not measurements of people, models, or runtimes.

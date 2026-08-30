@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from itertools import pairwise
 from pathlib import Path
-from typing import Annotated, Literal, Self
+from typing import Annotated, Literal, Self, cast
 
 import typer
 from pydantic import Field, ValidationError, model_validator
@@ -207,4 +207,35 @@ def candidate_events_command(
     typer.echo(
         "Candidate-event conformance verified: "
         f"{len(events)}/{len(fixture.truth_events)} expected events."
+    )
+
+
+@app.command("continuous-replay")
+def continuous_replay_command(
+    config_path: Annotated[Path, typer.Argument(help="Checked-in replay scoring config.")],
+    fixture_path: Annotated[Path, typer.Argument(help="Constructed replay fixture JSON.")],
+    candidate_event_config_path: Annotated[Path, typer.Argument(help="Detector config.")],
+    decision_policy_path: Annotated[Path, typer.Argument(help="Decision policy.")],
+    report: Annotated[Path, typer.Option(help="New path for the canonical JSON report.")],
+) -> None:
+    """Score timestamped constructed decisions without claiming live performance."""
+
+    from signlab.continuous_replay import ContinuousReplayError, run_continuous_replay
+
+    try:
+        result = run_continuous_replay(
+            config_path,
+            fixture_path,
+            candidate_event_config_path,
+            decision_policy_path,
+            report,
+        )
+    except ContinuousReplayError as error:
+        typer.echo("Continuous replay scoring failed: inputs or output are invalid.", err=True)
+        raise typer.Exit(code=1) from error
+    counts = cast(dict[str, int], result["counts"])
+    typer.echo(
+        "Constructed replay scoring verified: "
+        f"{counts['temporal_matches']}/{counts['truths']} accepted target decisions matched; "
+        "test sealed."
     )
