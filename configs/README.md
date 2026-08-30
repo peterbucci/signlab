@@ -27,3 +27,7 @@ access, tuning, or model selection.
 development folds and six declared model/representation conditions: 18 total fits,
 including nine neural fits. It compares only hand-local, body-relative, and combined
 views; test access, winner selection, checkpoints, and export are excluded.
+
+`evaluation/candidate-event-detector-v1.json` freezes one engineering configuration for
+the frame-by-frame candidate-event state machine. Its thresholds are exercised only by
+constructed conformance evidence; they are not tuned natural-use parameters.
