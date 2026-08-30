@@ -134,6 +134,46 @@ def sequence_baselines_command(
     )
 
 
+@app.command("constructed-calibration")
+def constructed_calibration_command(
+    config_path: Annotated[Path, typer.Argument(help="Frozen calibration JSON.")],
+    corpus_root: Annotated[Path, typer.Option(help="Frozen public feature root.")],
+    external_manifest: Annotated[Path, typer.Option(help="External manifest.")],
+    output_root: Annotated[Path, typer.Option(help="New local output directory.")],
+    public_report: Annotated[Path | None, typer.Option(help="New public report.")] = None,
+    public_policy: Annotated[Path | None, typer.Option(help="New public policy.")] = None,
+    tracking_uri: Annotated[str | None, typer.Option(help="Local MLflow SQLite URI.")] = None,
+) -> None:
+    """Run the development-only six-class calibration mechanics check."""
+
+    try:
+        from signlab.experiments.calibration import CalibrationError, run_calibration
+        from signlab.experiments.tracking import ExperimentTrackingError
+    except (ImportError, ModuleNotFoundError) as error:
+        typer.echo(
+            "Constructed calibration failed: install the SignLab experiments extra",
+            err=True,
+        )
+        raise typer.Exit(code=1) from error
+    try:
+        result = run_calibration(
+            config_path,
+            corpus_root=corpus_root,
+            external_manifest_path=external_manifest,
+            output_root=output_root,
+            public_report_path=public_report,
+            public_policy_path=public_policy,
+            tracking_uri=tracking_uri,
+        )
+    except (CalibrationError, ExperimentTrackingError) as error:
+        typer.echo(f"Constructed calibration failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        "Constructed calibration verified: policy written with test sealed; "
+        f"ledger run {result.tracking.run_id}."
+    )
+
+
 @app.command("legacy-gru-compatibility")
 def legacy_gru_compatibility_command(
     config_path: Annotated[
