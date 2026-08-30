@@ -146,6 +146,21 @@ reloads only best/last checkpoints, and reports descriptive validation behavior,
 serialized sizes, fit time, and CPU latency. It never requests test features and
 does not select a winning architecture. ONNX export remains outside this comparison.
 
+Run the frozen representation ablation on development folds only:
+
+```shell
+uv run --locked --extra experiments signlab train representation-ablations \
+  configs/experiments/popsign-representation-ablations-v1.json \
+  --corpus-root <frozen-split-root> \
+  --external-manifest <external-dataset-manifest.json> \
+  --output-root runs/popsign-representation-ablations-v1
+```
+
+The fixed matrix performs 18 fits across three signer-grouped folds: nine logistic
+fits and nine neural fits. It reports development evidence for the declared feature
+views and architectures, without opening test, choosing a winner, retaining
+checkpoints, or exporting a model.
+
 The sole store setting is `SIGNLAB_MLFLOW_TRACKING_URI`, defaulting to
 `sqlite:///runs/mlflow.sqlite`. Only persistent local SQLite URIs are accepted. The
 adapter derives a local `mlflow-artifacts` directory beside that database, disables
