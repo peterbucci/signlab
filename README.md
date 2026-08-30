@@ -52,6 +52,18 @@ uv run signlab --help
 uv run signlab doctor check
 ```
 
+After that locked install, run the complete synthetic reference experiment with:
+
+```shell
+uv run --locked --no-sync signlab train reference-experiment
+```
+
+It writes a verified research artifact pack and local MLflow evidence only under the
+ignored `runs/` directory. Its scores prove reproducible pipeline mechanics on
+no-person synthetic data; they do not measure real gesture quality, signer
+generalization, or sign-language performance, and they do not replace the separately
+evaluated PopSign browser candidate.
+
 The locked environment contains every development tool. Run the same gates as CI:
 
 ```shell

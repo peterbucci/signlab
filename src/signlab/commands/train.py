@@ -16,6 +16,53 @@ from signlab.contracts.taxonomy import (
 app = create_group(help_text="Run reproducible training experiments from validated configurations.")
 
 
+@app.command("reference-experiment")
+def reference_experiment_command(
+    config_path: Annotated[
+        Path,
+        typer.Argument(help="Checked-in synthetic reference-experiment configuration JSON."),
+    ] = Path("configs/experiments/signlab-reference-experiment-v1.json"),
+    output_root: Annotated[
+        Path,
+        typer.Option(help="New ignored directory for the sanitized reference artifact pack."),
+    ] = Path("runs/reference-experiment-v1"),
+    tracking_uri: Annotated[
+        str | None,
+        typer.Option(help="Optional persistent local SQLite MLflow URI."),
+    ] = None,
+) -> None:
+    """Run the bounded, synthetic reference experiment and verify its evidence."""
+
+    try:
+        from signlab.experiments.reference_experiment import (
+            ReferenceExperimentError,
+            run_reference_experiment,
+        )
+        from signlab.experiments.tracking import ExperimentTrackingError
+    except (ImportError, ModuleNotFoundError) as error:
+        typer.echo(
+            "Reference experiment failed: install the SignLab experiments "
+            "and portable-export extras",
+            err=True,
+        )
+        raise typer.Exit(code=1) from error
+    try:
+        result = run_reference_experiment(
+            config_path,
+            output_root=output_root,
+            tracking_uri=tracking_uri,
+        )
+    except (ReferenceExperimentError, ExperimentTrackingError) as error:
+        typer.echo(f"Reference experiment failed: {error}", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(
+        f"Reference experiment verified: {result.sample_count} synthetic classifier samples, "
+        f"{result.label_count} labels, ONNX maximum difference "
+        f"{result.parity_maximum_absolute_difference:.3g}; "
+        f"ledger run {result.tracking.run_id}."
+    )
+
+
 @app.command("representation-ablations")
 def representation_ablations_command(
     config_path: Annotated[

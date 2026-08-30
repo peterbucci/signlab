@@ -113,6 +113,34 @@ and per-example predictions. It records those four files plus a portable lineage
 file, and `verify_reference_run()` finds the run and re-hashes every referenced
 artifact. Training remains outside the tracker.
 
+### One-command synthetic reference experiment
+
+Install only the two optional capabilities used by the demo, then run the same
+command used by its scheduled workflow:
+
+```shell
+uv sync --locked --no-default-groups --extra experiments --extra portable-export
+uv run --locked --no-sync signlab train reference-experiment
+```
+
+The checked configuration supplies every input and enforces a 180-second CPU budget,
+a 2 GiB peak-process-memory ceiling, and a 5 MiB artifact-pack ceiling. The command
+validates the generic contract chain, deterministic linear fit, local MLflow lineage,
+production-shaped ONNX export, Python CPU parity, and the checked structural summary.
+By default the sanitized pack is written to ignored
+`runs/reference-experiment-v1/`; the local MLflow database and artifact store
+remain elsewhere under ignored `runs/` and are not part of that pack.
+
+The weekly/manual GitHub workflow runs this command on Ubuntu and Windows and retains
+each sanitized pack for 14 days. The shared expected summary fixes schemas,
+identities, labels, split membership, and metric keys while allowing only the declared
+small cross-platform metric tolerance. It does not upload the MLflow database.
+
+This is no-person synthetic conformance evidence. Its metrics are not evidence of
+real gesture accuracy, unseen-signer generalization, ASL capability, candidate-model
+quality, or browser behavior. The exact PopSign candidate and WebAssembly engine
+contract remain the separate #35/#37/#39 evidence path.
+
 Run the frozen reference benchmark with one command after making the licensed
 PopSign split root and external manifest available locally:
 
