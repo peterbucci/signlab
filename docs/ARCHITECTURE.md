@@ -40,9 +40,12 @@ development API. Hash-based navigation works on a root domain and on an arbitrar
 configured subpath without server-side route rewrites.
 
 The feature routes describe their intended behavior but deliberately do not imitate
-unfinished features. This shell requests no camera permission, makes no runtime data
-request, loads no model, reads no replay input, and stores no feedback. Those
-capabilities belong to later stories and retain their own evidence gates.
+unfinished features. The live route requests camera permission only after an explicit
+user action and can show a local preview. It stops camera tracks on stop, navigation,
+page hiding, or device interruption; it does not upload, record, persist, or submit
+frames to the worker. The shell makes no runtime data request, loads no model, reads
+no replay input, and stores no feedback. Those capabilities retain separate evidence
+gates.
 
 The intended bundle-loading flow is manifest-first:
 
@@ -58,9 +61,9 @@ The shell now contains a dormant `@mediapipe/tasks-vision@1.0.1` landmark worker
 It initializes one hand/pose task pair from externally verified buffers, returns
 typed timestamps, two-hand slots, six body anchors, validity, and confidence, keeps
 only the newest waiting frame, emits sanitized timing/drop/failure measurements, and
-releases replaced or processed images and task resources. Bundle verification and
-loading, camera and replay producers, ONNX inference, event detection, and route
-lifecycle controls remain separate gates; no browser model is usable yet.
+releases replaced or processed images and task resources. The camera preview remains
+disconnected from that worker. Bundle verification and loading, replay input, ONNX
+inference, and event detection remain separate gates; no browser model is usable yet.
 
 The [licensed external-data boundary](external-datasets.md) is intentionally
 separate from participant ingest. It registers source, license, attribution,

@@ -88,9 +88,10 @@ npm run build:subpath
 
 The two builds prove the static files can be published at a root domain or a
 configured `/signlab/` subpath. Hash-based routes keep every page usable on a plain
-static host without rewrite rules. Story #38 provides the responsive, honest shell
-only: it does not request camera access, load a model, process replay inputs, save
-feedback, or call a backend.
+static host without rewrite rules. The live route requests camera access only after
+the user selects **Start camera**, keeps its preview local, and releases tracks during
+its documented lifecycle transitions. It does not send frames to the dormant worker,
+load a model, process replay inputs, save feedback, or call a backend.
 
 The normal web checks also compile and test the dormant landmark worker. MediaPipe
 `.task` models remain external to Git, and neither task starts until a later boundary
