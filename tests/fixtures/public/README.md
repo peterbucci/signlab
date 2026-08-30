@@ -33,3 +33,8 @@ stores complete expected quantized value arrays so another runtime can apply the
 declared one-quantum tolerance. The golden covers all three representations, one and
 two hands, mirrored equivalence, an approved gap, a suspected-swap barrier, missing
 pose, irregular timing, optional geometry and derivatives, and padding.
+
+`events/` contains an MIT-licensed stream of invented timestamps, hand masks, quality
+flags, and quantized motion. It exercises candidate-event state transitions without
+including camera, landmark, public-corpus, or participant-derived values. Its metrics
+are conformance evidence only, not natural-use performance.
