@@ -52,7 +52,8 @@ const startableStatuses = new Set<CameraStatus>([
   "error",
 ]);
 
-type BundleLoader = Pick<ModelBundleSession, "load" | "status">;
+type BundleLoader = Pick<ModelBundleSession, "load" | "status"> &
+  Partial<Pick<ModelBundleSession, "rollback">>;
 type LiveSession = Pick<LiveRecognitionSession, "initialize" | "submitFrame" | "close">;
 
 interface LiveRuntime {
@@ -91,7 +92,16 @@ function bundleStatusMessage(status: ModelBundleStatus): string {
   if (status.phase === "idle") return "No model bundle is configured.";
   if (status.phase === "loading") return "Loading the model bundle manifest and files.";
   if (status.phase === "verifying") return "Verifying every model bundle file.";
-  if (status.phase === "ready") return `Verified model bundle ${active ?? ""} is ready.`;
+  if (status.phase === "ready") {
+    if (status.source === "fallback")
+      return `Using verified cached model bundle ${active ?? ""} because the bundle endpoint is unavailable.`;
+    if (status.source === "cache") return `Verified cached model bundle ${active ?? ""} is ready.`;
+    if (status.source === "rollback")
+      return `Restored previous verified model bundle ${active ?? ""}.`;
+    if (status.source === "network")
+      return `Verified model bundle ${active ?? ""} is ready${status.cacheWarning === undefined ? " and saved in this browser." : ` for this session. ${status.cacheWarning}`}`;
+    return `Verified model bundle ${active ?? ""} is ready.`;
+  }
   const fallback = "The model bundle could not be activated.";
   return `${status.failureReason ?? fallback}${active === null ? "" : ` ${active} remains active.`}`;
 }
@@ -287,6 +297,8 @@ export function LivePage({
   const bundleBlocked = bundleStatus.phase === "error" && bundleStatus.active === null;
   const runtimeFailed = state.status === "active" && liveSnapshot?.phase === "failed";
   const retryAvailable = bundleBlocked || runtimeFailed;
+  const rollbackAvailable =
+    bundleStatus.rollbackAvailable === true && bundleLoader.rollback !== undefined;
   const diagnosticBundle = diagnostics?.bundle ?? stableResult?.bundle ?? verifiedBundle;
   const retrySetup = () => {
     if (bundleBlocked) {
@@ -294,6 +306,16 @@ export function LivePage({
       setBundleAttempt((attempt) => attempt + 1);
     }
     if (runtimeFailed) setRuntimeAttempt((attempt) => attempt + 1);
+  };
+  const restorePrevious = () => {
+    if (bundleLoader.rollback === undefined) return;
+    void bundleLoader
+      .rollback(setBundleStatus)
+      .then((bundle) => {
+        setLiveSnapshot(null);
+        setVerifiedBundle(bundle);
+      })
+      .catch(() => undefined);
   };
 
   return (
@@ -342,6 +364,18 @@ export function LivePage({
               Retry setup
             </button>
             <span>Retries the failed setup without reloading this page.</span>
+          </div>
+        ) : null}
+        {rollbackAvailable ? (
+          <div className="recovery-action">
+            <button
+              type="button"
+              disabled={bundleStatus.phase === "loading" || bundleStatus.phase === "verifying"}
+              onClick={restorePrevious}
+            >
+              Restore previous model
+            </button>
+            <span>Rechecks and restores the one previously verified model.</span>
           </div>
         ) : null}
       </div>

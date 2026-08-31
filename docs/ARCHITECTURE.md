@@ -56,9 +56,23 @@ The intended bundle-loading flow is manifest-first:
 Static model-bundle files
   -> load and validate manifest + schema versions
   -> verify every declared asset checksum
+  -> stage exact verified bytes in Cache Storage
+  -> commit one active/previous pointer last
   -> start landmark and inference workers from verified bytes
   -> expose readiness or a clear failure to the route UI
 ```
+
+Cached bytes cross the same validation boundary on every activation; a cache marker is
+never treated as proof of integrity. When a network manifest has the same exact-byte
+SHA-256 identity, its cached assets may be reused. If the bundle endpoint is unavailable
+after the application shell has loaded, the current cached bundle may be reverified and
+activated. A deliberate rollback reverifies the one retained previous bundle before the
+pointer is swapped. Cache failures never activate partial state: a verified network
+bundle remains usable in memory while the last committed pointer stays authoritative.
+
+This cache does not make the entire site offline-capable. There is no service worker, and
+the application shell, ONNX Runtime support files, and two separately pinned MediaPipe
+task files are outside the model-bundle cache.
 
 The shell uses one `@mediapipe/tasks-vision@1.0.1` landmark worker. It initializes one
 hand/pose task pair from externally verified buffers, returns
