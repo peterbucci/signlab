@@ -35,9 +35,15 @@ export interface LiveRecognitionDiagnostics {
   readonly bundle: { readonly id: string; readonly version: string } | null;
 }
 
+export interface LiveFeedbackContext {
+  readonly event: CandidateEvent;
+  readonly input: CandidateInferenceInput;
+}
+
 export interface LiveRecognitionSnapshot {
   readonly phase: LiveRecognitionPhase;
   readonly stableResult: CandidateInferenceResult | null;
+  readonly feedbackContext?: LiveFeedbackContext | null;
   readonly failureCode: string | null;
   readonly diagnostics?: LiveRecognitionDiagnostics;
 }
@@ -75,6 +81,7 @@ export class LiveRecognitionSession {
   private nextDetectorIndex = 0;
   private nextRequestId = 0;
   private activeRequestId: number | null = null;
+  private pendingFeedbackContext: LiveFeedbackContext | null = null;
   private bufferedFrames: BufferedFrame[] = [];
   private retentionUs = 0;
 
@@ -142,6 +149,7 @@ export class LiveRecognitionSession {
     if (!this.closed) {
       this.closed = true;
       this.bufferedFrames = [];
+      this.pendingFeedbackContext = null;
       this.projector.reset();
       if (this.snapshotValue.phase !== "failed") this.closeClients();
     }
@@ -203,6 +211,7 @@ export class LiveRecognitionSession {
       return this.fail("live.recognition.inference.unavailable");
     const requestId = this.nextRequestId++;
     this.activeRequestId = requestId;
+    this.pendingFeedbackContext = Object.freeze({ event, input });
     this.publish("classifying");
     try {
       client.classify(requestId, input);
@@ -249,11 +258,14 @@ export class LiveRecognitionSession {
         this.updateDiagnostics({ backend: event.backend, bundle: event.bundle });
         if (++this.readyWorkers === 2) this.publish("ready");
         return;
-      case "result":
-        if (event.requestId !== this.activeRequestId)
+      case "result": {
+        if (event.requestId !== this.activeRequestId || this.pendingFeedbackContext === null)
           return this.fail("live.recognition.inference.result_mismatch");
+        const feedbackContext = this.pendingFeedbackContext;
         this.activeRequestId = null;
-        return this.publish("result", event);
+        this.pendingFeedbackContext = null;
+        return this.publish("result", event, null, feedbackContext);
+      }
       case "failure":
       case "worker-transport-failure":
         return this.fail(event.code);
@@ -266,10 +278,12 @@ export class LiveRecognitionSession {
     phase: LiveRecognitionPhase,
     stableResult = this.snapshotValue.stableResult,
     failureCode: string | null = null,
+    feedbackContext = this.snapshotValue.feedbackContext ?? null,
   ): void {
     this.snapshotValue = Object.freeze({
       phase,
       stableResult,
+      feedbackContext,
       failureCode,
       diagnostics: this.diagnosticsValue,
     });
@@ -285,6 +299,7 @@ export class LiveRecognitionSession {
     this.bufferedFrames = [];
     this.projector.reset();
     this.activeRequestId = null;
+    this.pendingFeedbackContext = null;
     this.publish("failed", this.snapshotValue.stableResult, code);
     this.closeClients();
   }

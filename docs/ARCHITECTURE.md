@@ -45,8 +45,10 @@ user action and can show a local preview. It stops camera tracks on stop, naviga
 page hiding, or device interruption. After a bundle is verified, it loads the two
 size- and digest-pinned MediaPipe task files, sends disposable frame bitmaps through
 the landmark worker, detects one bounded event, and runs ONNX inference in a second
-worker. It does not upload, record, or persist camera frames or landmarks. Replay and
-feedback remain disconnected and retain separate evidence gates.
+worker. It does not upload or record camera frames. Recognition retains only the
+latest result; an optional, separately consented feedback action may persist that
+event's derived landmarks. Replay remains disconnected and retains a separate
+evidence gate.
 
 The intended bundle-loading flow is manifest-first:
 
@@ -66,6 +68,11 @@ releases replaced or processed images and task resources. A bounded live coordin
 feeds those frames through the shared event detector and the WASM ONNX worker, then
 keeps one event-level decision stable in the React view. Replay remains a separate
 gate and will exercise this assembled post-landmark path rather than a parallel one.
+
+Feedback is a separate, explicit browser-local action. One completed event may be
+stored in IndexedDB with its correction and disclosed metadata; derived landmark
+coordinates require an additional opt-in. Raw video is never part of that record,
+and local consent does not authorize upload, export, research use, or training.
 
 The [licensed external-data boundary](external-datasets.md) is intentionally
 separate from participant ingest. It registers source, license, attribution,

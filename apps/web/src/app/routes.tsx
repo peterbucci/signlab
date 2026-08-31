@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import { livePageDefinition, type StaticPageDefinition } from "./routeDefinitions";
+import { FeedbackSaveForm } from "../feedback/Feedback";
+import type { FeedbackStore } from "../feedback/feedbackStore";
 import {
   useCameraSession,
   type CameraEnvironment,
@@ -141,11 +143,13 @@ export function LivePage({
   modelBundleUrl,
   modelBundleSession,
   liveRuntime = browserLiveRuntime,
+  feedbackStore,
 }: {
   cameraEnvironment?: CameraEnvironment;
   modelBundleUrl?: string;
   modelBundleSession?: BundleLoader;
   liveRuntime?: LiveRuntime;
+  feedbackStore?: FeedbackStore;
 }) {
   const headingRef = usePageHeading(livePageDefinition.label);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -270,6 +274,7 @@ export function LivePage({
   const canStart = canRequest && startableStatuses.has(state.status);
   const requestingCamera = state.status === "requesting";
   const stableResult = liveSnapshot?.stableResult ?? null;
+  const feedbackContext = liveSnapshot?.feedbackContext ?? null;
   const recognitionMessage =
     liveSnapshot?.failureCode === "live.recognition.candidate.invalid"
       ? "That event could not be classified. Hold still, then try again."
@@ -442,6 +447,15 @@ export function LivePage({
                 <dd>{`${stableResult.bundle.id} ${stableResult.bundle.version}`}</dd>
               </div>
             </dl>
+            {feedbackContext === null ? null : (
+              <FeedbackSaveForm
+                key={`${stableResult.bundle.id}:${stableResult.requestId}:${feedbackContext.event.firstTimestampUs}`}
+                result={stableResult}
+                context={feedbackContext}
+                previewMirrored={previewMirrored}
+                store={feedbackStore}
+              />
+            )}
           </section>
         )}
 

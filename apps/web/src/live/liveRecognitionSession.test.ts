@@ -229,6 +229,10 @@ describe("LiveRecognitionSession", () => {
     const stable = result(request.requestId);
     runtime.emitInference(stable);
     expect(runtime.snapshots.at(-1)).toMatchObject({ phase: "result", stableResult: stable });
+    expect(runtime.snapshots.at(-1)?.feedbackContext).toMatchObject({
+      event: { firstFrameIndex: 0, lastFrameIndex: 4, terminationReason: "signal_gap" },
+      input: request.input,
+    });
   });
 
   it("discards an event containing an invalid frame without classifying", async () => {
