@@ -191,12 +191,13 @@ three exact representation variants, optional geometry and elapsed-time kinemati
 masked training-only statistics, and content-addressed cache objects. Licensed
 PopSign execution now produces one deterministic, leakage-checked 80-sample public
 smoke split from the verified retained landmark inventory without rerunning MediaPipe.
-A responsive React/Vite shell now exposes the planned public routes without a backend
-and includes a dormant MediaPipe landmark-worker boundary. Its live route now provides
-an explicit, consent-first local camera preview with pause, stop, device switching,
-and lifecycle cleanup; it neither saves nor uploads video, and it does not send frames
-to the worker. Model-bundle delivery, replay, feedback storage, and gesture inference
-remain explicitly unconnected. A minimal local MLflow ledger can now log, query, and byte-verify one
+A static React/Vite app now exposes the public routes without a backend and runs its
+verified MediaPipe and ONNX paths in workers. Its live route provides consent-first
+camera controls and on-device event results; model bundles can be cached and rolled
+back, deterministic post-landmark replay is tested, and explicitly saved feedback
+stays local until a separate export. The exact PopSign candidate remains an
+unpublished development checkpoint, not a configured public release. A minimal local
+MLflow ledger can now log, query, and byte-verify one
 portable baseline result without a server or custom dashboard. The first frozen
 signer-disjoint benchmark now compares majority, seeded stratified-random, and
 train-only multinomial-logistic references from one checked-in configuration. The
@@ -224,9 +225,9 @@ and continuous-replay scorer evidence. Its
 [nomination report](docs/reports/popsign-tcn-portable-export-nomination-v1.json)
 freeze the exact evidence and nominate it for portable export only. No champion or
 natural-use, test, release, or production claim is made.
-The registered DVC graph remains the Story #14 fixture receipt scaffold rather
-than a production extraction runner. No headline model result is considered valid
-until the remaining licensed-corpus and grouped-evaluation foundations are complete.
+The public DVC graph remains fixture-only by design. The remaining release limits
+are the candidate's unresolved redistribution status, sealed locked test, missing
+natural continuous-use evidence, and not-yet-deployed public site.
 
 ## Data and privacy
 

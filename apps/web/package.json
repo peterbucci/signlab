@@ -18,6 +18,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings=0",
     "test": "npm run evidence:check && vitest run",
+    "test:browser": "node browser/releaseSmoke.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json"
   },
