@@ -86,7 +86,11 @@ gate and will exercise this assembled post-landmark path rather than a parallel 
 Feedback is a separate, explicit browser-local action. One completed event may be
 stored in IndexedDB with its correction and disclosed metadata; derived landmark
 coordinates require an additional opt-in. Raw video is never part of that record,
-and local consent does not authorize upload, export, research use, or training.
+and local consent does not authorize upload, export, research use, or training. A
+second consent can create a local-only [feedback contribution package](feedback-contributions.md).
+The Python boundary revalidates its exact allowlisted bytes into content-addressed,
+non-trainable quarantine; review, deduplication, split assignment, and a new DVC
+version remain separate gates.
 
 The [licensed external-data boundary](external-datasets.md) is intentionally
 separate from participant ingest. It registers source, license, attribution,

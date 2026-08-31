@@ -1,0 +1,43 @@
+{
+  "format": "signlab-feedback-package/1",
+  "manifest": {
+    "recordFormat": "signlab-feedback-record/1",
+    "recordCount": 2,
+    "bundleVersions": [
+      {
+        "id": "candidate",
+        "version": "1"
+      },
+      {
+        "id": "candidate",
+        "version": "2"
+      }
+    ],
+    "fields": [
+      "bundle",
+      "conditions",
+      "consent",
+      "correction",
+      "event",
+      "format",
+      "id",
+      "landmarks",
+      "prediction",
+      "savedAt",
+      "scores",
+      "timings"
+    ],
+    "localConsentScope": "local_feedback_only",
+    "landmarkRecordCount": 1,
+    "landmarksIncluded": true,
+    "exportConsent": {
+      "statementVersion": "signlab-feedback-export-consent/1",
+      "granted": true,
+      "grantedAt": "2026-08-31T13:00:00.000Z",
+      "scope": "manual_research_review",
+      "trainingUse": "requires_review_and_approval"
+    }
+  },
+  "payloadJson": "[{\"format\":\"signlab-feedback-record/1\",\"id\":\"feedback-package-1\",\"savedAt\":\"2026-08-31T12:00:00.000Z\",\"bundle\":{\"id\":\"candidate\",\"version\":\"2\"},\"prediction\":{\"decision\":{\"kind\":\"target\",\"label\":\"hello\",\"confidence\":0.8},\"reason\":\"accepted_target\"},\"scores\":[{\"label\":\"hello\",\"confidence\":0.8},{\"label\":\"no\",\"confidence\":0.8},{\"label\":\"please\",\"confidence\":0.8},{\"label\":\"thank_you\",\"confidence\":0.8},{\"label\":\"yes\",\"confidence\":0.8},{\"label\":\"other\",\"confidence\":0.8}],\"timings\":{\"preprocessingMs\":1,\"inferenceMs\":2,\"decisionMs\":1,\"totalMs\":4},\"event\":{\"firstFrameIndex\":1,\"lastFrameIndex\":2,\"firstTimestampUs\":10,\"lastTimestampUs\":20,\"terminationReason\":\"settled\",\"configSha256\":\"sha256:detector\",\"durationUs\":10},\"conditions\":{\"sourceMirrorState\":\"not_mirrored\",\"previewMirrored\":false},\"correction\":\"hello\",\"consent\":{\"mode\":\"per_event\",\"scope\":\"local_feedback_only\",\"grantedAt\":\"2026-08-31T12:00:00.000Z\",\"landmarksIncluded\":true},\"landmarks\":[]},{\"format\":\"signlab-feedback-record/1\",\"id\":\"feedback-package-2\",\"savedAt\":\"2026-08-31T12:00:00.000Z\",\"bundle\":{\"id\":\"candidate\",\"version\":\"1\"},\"prediction\":{\"decision\":{\"kind\":\"target\",\"label\":\"hello\",\"confidence\":0.8},\"reason\":\"accepted_target\"},\"scores\":[{\"label\":\"hello\",\"confidence\":0.8},{\"label\":\"no\",\"confidence\":0.8},{\"label\":\"please\",\"confidence\":0.8},{\"label\":\"thank_you\",\"confidence\":0.8},{\"label\":\"yes\",\"confidence\":0.8},{\"label\":\"other\",\"confidence\":0.8}],\"timings\":{\"preprocessingMs\":1,\"inferenceMs\":2,\"decisionMs\":1,\"totalMs\":4},\"event\":{\"firstFrameIndex\":1,\"lastFrameIndex\":2,\"firstTimestampUs\":10,\"lastTimestampUs\":20,\"terminationReason\":\"settled\",\"configSha256\":\"sha256:detector\",\"durationUs\":10},\"conditions\":{\"sourceMirrorState\":\"not_mirrored\",\"previewMirrored\":false},\"correction\":\"yes\",\"consent\":{\"mode\":\"per_event\",\"scope\":\"local_feedback_only\",\"grantedAt\":\"2026-08-31T12:00:00.000Z\",\"landmarksIncluded\":false}}]",
+  "payloadSha256": "sha256:4da8f287690ed4051894bf1ea1d57f8407a977ec9d99e070cfbff98b1e51fa24"
+}

@@ -39,6 +39,10 @@ flags, and quantized motion. It exercises candidate-event state transitions with
 including camera, landmark, public-corpus, or participant-derived values. Its metrics
 are conformance evidence only, not natural-use performance.
 
+`feedback/` contains one MIT-licensed package of invented records emitted by the real
+browser serializer. Browser and Python tests share its exact bytes to prove local
+download compatibility without including a person, camera, or participant data.
+
 `replay/` contains MIT-licensed invented truth intervals and final decisions for one
 mixed and one negative-only session. It proves scoring counts and grouping mechanics;
 its rates and timing values are not measurements of people, models, or runtimes. It

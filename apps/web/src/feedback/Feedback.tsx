@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import type { CandidateInferenceResult } from "../inference/candidateInferenceProtocol";
 import type { LiveFeedbackContext } from "../live/liveRecognitionSession";
+import { downloadFeedbackPackage, summarizeFeedbackPackage } from "./feedbackPackage";
 import {
   FEEDBACK_LABELS,
   NativeFeedbackStore,
@@ -27,6 +28,12 @@ function feedbackStorageMessage(error: unknown): string {
   if (code.includes("blocked")) return "Close other SignLab tabs, then try again.";
   if (code.includes("version")) return "This feedback was created by a newer SignLab version.";
   return "Local feedback storage is unavailable. Nothing was saved.";
+}
+
+function feedbackCountMessage(count: number): string {
+  return count
+    ? `${count} feedback record(s) saved locally.`
+    : "No feedback is saved in this browser.";
 }
 
 export function FeedbackSaveForm({
@@ -113,32 +120,70 @@ function RecordDetails({ record }: { record: FeedbackRecord }) {
   );
 }
 
-export function FeedbackPage({ store = browserStore }: { store?: FeedbackStore }) {
+type FeedbackExporter = typeof downloadFeedbackPackage;
+
+export function FeedbackPage({
+  store = browserStore,
+  exporter = downloadFeedbackPackage,
+}: {
+  store?: FeedbackStore;
+  exporter?: FeedbackExporter;
+}) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [items, setItems] = useState<FeedbackListResult>({ records: [], damagedKeys: [] });
   const [message, setMessage] = useState("Loading local feedback.");
-  const [revision, setRevision] = useState(0);
+  const [includeLandmarks, setIncludeLandmarks] = useState(false);
+  const [exportMessage, setExportMessage] = useState("");
+  const [mutating, setMutating] = useState(false);
   useEffect(() => {
     document.title = "Feedback | SignLab";
     headingRef.current?.focus();
     void store.list().then(
       (next) => {
         setItems(next);
-        setMessage(
-          next.records.length
-            ? `${next.records.length} feedback record(s) saved locally.`
-            : "No feedback is saved in this browser.",
-        );
+        setMessage(feedbackCountMessage(next.records.length));
       },
       (error: unknown) => setMessage(feedbackStorageMessage(error)),
     );
-  }, [revision, store]);
+  }, [store]);
   const mutate = async (operation: () => Promise<void>) => {
+    if (mutating) return;
+    setMutating(true);
     try {
       await operation();
-      setRevision((value) => value + 1);
+      const next = await store.list();
+      setItems(next);
+      setMessage(feedbackCountMessage(next.records.length));
     } catch (error) {
+      setItems({ records: [], damagedKeys: [] });
       setMessage(feedbackStorageMessage(error));
+    } finally {
+      setMutating(false);
+    }
+  };
+  const summary = summarizeFeedbackPackage(items.records, includeLandmarks);
+  const storedLandmarkCount = items.records.filter((record) => "landmarks" in record).length;
+  const bundleVersions =
+    summary.bundleVersions.map(({ id, version }) => `${id} ${version}`).join(", ") || "None";
+  const exportedFields = summary.fields.join(", ") || "None";
+  const exporting = exportMessage === "Creating local download.";
+  const exportFeedback = async (event: FormEvent) => {
+    event.preventDefault();
+    if (
+      !new FormData(event.currentTarget as HTMLFormElement).has("exportConsent") ||
+      items.records.length === 0 ||
+      exporting ||
+      mutating
+    )
+      return;
+    setExportMessage("Creating local download.");
+    try {
+      await exporter(items.records, includeLandmarks);
+      setExportMessage("Feedback package downloaded locally. Nothing was uploaded.");
+    } catch {
+      setExportMessage(
+        "The feedback package could not be created. Saved feedback was not changed.",
+      );
     }
   };
 
@@ -164,6 +209,48 @@ export function FeedbackPage({ store = browserStore }: { store?: FeedbackStore }
           Clear all local feedback
         </button>
       </div>
+      <section aria-labelledby="feedback-export-heading">
+        <h2 id="feedback-export-heading">Download for manual research review</h2>
+        <p>
+          This creates a file on this device only; SignLab does not upload it. Sharing it would be a
+          manual contribution for review, and any possible training use requires later review and
+          approval.
+        </p>
+        <dl>
+          <dt>Valid records</dt>
+          <dd>{summary.recordCount}</dd>
+          <dt>Bundle versions</dt>
+          <dd>{bundleVersions}</dd>
+          <dt>Exported fields</dt>
+          <dd>{exportedFields}</dd>
+          <dt>Local consent scope</dt>
+          <dd>{summary.localConsentScope}</dd>
+          <dt>Stored records with landmarks</dt>
+          <dd>{storedLandmarkCount}</dd>
+          <dt>Landmarks included in this download</dt>
+          <dd>{summary.landmarksIncluded ? `Yes (${summary.landmarkRecordCount})` : "No"}</dd>
+        </dl>
+        <form onSubmit={(event) => void exportFeedback(event)}>
+          <label className="feedback-check">
+            <input
+              type="checkbox"
+              checked={includeLandmarks}
+              onChange={(event) => setIncludeLandmarks(event.target.checked)}
+            />{" "}
+            Include stored landmark coordinates in this download (off by default)
+          </label>
+          <label className="feedback-check">
+            <input name="exportConsent" type="checkbox" required /> I consent to this local download
+            for manual research review only. Possible training use requires later review and
+            approval.
+          </label>
+          <button type="submit" disabled={items.records.length === 0 || exporting || mutating}>
+            {exporting ? "Creating download" : "Download feedback package"}
+          </button>
+        </form>
+        {items.records.length === 0 && <p>There are no valid records to export.</p>}
+        {exportMessage && <p role="status">{exportMessage}</p>}
+      </section>
       <section className="feedback-list" aria-label="Locally saved feedback">
         {items.records.map((record) => (
           <article key={record.id}>
