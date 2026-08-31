@@ -11,18 +11,26 @@ export type CandidateDecision =
       readonly confidence: number;
     }
   | { readonly kind: "other"; readonly label: "other"; readonly confidence: number };
+export interface ScoredCandidateDecision {
+  readonly decision: Exclude<CandidateDecision, { readonly kind: "inactive" }>;
+  readonly reason: "accepted_target" | "accepted_other" | "below_threshold";
+  readonly rankedScores: readonly {
+    readonly label: CandidateLabel;
+    readonly confidence: number;
+  }[];
+}
 
 const TEMPERATURE = candidateDecisionPolicy.temperature.temperature_milli / 1_000;
 const THRESHOLD = candidateDecisionPolicy.abstention.threshold_percent / 100;
 const PROBABILITY_SUM_TOLERANCE = 1e-5 + 1e-5;
 const LOG_FLOOR = 1e-7;
 
-function exactPolicy(value: unknown, expected: unknown = candidateDecisionPolicy): boolean {
+export function exactJson(value: unknown, expected: unknown = candidateDecisionPolicy): boolean {
   if (Array.isArray(expected)) {
     return (
       Array.isArray(value) &&
       value.length === expected.length &&
-      expected.every((item, index) => exactPolicy(value[index], item))
+      expected.every((item, index) => exactJson(value[index], item))
     );
   }
   if (typeof expected === "object" && expected !== null) {
@@ -31,7 +39,7 @@ function exactPolicy(value: unknown, expected: unknown = candidateDecisionPolicy
     const entries = Object.entries(expected);
     return (
       Object.keys(actual).length === entries.length &&
-      entries.every(([key, item]) => exactPolicy(actual[key], item))
+      entries.every(([key, item]) => exactJson(actual[key], item))
     );
   }
   return value === expected;
@@ -61,6 +69,30 @@ function calibratedProbabilities(probabilities: readonly number[]): number[] {
   return exponentials.map((value) => value / total);
 }
 
+export function scoreCandidate(
+  probabilities: unknown,
+  policy: unknown,
+): ScoredCandidateDecision | null {
+  const checked = validProbabilities(probabilities);
+  if (!exactJson(policy) || checked === null) return null;
+  const rankedScores = calibratedProbabilities(checked)
+    .map((confidence, index) => ({ label: CANDIDATE_LABELS[index]!, confidence }))
+    .sort((left, right) => right.confidence - left.confidence);
+  const selected = rankedScores[0]!;
+  if (selected.confidence < THRESHOLD) {
+    return { decision: { kind: "abstain" }, reason: "below_threshold", rankedScores };
+  }
+  const decision =
+    selected.label === "other"
+      ? ({ kind: "other", label: "other", confidence: selected.confidence } as const)
+      : ({ kind: "target", label: selected.label, confidence: selected.confidence } as const);
+  return {
+    decision,
+    reason: decision.kind === "other" ? "accepted_other" : "accepted_target",
+    rankedScores,
+  };
+}
+
 /** Apply the one supported candidate policy without guessing on invalid runtime input. */
 export function decideCandidate(
   candidateActive: boolean,
@@ -68,22 +100,5 @@ export function decideCandidate(
   policy: unknown,
 ): CandidateDecision {
   if (!candidateActive) return { kind: "inactive" };
-
-  const checkedProbabilities = validProbabilities(probabilities);
-  if (!exactPolicy(policy) || checkedProbabilities === null) {
-    return { kind: "abstain" };
-  }
-
-  const calibrated = calibratedProbabilities(checkedProbabilities);
-  let selectedIndex = 0;
-  for (let index = 1; index < calibrated.length; index += 1) {
-    if (calibrated[index]! > calibrated[selectedIndex]!) selectedIndex = index;
-  }
-  const confidence = calibrated[selectedIndex]!;
-  const label = CANDIDATE_LABELS[selectedIndex]!;
-
-  if (confidence < THRESHOLD) return { kind: "abstain" };
-  return label === "other"
-    ? { kind: "other", label, confidence }
-    : { kind: "target", label, confidence };
+  return scoreCandidate(probabilities, policy)?.decision ?? { kind: "abstain" };
 }
