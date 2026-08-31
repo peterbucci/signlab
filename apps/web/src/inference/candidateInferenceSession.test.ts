@@ -19,6 +19,7 @@ import {
   type InitializeCandidateInference,
 } from "./candidateInferenceProtocol";
 import {
+  CANDIDATE_BROWSER_RUNTIME,
   CandidateInferenceSession,
   createCandidateInferenceEngine,
   type CandidateInferenceEngine,
@@ -65,6 +66,10 @@ const expectedTensorQ = () => {
 };
 
 describe("candidate inference session", () => {
+  it("pins the browser release to one WASM thread", () => {
+    expect(CANDIDATE_BROWSER_RUNTIME).toEqual({ backend: "wasm", wasmThreads: 1 });
+  });
+
   it("reports an unknown message as a typed protocol failure", async () => {
     const messages: CandidateInferenceWorkerOutput[] = [];
     const session = new CandidateInferenceSession(vi.fn(), (message) => messages.push(message));

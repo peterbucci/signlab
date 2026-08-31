@@ -20,13 +20,18 @@ export interface CandidateInferenceEngine {
 
 type EngineFactory = (model: ArrayBuffer) => Promise<CandidateInferenceEngine>;
 
+export const CANDIDATE_BROWSER_RUNTIME = Object.freeze({
+  backend: "wasm",
+  wasmThreads: 1,
+} as const);
+
 export async function createCandidateInferenceEngine(
   modelBuffer: ArrayBuffer,
 ): Promise<CandidateInferenceEngine> {
-  ort.env.wasm.numThreads = 1;
+  ort.env.wasm.numThreads = CANDIDATE_BROWSER_RUNTIME.wasmThreads;
   ort.env.wasm.proxy = false;
   const session = await ort.InferenceSession.create(new Uint8Array(modelBuffer), {
-    executionProviders: ["wasm"],
+    executionProviders: [CANDIDATE_BROWSER_RUNTIME.backend],
     executionMode: "sequential",
   });
   const input = session.inputMetadata.length === 1 ? session.inputMetadata[0] : undefined;
@@ -133,7 +138,7 @@ export class CandidateInferenceSession {
         type: "ready",
         protocolVersion: CANDIDATE_INFERENCE_PROTOCOL_VERSION,
         bundle: this.bundle,
-        backend: "wasm",
+        backend: CANDIDATE_BROWSER_RUNTIME.backend,
         startupMs: elapsed(started, this.now()),
       });
     } catch {
@@ -196,7 +201,7 @@ export class CandidateInferenceSession {
         requestId: message.requestId,
         ...scored,
         bundle: this.bundle,
-        backend: "wasm",
+        backend: CANDIDATE_BROWSER_RUNTIME.backend,
         timings: {
           preprocessingMs: elapsed(started, preprocessed),
           inferenceMs: elapsed(preprocessed, inferred),

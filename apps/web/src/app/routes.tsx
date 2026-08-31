@@ -520,6 +520,10 @@ export function LivePage({
               <dd>{diagnostics?.droppedFrames ?? 0}</dd>
             </div>
             <div>
+              <dt>Processed frames</dt>
+              <dd>{diagnostics?.processedFrames ?? 0}</dd>
+            </div>
+            <div>
               <dt>Runtime</dt>
               <dd>{diagnostics?.backend?.toUpperCase() ?? "Waiting"}</dd>
             </div>
