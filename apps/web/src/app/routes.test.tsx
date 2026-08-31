@@ -31,7 +31,7 @@ describe("static application routes", () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByRole("heading", { level: 1, name: heading })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { level: 1, name: heading })).toHaveFocus();
       expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
       expect(document.title).toBe(`${title} | SignLab`);
       expect(fetchSpy).not.toHaveBeenCalled();
@@ -82,5 +82,18 @@ describe("static application routes", () => {
       "href",
       "/",
     );
+  });
+
+  it("moves focus to the main content without changing the route", () => {
+    render(
+      <MemoryRouter initialEntries={["/live"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("link", { name: "Skip to content" }));
+
+    expect(screen.getByRole("main")).toHaveFocus();
+    expect(screen.getByRole("heading", { level: 1, name: "Live recognition" })).toBeVisible();
   });
 });
