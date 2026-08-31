@@ -15,7 +15,7 @@ export const livePageDefinition = {
   label: "Live demo",
   eyebrow: "Local camera preview",
   heading: "Live recognition",
-  summary: "Start a private camera preview when you are ready. Recognition is not connected yet.",
+  summary: "Start a private camera preview and turn one gesture into an on-device result.",
   status: "Camera is off. Nothing is being captured.",
   detailsTitle: "Camera privacy",
   details: [],
@@ -96,10 +96,10 @@ export const staticPages = [
     summary:
       "The completed browser demo is intended to process camera frames on the user’s device. Raw video will not be uploaded or stored by default.",
     status:
-      "The live route requests camera access only after an explicit start action. The app does not store feedback, run inference, or include analytics.",
+      "Camera access is explicit. Inference stays on-device, with no stored feedback or analytics.",
     detailsTitle: "Current privacy facts",
     details: [
-      "This page loads only static application files.",
+      "The live path downloads only its configured model bundle and two integrity-checked MediaPipe model files.",
       "There is no application server or user account.",
       "The live preview remains on-device and releases its camera when stopped or interrupted.",
     ],
@@ -111,8 +111,7 @@ export const staticPages = [
     heading: "What SignLab does—and does not—claim",
     summary:
       "SignLab is a research prototype for recognizing isolated performances of five predefined hand gestures within continuous webcam video. No sign-language or translation capability is claimed.",
-    status:
-      "No approved model performance result exists yet, and the browser inference path is not connected.",
+    status: "The browser path is connected, but no approved model performance result exists yet.",
     detailsTitle: "Known limitations",
     details: [
       "Five predefined prompts only—not an open vocabulary.",
