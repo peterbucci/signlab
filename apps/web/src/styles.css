@@ -352,6 +352,14 @@ h1 {
   color: #415a58;
 }
 
+.model-bundle-status {
+  margin-top: 1.25rem;
+}
+
+.model-bundle-status .card-label {
+  margin-bottom: 0.5rem;
+}
+
 .camera-card {
   padding: clamp(1rem, 2.5vw, 1.5rem);
   border-radius: 1.5rem;

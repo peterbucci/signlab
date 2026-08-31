@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import { livePageDefinition, type StaticPageDefinition } from "./routeDefinitions";
@@ -7,6 +7,7 @@ import {
   type CameraEnvironment,
   type CameraStatus,
 } from "../camera/useCameraSession";
+import { ModelBundleSession, type ModelBundleStatus } from "../modelBundle/modelBundleSession";
 
 function usePageHeading(title: string) {
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -19,9 +20,9 @@ function usePageHeading(title: string) {
   return headingRef;
 }
 
-function StatusBanner({ children }: { children: ReactNode }) {
+function StatusBanner({ children, label }: { children: ReactNode; label?: string }) {
   return (
-    <div className="status-banner" role="status">
+    <div className="status-banner" role="status" aria-label={label}>
       <span aria-hidden="true" />
       {children}
     </div>
@@ -36,12 +37,53 @@ const startableStatuses = new Set<CameraStatus>([
   "error",
 ]);
 
-export function LivePage({ cameraEnvironment }: { cameraEnvironment?: CameraEnvironment }) {
+type BundleLoader = Pick<ModelBundleSession, "load" | "status">;
+
+function bundleStatusMessage(status: ModelBundleStatus): string {
+  const active =
+    status.active === null ? null : `${status.active.id} version ${status.active.version}`;
+  if (status.phase === "idle") return "No model bundle is configured.";
+  if (status.phase === "loading") return "Loading the model bundle manifest and files.";
+  if (status.phase === "verifying") return "Verifying every model bundle file.";
+  if (status.phase === "ready") return `Verified model bundle ${active ?? ""} is ready.`;
+  const fallback = "The model bundle could not be activated.";
+  return `${status.failureReason ?? fallback}${active === null ? "" : ` ${active} remains active.`}`;
+}
+
+export function LivePage({
+  cameraEnvironment,
+  modelBundleUrl,
+  modelBundleSession,
+}: {
+  cameraEnvironment?: CameraEnvironment;
+  modelBundleUrl?: string;
+  modelBundleSession?: BundleLoader;
+}) {
   const headingRef = usePageHeading(livePageDefinition.label);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [previewMirrored, setPreviewMirrored] = useState(true);
+  const bundleLoader = useMemo(
+    () => modelBundleSession ?? new ModelBundleSession(),
+    [modelBundleSession],
+  );
+  const [bundleStatus, setBundleStatus] = useState(bundleLoader.status);
   const { state, canRequest, start, pause, resume, stop, switchCamera } =
     useCameraSession(cameraEnvironment);
+
+  useEffect(() => {
+    const configuredUrl = modelBundleUrl ?? import.meta.env.VITE_SIGNLAB_MODEL_BUNDLE_URL;
+    if (configuredUrl?.trim() === "") return;
+    if (configuredUrl === undefined) return;
+    let mounted = true;
+    void bundleLoader
+      .load(configuredUrl, (status) => {
+        if (mounted) setBundleStatus(status);
+      })
+      .catch(() => undefined);
+    return () => {
+      mounted = false;
+    };
+  }, [bundleLoader, modelBundleUrl]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -71,9 +113,15 @@ export function LivePage({ cameraEnvironment }: { cameraEnvironment?: CameraEnvi
           </p>
         </div>
         <StatusBanner>{state.message}</StatusBanner>
+        <div className="model-bundle-status">
+          <p className="card-label">Model bundle</p>
+          <StatusBanner label="Model bundle status">
+            {bundleStatusMessage(bundleStatus)}
+          </StatusBanner>
+        </div>
         <p className="page-note">
-          The recognition model is not connected yet. Preview mirroring changes only what you see,
-          never the camera stream or future model coordinates.
+          Model execution and recognition are not connected yet. Preview mirroring changes only what
+          you see, never the camera stream or future model coordinates.
         </p>
       </div>
 
