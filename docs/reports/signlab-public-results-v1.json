@@ -1,0 +1,169 @@
+{
+  "format": "signlab-public-results/1",
+  "evidenceCommit": "5fb187c5a36678f868b14200452fcdc7c8650f94",
+  "sources": {
+    "datasetCard": {
+      "path": "docs/cards/popsign-five-isolated-smoke-v1.md",
+      "sha256": "sha256:e8ccbfb9fed7e0d2529b24d18f2ea29a40593d5d4f3ac2a666e6ede0d0a76109"
+    },
+    "modelCard": {
+      "path": "docs/cards/popsign-tcn-portable-export-candidate-v1.md",
+      "sha256": "sha256:ed58c02d6692396675554ac607d35f8681e68a6eaeed4a5165dde1b26ffd2705"
+    },
+    "baselineReport": {
+      "path": "docs/reports/popsign-reference-baselines-v1.md",
+      "sha256": "sha256:0fe9c35ad0fddd084ed3afaaad5c304e035a302ebdbcb5f0ea7ce0b34b455524"
+    },
+    "architectureReport": {
+      "path": "docs/reports/popsign-representation-ablations-v1.md",
+      "sha256": "sha256:dddbba8e6aa5b1f7537005e91669ef73e9c2151a79f76971779d1d134f25dabc"
+    },
+    "calibrationReport": {
+      "path": "docs/reports/popsign-constructed-calibration-v1.md",
+      "sha256": "sha256:f4d5ef440a509c50a56ada1dbf45dc66f2f545f3c120f9e2656155788518e561"
+    },
+    "nativeParityReport": {
+      "path": "docs/reports/popsign-tcn-native-onnx-parity-v1.json",
+      "sha256": "sha256:9e6446a5f6c0eb6a03c194dfe2f875880b3ea46e1ca7bf6cea3ba78c59045e6d"
+    },
+    "webParityReport": {
+      "path": "docs/reports/popsign-tcn-onnx-web-parity-v1.json",
+      "sha256": "sha256:4d1bb0a728f73552989a88fd4d1a6c55fc5706728ad0cd19a68b4da4e6e5f3e4"
+    },
+    "browserReference": {
+      "path": "docs/reports/browser-reference-v1.json",
+      "sha256": "sha256:88fcb8c6c2f59f155c452e5a32d527d6d5e49971564736375e511cef0ee9ed79"
+    },
+    "continuousReplay": {
+      "path": "docs/reports/constructed-continuous-replay-v1.json",
+      "sha256": "sha256:4f8f5969b8a1b92b88a9a59ee12f2a414bd5b4365dd2197abb4e99d8247d489f"
+    }
+  },
+  "dataset": {
+    "label": "Public dataset facts",
+    "scope": "dataset_fact",
+    "statement": "PopSign ASL v1.0 (CC BY 4.0) is a small, isolated five-prompt corpus. A session count is not defined by the public evidence.",
+    "clips": 80,
+    "signers": 40,
+    "split": { "train": 50, "validation": 15, "test": 15 },
+    "sessionCount": null,
+    "sources": ["datasetCard"]
+  },
+  "baseline": {
+    "label": "Signer-held-out logistic baseline",
+    "scope": "signer_held_out_baseline",
+    "statement": "These are real held-out results for the five-class logistic baseline, not performance for the browser candidate.",
+    "metrics": [
+      ["Test macro-F1", "0.725"],
+      ["Test balanced accuracy", "0.733"]
+    ],
+    "errors": [
+      ["Hello", 2, 3],
+      ["No", 0, 3],
+      ["Please", 1, 3],
+      ["Thank you", 1, 3],
+      ["Yes", 0, 3]
+    ],
+    "sources": ["baselineReport", "datasetCard"]
+  },
+  "architecture": {
+    "label": "Development architecture evidence",
+    "scope": "development_architecture_support",
+    "statement": "Three signer-grouped development folds support carrying the hand-local TCN architecture forward. They do not measure the exact browser checkpoint.",
+    "metrics": [
+      ["OOF macro-F1", "0.834"],
+      ["Balanced accuracy", "0.831"]
+    ],
+    "sources": ["architectureReport", "modelCard"]
+  },
+  "calibration": {
+    "label": "Constructed calibration mechanics",
+    "scope": "constructed_mechanics",
+    "statement": "The exact candidate used reused development examples and three constructed transition fragments. Temperature 0.050 hit the search boundary; the selected 0% threshold abstained on no rows. This checks mechanics, not model quality or natural use.",
+    "metrics": [
+      ["Development rows", "18"],
+      ["Constructed other rows", "3"],
+      ["Temperature", "0.050"],
+      ["NLL", "0.173056 → 0.000076"]
+    ],
+    "sources": ["calibrationReport", "modelCard"]
+  },
+  "runtime": {
+    "label": "Runtime equivalence evidence",
+    "scope": "runtime_equivalence",
+    "statement": "The exported candidate matched its reference implementation on the measured fixtures. This does not establish recognition quality or behavior on unmeasured inputs.",
+    "metrics": [
+      ["Native → ONNX", "18 rows; 0 decision mismatches"],
+      ["Maximum native difference", "0.0000019073"],
+      ["Python → Web/WASM", "3 cases; matching decisions"],
+      ["Maximum web difference", "0.0000002384"]
+    ],
+    "sources": ["nativeParityReport", "webParityReport"]
+  },
+  "browser": {
+    "label": "Reference-machine browser measurement",
+    "scope": "reference_machine_only",
+    "statement": "One reference-machine benchmark measured cold and warm Chromium runs on a Windows computer under a generated no-person camera workload.",
+    "environment": "Chromium 151.0.7922.34; Windows 10.0.26200 x64; Intel i9-14900HX; 32 logical CPUs; WASM with one thread.",
+    "sampleNote": "Each inference percentile uses 5 warmups followed by 50 measured calls.",
+    "runLabels": ["Cold", "Warm"],
+    "metrics": [
+      ["Startup", "2327.2 ms", "981.2 ms"],
+      ["Processed frames", "107", "121"],
+      ["Dropped frames", "14", "0"],
+      ["Processed FPS", "17.83", "20.13"],
+      ["Inference p50", "0.5 ms", "0.5 ms"],
+      ["Inference p95", "0.8 ms", "0.9 ms"],
+      ["Longest UI task", "89 ms", "55 ms"]
+    ],
+    "limitations": [
+      "One machine and browser cannot predict other devices.",
+      "The generated no-person workload is easier than real hand video.",
+      "Inference timing excludes capture, worker transfer, event detection, and rendering.",
+      "Memory was unavailable, and these timings are not CI thresholds."
+    ],
+    "sources": ["browserReference"]
+  },
+  "unavailable": {
+    "label": "Evidence not available",
+    "scope": "unavailable",
+    "items": [
+      {
+        "id": "exact_candidate_locked_test",
+        "label": "Exact-candidate locked-test performance",
+        "statement": "The exact browser candidate has not been evaluated on the locked test set.",
+        "sources": ["modelCard"]
+      },
+      {
+        "id": "natural_other",
+        "label": "Natural other movement",
+        "statement": "The available other examples are constructed transition fragments, not natural recordings.",
+        "sources": ["calibrationReport", "modelCard"]
+      },
+      {
+        "id": "natural_continuous_false_activations",
+        "label": "Natural continuous false activations",
+        "statement": "Constructed replay checks scorer behavior but cannot estimate false activations in natural sessions.",
+        "sources": ["continuousReplay", "modelCard"]
+      },
+      {
+        "id": "fairness",
+        "label": "Fairness",
+        "statement": "The current evidence does not support subgroup comparisons.",
+        "sources": ["datasetCard", "modelCard"]
+      },
+      {
+        "id": "robustness",
+        "label": "Robustness",
+        "statement": "The current evidence does not establish behavior across varied capture conditions or devices.",
+        "sources": ["datasetCard", "modelCard"]
+      },
+      {
+        "id": "population_claims",
+        "label": "Population performance",
+        "statement": "This small corpus cannot support broad population or sign-language generalization claims.",
+        "sources": ["datasetCard", "modelCard"]
+      }
+    ]
+  }
+}
