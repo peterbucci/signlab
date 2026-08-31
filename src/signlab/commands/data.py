@@ -18,6 +18,34 @@ app = create_group(
 )
 
 
+@app.command("import-feedback-package")
+def import_feedback_package_command(
+    package: Annotated[
+        Path,
+        typer.Argument(help="Browser-downloaded signlab-feedback-package/1 JSON file."),
+    ],
+    quarantine_root: Annotated[
+        Path,
+        typer.Option(
+            "--quarantine-root",
+            help="Ignored private root for content-addressed feedback quarantine.",
+        ),
+    ] = Path("data/private/feedback-quarantine"),
+) -> None:
+    """Validate and quarantine feedback; never promote it for training."""
+
+    from signlab.feedback_packages import import_feedback_package
+
+    try:
+        result = import_feedback_package(package, quarantine_root=quarantine_root)
+    except (OSError, TypeError, ValueError) as error:
+        typer.echo("Feedback package import failed.", err=True)
+        raise typer.Exit(code=1) from error
+    typer.echo(f"Feedback package quarantined: {result.record_count} records.")
+    typer.echo(f"Package SHA-256: {result.package_sha256}")
+    typer.echo("Trainable: no; manual review gates remain.")
+
+
 def _read_capture_source_map(path: Path) -> dict[str, str]:
     """Read the private path map without returning untrusted values in errors."""
 
