@@ -184,6 +184,7 @@ describe("LiveRecognitionSession", () => {
       detectorState: "inactive",
       landmarkState: "waiting",
       detectedHands: 0,
+      processedFrames: 0,
       droppedFrames: 0,
       backend: "wasm",
       bundle: { id: bundle.id, version: bundle.version },
@@ -197,6 +198,7 @@ describe("LiveRecognitionSession", () => {
       detectorState: "inactive",
       landmarkState: "usable",
       detectedHands: 1,
+      processedFrames: 1,
       droppedFrames: 2,
     });
 
@@ -204,6 +206,7 @@ describe("LiveRecognitionSession", () => {
     expect(runtime.snapshots.at(-1)?.diagnostics).toMatchObject({
       landmarkState: "no_hands",
       detectedHands: 0,
+      processedFrames: 2,
       droppedFrames: 2,
     });
   });

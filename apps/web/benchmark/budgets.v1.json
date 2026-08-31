@@ -1,0 +1,24 @@
+{
+  "format": "signlab-browser-release-budgets/1",
+  "staticAssets": {
+    "totalBytesMaximum": 28000000,
+    "javascriptBytesMaximum": 1100000,
+    "largestJavaScriptBytesMaximum": 500000,
+    "wasmBytesMaximum": 26000000
+  },
+  "mediapipeTasks": {
+    "expectedBytes": 13596851,
+    "maximumBytes": 14000000
+  },
+  "candidateBundle": {
+    "expectedBytes": 151324,
+    "maximumBytes": 200000,
+    "semanticSha256": "sha256:6952ad0e6a0550dd26deb400695c1021ee407e235d60bf65d50e37f2421553dc",
+    "manifestSha256": "sha256:a2277b8cd4f7f738080594977e59b9942dc31d456e0d00b365287325c14c2954",
+    "modelSha256": "sha256:0ceac237a035aaf5ee7de48dd1819c543a3f4eb9c39f2813430bd403f8542ef3"
+  },
+  "runtime": {
+    "backend": "wasm",
+    "wasmThreads": 1
+  }
+}

@@ -30,6 +30,7 @@ export interface LiveRecognitionDiagnostics {
   readonly detectorState: CandidateEventState | "not_ready";
   readonly landmarkState: "waiting" | "usable" | "no_hands" | "invalid";
   readonly detectedHands: 0 | 1 | 2;
+  readonly processedFrames: number;
   readonly droppedFrames: number;
   readonly backend: "wasm" | null;
   readonly bundle: { readonly id: string; readonly version: string } | null;
@@ -90,6 +91,7 @@ export class LiveRecognitionSession {
       detectorState: "not_ready",
       landmarkState: "waiting",
       detectedHands: 0,
+      processedFrames: 0,
       droppedFrames: 0,
       backend: null,
       bundle: null,
@@ -190,6 +192,7 @@ export class LiveRecognitionSession {
         detectorState: detector.state,
         landmarkState: !frame.valid ? "invalid" : detectedHands === 0 ? "no_hands" : "usable",
         detectedHands,
+        processedFrames: this.diagnosticsValue.processedFrames + 1,
       });
       if (event !== null) this.classify(event);
       else
