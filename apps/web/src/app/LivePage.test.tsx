@@ -100,6 +100,15 @@ describe("consent-first camera preview", () => {
     expect(
       screen.getByText(/asks for permission only after you select Start camera/),
     ).toBeVisible();
+    expect(screen.getByRole("heading", { name: "How to try it" })).toBeVisible();
+    expect(
+      screen.getByText(/Choose one prompt: Hello, No, Please, Thank you, or Yes/),
+    ).toBeVisible();
+    expect(screen.getByText(/even light facing you, not behind you/)).toBeVisible();
+    expect(screen.getByRole("link", { name: "Read its limitations." })).toHaveAttribute(
+      "href",
+      "#/limitations",
+    );
     expect(screen.getByRole("status", { name: "Model bundle status" })).toHaveTextContent(
       "No model bundle is configured.",
     );
@@ -357,6 +366,34 @@ describe("model bundle status", () => {
     expect(await screen.findByText(message)).toBeVisible();
     expect(loader.load).toHaveBeenCalledOnce();
   });
+
+  it("retries a blocked bundle load without reloading the page", async () => {
+    const bundle = { id: "browser-candidate", version: "1.0.0" } as VerifiedModelBundle;
+    let attempt = 0;
+    const load: ModelBundleSession["load"] = (_url, onStatus) => {
+      attempt += 1;
+      if (attempt === 1) {
+        onStatus?.({
+          phase: "error",
+          active: null,
+          failureReason: "The model bundle could not be downloaded.",
+        });
+        return Promise.reject(new Error("simulated download failure"));
+      }
+      onStatus?.({ phase: "ready", active: { id: bundle.id, version: bundle.version } });
+      return Promise.resolve(bundle);
+    };
+    const loader: Pick<ModelBundleSession, "load" | "status"> = {
+      status: { phase: "idle", active: null },
+      load: vi.fn(load),
+    };
+
+    render(<LivePage modelBundleUrl="https://example.test/bundle/" modelBundleSession={loader} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Retry setup" }));
+
+    await waitFor(() => expect(loader.load).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText(/Verified model bundle browser-candidate/)).toBeVisible();
+  });
 });
 
 const resultCases = [
@@ -458,9 +495,17 @@ describe("live on-device result", () => {
       await screen.findByText(/Models are ready/);
       act(() => {
         emit({
-          phase: "result",
+          phase: "recording",
           stableResult: inferenceResult(decision, reason),
           failureCode: null,
+          diagnostics: {
+            detectorState: "recording",
+            landmarkState: "usable",
+            detectedHands: 2,
+            droppedFrames: 3,
+            backend: "wasm",
+            bundle: { id: bundle.id, version: bundle.version },
+          },
         });
       });
 
@@ -470,6 +515,14 @@ describe("live on-device result", () => {
       expect(screen.getByText("8 ms")).toBeVisible();
       expect(within(resultCard).getByText("WASM")).toBeVisible();
       expect(within(resultCard).getByText("browser-candidate 1.0.0")).toBeVisible();
+      expect(within(resultCard).getByText(/stronger model matches, not guarantees/)).toBeVisible();
+      fireEvent.click(screen.getByText("Session diagnostics"));
+      const diagnostics = screen.getByLabelText("Session diagnostics");
+      expect(within(diagnostics).getAllByText("Gesture in progress")).toHaveLength(2);
+      expect(within(diagnostics).getByText("2 hands detected")).toBeVisible();
+      expect(within(diagnostics).getByText("3")).toBeVisible();
+      expect(within(diagnostics).getByText("WASM")).toBeVisible();
+      expect(within(diagnostics).getByText("browser-candidate 1.0.0")).toBeVisible();
       fireEvent.click(screen.getByRole("button", { name: "Stop camera" }));
       await waitFor(() => expect(close).toHaveBeenCalledOnce());
       expect(frameSource.cancel).toHaveBeenCalledWith(expect.any(HTMLVideoElement), 7);
@@ -538,6 +591,69 @@ describe("live on-device result", () => {
     expect(submitFrame).toHaveBeenCalledOnce();
   });
 
+  it("keeps the last diagnostics when frame capture fails", async () => {
+    const devices = new TestMediaDevices();
+    devices.getUserMedia.mockResolvedValue(cameraStream("front").stream);
+    devices.enumerateDevices.mockResolvedValue([]);
+    const bundle = { id: "browser-candidate", version: "1.0.0" } as VerifiedModelBundle;
+    const callbacks: Array<(timestampMs: number) => void> = [];
+    const liveRuntime: TestLiveRuntime = {
+      loadAssets: () =>
+        Promise.resolve({
+          handModelBuffer: new ArrayBuffer(1),
+          poseModelBuffer: new ArrayBuffer(1),
+        }),
+      createSession: (_bundle, _buffers, onState) => ({
+        initialize: () => {
+          onState({
+            phase: "ready",
+            stableResult: null,
+            failureCode: null,
+            diagnostics: {
+              detectorState: "inactive",
+              landmarkState: "usable",
+              detectedHands: 1,
+              droppedFrames: 4,
+              backend: "wasm",
+              bundle: { id: bundle.id, version: bundle.version },
+            },
+          });
+          return Promise.resolve();
+        },
+        submitFrame: vi.fn(),
+        close: vi.fn(() => Promise.resolve()),
+      }),
+      request: vi.fn((_video: HTMLVideoElement, callback: (timestampMs: number) => void) => {
+        callbacks.push(callback);
+        return callbacks.length;
+      }),
+      cancel: vi.fn(),
+      capture: vi.fn(() => Promise.reject(new Error("simulated capture failure"))),
+    };
+
+    render(
+      <LivePage
+        cameraEnvironment={cameraEnvironment(devices).environment}
+        modelBundleUrl="https://example.test/bundle/"
+        modelBundleSession={{
+          status: { phase: "ready", active: { id: bundle.id, version: bundle.version } },
+          load: vi.fn(() => Promise.resolve(bundle)),
+        }}
+        liveRuntime={liveRuntime}
+      />,
+    );
+
+    await startCamera();
+    await waitFor(() => expect(callbacks).toHaveLength(1));
+    act(() => callbacks[0]!(1_250));
+    await screen.findByRole("button", { name: "Retry setup" });
+    fireEvent.click(screen.getByText("Session diagnostics"));
+    const diagnostics = screen.getByLabelText("Session diagnostics");
+    expect(within(diagnostics).getByText("Inactive")).toBeVisible();
+    expect(within(diagnostics).getByText("1 hand detected")).toBeVisible();
+    expect(within(diagnostics).getByText("4")).toBeVisible();
+  });
+
   it("recreates a failed runtime when the user retries", async () => {
     const devices = new TestMediaDevices();
     devices.getUserMedia.mockResolvedValue(cameraStream("front").stream);
@@ -578,8 +694,12 @@ describe("live on-device result", () => {
     );
 
     await startCamera();
-    const retry = await screen.findByRole("button", { name: "Retry recognition" });
+    const retry = await screen.findByRole("button", { name: "Retry setup" });
     fireEvent.click(retry);
     await waitFor(() => expect(factory).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole("button", { name: "Stop camera" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Retry setup" })).not.toBeInTheDocument(),
+    );
   });
 });
