@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 
 import { navigationItems } from "./routeDefinitions";
@@ -9,14 +9,19 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
   const closeMenu = () => {
     setMenuOpen(false);
   };
+  const skipToMain = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    mainRef.current?.focus();
+  };
 
   return (
     <div className="site-shell">
-      <a className="skip-link" href="#main-content">
+      <a className="skip-link" href="#main-content" onClick={skipToMain}>
         Skip to content
       </a>
       <header className="site-header">
@@ -62,7 +67,9 @@ export function AppShell({ children }: AppShellProps) {
         </nav>
       </header>
 
-      <main id="main-content">{children}</main>
+      <main ref={mainRef} id="main-content" tabIndex={-1}>
+        {children}
+      </main>
 
       <footer className="site-footer">
         <p>SignLab is a research prototype, not a sign-language translator.</p>

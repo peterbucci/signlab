@@ -27,7 +27,7 @@ function usePageHeading(title: string) {
 
   useEffect(() => {
     document.title = `${title} | SignLab`;
-    headingRef.current?.focus({ preventScroll: true });
+    headingRef.current?.focus();
   }, [title]);
 
   return headingRef;
@@ -110,16 +110,22 @@ const readableLabel = (label: string) =>
 const diagnosticStateLabel = (state: string) =>
   state === "recording" ? "Gesture in progress" : readableLabel(state);
 
-function decisionTitle(result: NonNullable<LiveRecognitionSnapshot["stableResult"]>): string {
+type StableResult = NonNullable<LiveRecognitionSnapshot["stableResult"]>;
+
+function decisionTitle(result: StableResult): string {
   if (!("label" in result.decision)) return "No confident match";
   if (result.decision.kind === "other") return "Other movement";
   return readableLabel(result.decision.label);
 }
 
-function decisionReason(result: NonNullable<LiveRecognitionSnapshot["stableResult"]>): string {
+function decisionReason(result: StableResult): string {
   if (result.reason === "below_threshold") return "The model abstained because confidence was low.";
   if (result.reason === "accepted_other") return "The event looked unlike the five target prompts.";
   return "The top calibrated score passed the decision threshold.";
+}
+
+function resultStatusMessage(result: StableResult): string {
+  return `Result: ${decisionTitle(result)}. ${decisionReason(result)}`;
 }
 
 function landmarkSummary(diagnostics: LiveRecognitionDiagnostics | undefined): string {
@@ -262,13 +268,16 @@ export function LivePage({
 
   const hasStream = state.stream !== null;
   const canStart = canRequest && startableStatuses.has(state.status);
+  const requestingCamera = state.status === "requesting";
+  const stableResult = liveSnapshot?.stableResult ?? null;
   const recognitionMessage =
     liveSnapshot?.failureCode === "live.recognition.candidate.invalid"
       ? "That event could not be classified. Hold still, then try again."
       : state.status !== "active" || liveSnapshot === null
         ? "Recognition starts when the camera and model are ready."
-        : livePhaseMessages[liveSnapshot.phase];
-  const stableResult = liveSnapshot?.stableResult ?? null;
+        : liveSnapshot.phase === "result" && stableResult !== null
+          ? resultStatusMessage(stableResult)
+          : livePhaseMessages[liveSnapshot.phase];
   const diagnostics = liveSnapshot?.diagnostics;
   const bundleBlocked = bundleStatus.phase === "error" && bundleStatus.active === null;
   const runtimeFailed = state.status === "active" && liveSnapshot?.phase === "failed";
@@ -350,25 +359,24 @@ export function LivePage({
           )}
         </div>
 
-        <div className="camera-controls" aria-label="Camera controls">
-          {canStart ? (
-            <button className="primary-action" type="button" onClick={() => void start()}>
-              Start camera
+        <div className="camera-controls" role="group" aria-label="Camera controls">
+          {canStart || requestingCamera || hasStream ? (
+            <button
+              className={hasStream ? undefined : "primary-action"}
+              type="button"
+              aria-disabled={requestingCamera || undefined}
+              onClick={() => {
+                if (requestingCamera) return;
+                if (hasStream) stop();
+                else void start();
+              }}
+            >
+              {hasStream ? "Stop camera" : requestingCamera ? "Starting camera" : "Start camera"}
             </button>
           ) : null}
-          {state.status === "active" ? (
-            <button type="button" onClick={pause}>
-              Pause preview
-            </button>
-          ) : null}
-          {state.status === "paused" ? (
-            <button type="button" onClick={resume}>
-              Resume preview
-            </button>
-          ) : null}
-          {hasStream ? (
-            <button type="button" onClick={() => stop()}>
-              Stop camera
+          {state.status === "active" || state.status === "paused" ? (
+            <button type="button" onClick={state.status === "active" ? pause : resume}>
+              {state.status === "active" ? "Pause preview" : "Resume preview"}
             </button>
           ) : null}
         </div>

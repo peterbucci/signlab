@@ -113,7 +113,14 @@ describe("consent-first camera preview", () => {
       "No model bundle is configured.",
     );
 
-    await startCamera();
+    const cameraButton = screen.getByRole("button", { name: "Start camera" });
+    cameraButton.focus();
+    fireEvent.click(cameraButton);
+    await screen.findByText(
+      "Camera is on. Raw video stays on this page and is not saved or uploaded.",
+    );
+    expect(screen.getByRole("button", { name: "Stop camera" })).toBe(cameraButton);
+    expect(cameraButton).toHaveFocus();
 
     expect(devices.getUserMedia).toHaveBeenCalledWith({
       audio: false,
@@ -126,15 +133,24 @@ describe("consent-first camera preview", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Mirror preview" }));
     expect(video).not.toHaveClass("is-mirrored");
 
-    fireEvent.click(screen.getByRole("button", { name: "Pause preview" }));
+    const previewButton = screen.getByRole("button", { name: "Pause preview" });
+    previewButton.focus();
+    fireEvent.click(previewButton);
     expect(track.enabled).toBe(false);
     expect(screen.getByText(/Stop the camera to release it completely/)).toBeVisible();
+    expect(screen.getByRole("button", { name: "Resume preview" })).toBe(previewButton);
+    expect(previewButton).toHaveFocus();
 
-    fireEvent.click(screen.getByRole("button", { name: "Resume preview" }));
+    fireEvent.click(previewButton);
     expect(track.enabled).toBe(true);
+    expect(screen.getByRole("button", { name: "Pause preview" })).toBe(previewButton);
+    expect(previewButton).toHaveFocus();
 
-    fireEvent.click(screen.getByRole("button", { name: "Stop camera" }));
+    cameraButton.focus();
+    fireEvent.click(cameraButton);
     expect(track.stop).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Start camera" })).toBe(cameraButton);
+    expect(cameraButton).toHaveFocus();
     expect(screen.queryByLabelText("Local camera preview")).not.toBeInTheDocument();
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(xhrSpy).not.toHaveBeenCalled();
@@ -495,7 +511,7 @@ describe("live on-device result", () => {
       await screen.findByText(/Models are ready/);
       act(() => {
         emit({
-          phase: "recording",
+          phase: "result",
           stableResult: inferenceResult(decision, reason),
           failureCode: null,
           diagnostics: {
@@ -511,6 +527,15 @@ describe("live on-device result", () => {
 
       const resultCard = screen.getByRole("region", { name: "Latest recognition result" });
       expect(within(resultCard).getByText(title, { selector: "strong" })).toBeVisible();
+      const recognitionStatus = screen.getByRole("status", { name: "Recognition status" });
+      expect(recognitionStatus).toHaveTextContent(`Result: ${title}.`);
+      expect(recognitionStatus).toHaveTextContent(
+        reason === "below_threshold"
+          ? "confidence was low"
+          : reason === "accepted_other"
+            ? "unlike the five target prompts"
+            : "calibrated score",
+      );
       expect(within(resultCard).getByRole("list", { name: "Top calibrated scores" })).toBeVisible();
       expect(screen.getByText("8 ms")).toBeVisible();
       expect(within(resultCard).getByText("WASM")).toBeVisible();
@@ -518,7 +543,8 @@ describe("live on-device result", () => {
       expect(within(resultCard).getByText(/stronger model matches, not guarantees/)).toBeVisible();
       fireEvent.click(screen.getByText("Session diagnostics"));
       const diagnostics = screen.getByLabelText("Session diagnostics");
-      expect(within(diagnostics).getAllByText("Gesture in progress")).toHaveLength(2);
+      expect(within(diagnostics).getByText("Result")).toBeVisible();
+      expect(within(diagnostics).getByText("Gesture in progress")).toBeVisible();
       expect(within(diagnostics).getByText("2 hands detected")).toBeVisible();
       expect(within(diagnostics).getByText("3")).toBeVisible();
       expect(within(diagnostics).getByText("WASM")).toBeVisible();

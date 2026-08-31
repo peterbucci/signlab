@@ -38,7 +38,7 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid #b54428;
+  outline: 3px solid #cf5d3f;
   outline-offset: 4px;
 }
 
@@ -470,8 +470,8 @@ h1 {
 }
 
 .camera-controls .primary-action {
-  border-color: #e8623c;
-  background: #e8623c;
+  border-color: #b54428;
+  background: #b54428;
 }
 
 .camera-controls button:hover {
@@ -532,6 +532,11 @@ h1 {
   font-size: 2rem;
   font-weight: 500;
   letter-spacing: -0.03em;
+}
+
+.recognition-result .card-label,
+.principles .section-index {
+  color: #f5a58b;
 }
 
 .recognition-result > p:not(.card-label) {
