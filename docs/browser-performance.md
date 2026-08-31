@@ -8,11 +8,15 @@ person's video, landmarks, device identifiers, or local paths. From
 npm run benchmark:reference
 ```
 
-The command verifies the exact ignored candidate bundle, downloads and verifies
+The command first requires the repository's exact pinned Node and npm versions.
+It then verifies the exact ignored candidate bundle, downloads and verifies
 the two public hash-pinned MediaPipe task files when needed, builds the production
 site, and drives its real workers in Chromium. It installs the matching pinned
 Chromium build on first use. A non-default ignored bundle can be selected with
 `-- --bundle-root=<directory>`.
+
+The local-evaluation model is copied only into a temporary localhost preview
+tree, never the normal deployment directory, and that tree is removed on exit.
 
 It writes the sanitized JSON and short Markdown evidence in `docs/reports/`.
 The committed report names the browser, operating system, CPU, logical CPU

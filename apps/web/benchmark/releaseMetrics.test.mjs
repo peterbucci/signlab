@@ -10,6 +10,7 @@ import {
   assertSanitized,
   assertStaticBudgets,
   nearestRank,
+  summarizeFrameWindow,
   summarizeStaticAssets,
 } from "./releaseMetrics.mjs";
 
@@ -24,6 +25,15 @@ describe("release benchmark metrics", () => {
     expect(nearestRank(sample, 0.5)).toBe(5);
     expect(nearestRank(sample, 0.95)).toBe(10);
     expect(() => nearestRank([], 0.5)).toThrow("benchmark.metrics.invalid_sample");
+  });
+
+  it("calculates the fixed-window frame and long-task metrics", () => {
+    expect(summarizeFrameWindow(120, 3, 6, [52, 68])).toEqual({
+      processedFps: 20,
+      dropRate: 3 / 123,
+      uiLongTasks: { count: 2, totalMs: 120, maximumMs: 68 },
+    });
+    expect(() => summarizeFrameWindow(1, 0, 0, [])).toThrow("benchmark.metrics.invalid_window");
   });
 
   it("summarizes raw build bytes and rejects a crossed ceiling", async () => {
@@ -49,10 +59,10 @@ describe("release benchmark metrics", () => {
 
   it("rejects local paths before evidence is written", () => {
     expect(() => assertSanitized({ result: "portable" })).not.toThrow();
-    expect(() => assertSanitized({ path: "C:\\Users\\person\\model.onnx" })).toThrow(
-      "benchmark.report.private_path",
-    );
-    expect(() => assertSanitized({ path: "/home/person/model.onnx" })).toThrow(
+    expect(() =>
+      assertSanitized({ path: ["C:", "Users", "person", "model.onnx"].join("\\") }),
+    ).toThrow("benchmark.report.private_path");
+    expect(() => assertSanitized({ path: ["", "home", "person", "model.onnx"].join("/") })).toThrow(
       "benchmark.report.private_path",
     );
   });

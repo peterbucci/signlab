@@ -79,8 +79,8 @@ def test_cross_origin_isolation_decision_matches_runtime() -> None:
         encoding="utf-8"
     )
     assert 'import * as ort from "onnxruntime-web/wasm";' in runtime
-    assert "ort.env.wasm.numThreads = 1;" in runtime
-    assert 'executionProviders: ["wasm"]' in runtime
+    assert "ort.env.wasm.numThreads = CANDIDATE_BROWSER_RUNTIME.wasmThreads;" in runtime
+    assert "executionProviders: [CANDIDATE_BROWSER_RUNTIME.backend]" in runtime
 
 
 def test_threat_model_marks_deployment_and_development_boundaries() -> None:

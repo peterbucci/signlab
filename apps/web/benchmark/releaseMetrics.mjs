@@ -17,6 +17,20 @@ export function nearestRank(values, percentile) {
   return ordered[Math.ceil(percentile * ordered.length) - 1];
 }
 
+export function summarizeFrameWindow(processedFrames, droppedFrames, windowSeconds, longTasks) {
+  const valid = [processedFrames, droppedFrames, ...longTasks].every(
+    (value) => Number.isFinite(value) && value >= 0,
+  );
+  if (!valid || !Number.isFinite(windowSeconds) || windowSeconds <= 0)
+    throw new Error("benchmark.metrics.invalid_window");
+  const totalMs = longTasks.reduce((sum, value) => sum + value, 0);
+  return {
+    processedFps: processedFrames / windowSeconds,
+    dropRate: droppedFrames / Math.max(1, processedFrames + droppedFrames),
+    uiLongTasks: { count: longTasks.length, totalMs, maximumMs: Math.max(0, ...longTasks) },
+  };
+}
+
 async function filesUnder(root) {
   const output = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
