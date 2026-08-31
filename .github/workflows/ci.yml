@@ -204,6 +204,11 @@ jobs:
       - name: Build for a root domain
         run: npm run build
 
+      - name: Install pinned engines and smoke test the built release
+        run: |
+          npx playwright install --with-deps chromium firefox webkit
+          npm run test:browser
+
       - name: Build for a configured subpath
         run: npm run build:subpath
 

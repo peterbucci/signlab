@@ -5,7 +5,7 @@
 | Path | Owner | Responsibility |
 | --- | --- | --- |
 | `src/signlab/` | Python application | Importable domain, application, and adapter code; no private data |
-| `apps/web/` | Public browser application | Static React/Vite shell and, after later review gates, on-device inference |
+| `apps/web/` | Public browser application | Static React/Vite app with verified worker-based on-device inference |
 | `tests/` | Verification | Fast unit/integration tests and tiny public fixtures |
 | `docs/` | Evidence and decisions | Architecture, protocols, cards, audits, and tutorials |
 | `configs/` | Portable inputs | Reviewed versioned configuration; never resolved local state |
@@ -38,7 +38,7 @@ The native landmark boundary is an optional `extraction` extra containing exact
 `mediapipe==1.0.1` and `av==18.1.0` pins. Core contract, governance, dataset, and CLI
 imports must remain usable without loading either native package. The developer
 workflow installs all extras so Linux and Windows exercise that boundary; consumers
-that do not extract video can install the base wheel. The future browser runtime is
+that do not extract video can install the base wheel. The browser runtime is
 separately pinned to `@mediapipe/tasks-vision@1.0.1` by the extraction contract.
 
 The local experiment ledger and simple reference models are a separate optional
@@ -84,6 +84,8 @@ npm run lint
 npm run typecheck
 npm test
 npm run build
+npx playwright install chromium firefox webkit
+npm run test:browser
 npm run build:subpath
 ```
 
@@ -91,12 +93,21 @@ The two builds prove the static files can be published at a root domain or a
 configured `/signlab/` subpath. Hash-based routes keep every page usable on a plain
 static host without rewrite rules. The live route requests camera access only after
 the user selects **Start camera**, keeps its preview local, and releases tracks during
-its documented lifecycle transitions. It does not send frames to the dormant worker,
-load a model, process replay inputs, save feedback, or call a backend.
+its documented lifecycle transitions. MediaPipe and ONNX workers run only after an
+exact model bundle and the two task assets pass verification; there is no backend,
+upload path, analytics, or automatic feedback save.
 
-The normal web checks also compile and test the dormant landmark worker. MediaPipe
-`.task` models remain external to Git, and neither task starts until a later boundary
-supplies verified model buffers and frames.
+The browser smoke runs the built root-domain application sequentially in Playwright
+Chromium, Firefox, and WebKit. It uses a deterministic no-person camera mock to check
+route rendering, camera start/pause/resume/stop and denial behavior, and the
+observed shell's same-origin `GET`-only requests. Model-bundle and MediaPipe task
+requests remain part of the later packaged-release check. This is compatibility
+automation, not a physical-device, Safari, model-inference, or recognition-quality
+claim.
+
+The MediaPipe `.task` models and generated candidate bundle remain external to Git.
+The three-engine smoke deliberately supplies neither, so it tests release rendering,
+camera lifecycle, and network behavior—not landmark extraction or inference.
 
 ## Local experiment ledger
 
