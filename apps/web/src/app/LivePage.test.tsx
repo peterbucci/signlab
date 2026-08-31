@@ -352,9 +352,38 @@ describe("model bundle status", () => {
       {
         phase: "ready",
         active: { id: "candidate_bundle", version: "1.2.3" },
+        source: "network",
       } satisfies ModelBundleStatus,
       false,
-      "Verified model bundle candidate_bundle version 1.2.3 is ready.",
+      "Verified model bundle candidate_bundle version 1.2.3 is ready and saved in this browser.",
+    ],
+    [
+      {
+        phase: "ready",
+        active: { id: "candidate_bundle", version: "1.2.3" },
+        source: "fallback",
+      } satisfies ModelBundleStatus,
+      false,
+      "Using verified cached model bundle candidate_bundle version 1.2.3 because the bundle endpoint is unavailable.",
+    ],
+    [
+      {
+        phase: "ready",
+        active: { id: "candidate_bundle", version: "1.2.3" },
+        source: "cache",
+      } satisfies ModelBundleStatus,
+      false,
+      "Verified cached model bundle candidate_bundle version 1.2.3 is ready.",
+    ],
+    [
+      {
+        phase: "ready",
+        active: { id: "candidate_bundle", version: "1.2.3" },
+        source: "network",
+        cacheWarning: "Browser storage is unavailable.",
+      } satisfies ModelBundleStatus,
+      false,
+      "Verified model bundle candidate_bundle version 1.2.3 is ready for this session. Browser storage is unavailable.",
     ],
     [
       {
@@ -381,6 +410,83 @@ describe("model bundle status", () => {
 
     expect(await screen.findByText(message)).toBeVisible();
     expect(loader.load).toHaveBeenCalledOnce();
+    expect(
+      screen.queryByRole("button", { name: "Restore previous model" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("restores the previous verified bundle only after rollback succeeds", async () => {
+    const current = { id: "candidate_bundle", version: "2.0.0" } as VerifiedModelBundle;
+    const previous = { id: "candidate_bundle", version: "1.0.0" } as VerifiedModelBundle;
+    const rollback: ModelBundleSession["rollback"] = (onStatus) => {
+      onStatus?.({
+        phase: "ready",
+        active: { id: previous.id, version: previous.version },
+        source: "rollback",
+        rollbackAvailable: true,
+      });
+      return Promise.resolve(previous);
+    };
+    const load: ModelBundleSession["load"] = (_url, onStatus) => {
+      onStatus?.({
+        phase: "ready",
+        active: { id: current.id, version: current.version },
+        source: "network",
+        rollbackAvailable: true,
+      });
+      return Promise.resolve(current);
+    };
+    const loader = {
+      status: { phase: "idle", active: null } satisfies ModelBundleStatus,
+      load: vi.fn(load),
+      rollback: vi.fn(rollback),
+    };
+
+    render(<LivePage modelBundleUrl="https://example.test/bundle/" modelBundleSession={loader} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Restore previous model" }));
+
+    expect(await screen.findByText(/Restored previous verified model bundle/)).toBeVisible();
+    fireEvent.click(screen.getByText("Session diagnostics"));
+    expect(
+      within(screen.getByLabelText("Session diagnostics")).getByText("candidate_bundle 1.0.0"),
+    ).toBeVisible();
+  });
+
+  it("keeps the current bundle when rollback fails", async () => {
+    const current = { id: "candidate_bundle", version: "2.0.0" } as VerifiedModelBundle;
+    const load: ModelBundleSession["load"] = (_url, onStatus) => {
+      onStatus?.({
+        phase: "ready",
+        active: { id: current.id, version: current.version },
+        source: "network",
+        rollbackAvailable: true,
+      });
+      return Promise.resolve(current);
+    };
+    const rollback: ModelBundleSession["rollback"] = (onStatus) => {
+      onStatus?.({
+        phase: "error",
+        active: { id: current.id, version: current.version },
+        failureReason: "The cached model bundle is incomplete or damaged.",
+        source: "network",
+        rollbackAvailable: true,
+      });
+      return Promise.reject(new Error("simulated damaged rollback"));
+    };
+    const loader = {
+      status: { phase: "idle", active: null } satisfies ModelBundleStatus,
+      load: vi.fn(load),
+      rollback: vi.fn(rollback),
+    };
+
+    render(<LivePage modelBundleUrl="https://example.test/bundle/" modelBundleSession={loader} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Restore previous model" }));
+
+    expect(await screen.findByText(/incomplete or damaged/)).toBeVisible();
+    fireEvent.click(screen.getByText("Session diagnostics"));
+    expect(
+      within(screen.getByLabelText("Session diagnostics")).getByText("candidate_bundle 2.0.0"),
+    ).toBeVisible();
   });
 
   it("retries a blocked bundle load without reloading the page", async () => {

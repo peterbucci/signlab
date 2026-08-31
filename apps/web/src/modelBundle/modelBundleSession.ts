@@ -6,6 +6,11 @@ import candidateFeaturePlan from "../../../../src/signlab/resources/features/con
 import mediaPipeConfig from "../../../../src/signlab/resources/extraction/config/mediapipe-extraction-config-1.default.json";
 import manifestSchema from "../../../../src/signlab/resources/model_bundles/schemas/browser-model-bundle-manifest-1.schema.json";
 import qualityPolicy from "../../../../src/signlab/resources/quality/config/landmark-quality-policy-1.default.json";
+import {
+  ModelBundleCache,
+  type CachedModelBundle,
+  type ModelBundleCacheState,
+} from "./modelBundleCache";
 
 const LABELS = ["hello", "no", "please", "thank_you", "yes", "other"] as const;
 const ASSETS = [
@@ -58,6 +63,7 @@ const PINNED_COMPONENTS = {
 
 export type ModelBundleAssetRole = (typeof ASSETS)[number][0];
 export type ModelBundlePhase = "idle" | "loading" | "verifying" | "ready" | "error";
+export type ModelBundleSource = "network" | "cache" | "fallback" | "rollback";
 export type ModelBundleFailureCode =
   | "bundle.environment.unsupported"
   | "bundle.load.superseded"
@@ -67,7 +73,9 @@ export type ModelBundleFailureCode =
   | "bundle.asset.unavailable"
   | "bundle.asset.size_mismatch"
   | "bundle.asset.digest_mismatch"
-  | "bundle.component.incompatible";
+  | "bundle.component.incompatible"
+  | "bundle.cache.corrupt"
+  | "bundle.cache.rollback_unavailable";
 
 interface ManifestAsset {
   readonly artifact_id: string;
@@ -94,6 +102,8 @@ export interface VerifiedModelBundle {
   readonly id: string;
   readonly version: string;
   readonly manifest: ModelBundleManifest;
+  readonly manifestBytes: Blob;
+  readonly manifestSha256: string;
   readonly bytesByRole: Readonly<Record<ModelBundleAssetRole, Blob>>;
 }
 
@@ -101,12 +111,16 @@ export interface ModelBundleStatus {
   readonly phase: ModelBundlePhase;
   readonly active: { readonly id: string; readonly version: string } | null;
   readonly failureReason?: string;
+  readonly source?: ModelBundleSource;
+  readonly rollbackAvailable?: boolean;
+  readonly cacheWarning?: string;
 }
 
 export interface ModelBundleEnvironment {
   readonly fetch: (input: URL) => Promise<Response>;
   readonly subtle?: SubtleCrypto;
   readonly documentBaseUrl?: string;
+  readonly cacheStorage?: Pick<CacheStorage, "open">;
 }
 
 const FAILURE_MESSAGES: Record<ModelBundleFailureCode, string> = {
@@ -119,7 +133,11 @@ const FAILURE_MESSAGES: Record<ModelBundleFailureCode, string> = {
   "bundle.asset.size_mismatch": "A model bundle file has the wrong size.",
   "bundle.asset.digest_mismatch": "A model bundle file failed its integrity check.",
   "bundle.component.incompatible": "The model bundle is incompatible with this demo.",
+  "bundle.cache.corrupt": "The cached model bundle is incomplete or damaged.",
+  "bundle.cache.rollback_unavailable": "No verified previous model bundle is available.",
 };
+const CACHE_WARNING =
+  "Offline model storage is unavailable, so this model may need to be downloaded again.";
 
 export class ModelBundleLoadError extends Error {
   constructor(readonly code: ModelBundleFailureCode) {
@@ -269,26 +287,51 @@ function statusFor(
   phase: ModelBundlePhase,
   active: VerifiedModelBundle | null,
   failureReason?: string,
+  source?: ModelBundleSource,
+  rollbackAvailable?: boolean,
+  cacheWarning?: string,
 ): ModelBundleStatus {
   return Object.freeze({
     phase,
     active: active === null ? null : Object.freeze({ id: active.id, version: active.version }),
     ...(failureReason === undefined ? {} : { failureReason }),
+    ...(source === undefined ? {} : { source }),
+    ...(rollbackAvailable === undefined ? {} : { rollbackAvailable }),
+    ...(cacheWarning === undefined ? {} : { cacheWarning }),
   });
 }
+
+interface PreparedManifest {
+  readonly manifest: ModelBundleManifest;
+  readonly buffer: ArrayBuffer;
+  readonly sha256: string;
+}
+
+type StatusUpdate = (
+  phase: ModelBundlePhase,
+  reason?: string,
+  source?: ModelBundleSource,
+  rollbackAvailable?: boolean,
+  cacheWarning?: string | null,
+) => void;
 
 export class ModelBundleSession {
   private activeValue: VerifiedModelBundle | null = null;
   private statusValue = statusFor("idle", null);
   private attempt = 0;
+  private readonly cache: ModelBundleCache;
+  private cacheMutation = Promise.resolve();
 
   constructor(
     private readonly environment: ModelBundleEnvironment = {
       fetch: (input) => globalThis.fetch(input),
       subtle: globalThis.crypto?.subtle,
       documentBaseUrl: globalThis.document?.baseURI,
+      cacheStorage: globalThis.caches,
     },
-  ) {}
+  ) {
+    this.cache = new ModelBundleCache(environment.cacheStorage);
+  }
 
   get active(): VerifiedModelBundle | null {
     return this.activeValue;
@@ -303,75 +346,271 @@ export class ModelBundleSession {
     onStatus: (status: ModelBundleStatus) => void = () => undefined,
   ): Promise<VerifiedModelBundle> {
     const attempt = ++this.attempt;
-    const update = (phase: ModelBundlePhase, reason?: string) => {
-      if (attempt !== this.attempt) fail("bundle.load.superseded");
-      this.statusValue = statusFor(phase, this.activeValue, reason);
-      onStatus(this.statusValue);
-    };
+    const update = this.updater(attempt, onStatus);
 
     try {
       update("loading");
       const manifestUrl = bundleManifestUrl(baseUrl, this.environment.documentBaseUrl);
-      const manifestBuffer = await this.fetchBytes(manifestUrl, "bundle.manifest.unavailable");
-      if (attempt !== this.attempt) fail("bundle.load.superseded");
-      const manifest = validateManifest(parseJson(manifestBuffer, "bundle.manifest.invalid"));
-      const subtle = this.environment.subtle;
-      if (subtle === undefined) fail("bundle.environment.unsupported");
-      const downloads = await Promise.all(
-        manifest.assets.map(async (asset) => ({
-          asset,
-          buffer: await this.fetchBytes(
-            assetUrl(manifestUrl, asset.locator.path),
-            "bundle.asset.unavailable",
-          ),
-        })),
-      );
-      update("verifying");
-      const buffers = {} as Record<ModelBundleAssetRole, ArrayBuffer>;
-      for (const { asset, buffer } of downloads) {
-        if (buffer.byteLength !== asset.size_bytes) fail("bundle.asset.size_mismatch");
-        let digest: ArrayBuffer;
+      let manifestBuffer: ArrayBuffer;
+      try {
+        manifestBuffer = await this.fetchBytes(manifestUrl, "bundle.manifest.unavailable");
+      } catch (error) {
+        return await this.restoreActive(error, update, attempt);
+      }
+      const prepared = await this.prepareManifest(manifestBuffer);
+
+      const warm = await this.cache.read(prepared.sha256);
+      if (warm !== null) {
         try {
-          digest = await subtle.digest("SHA-256", new Uint8Array(buffer));
-        } catch {
-          fail("bundle.environment.unsupported");
+          const verified = await this.verifyCached(warm, prepared.sha256, update);
+          const activation = await this.mutateCache(attempt, () =>
+            this.cache.activate(verified.manifestSha256),
+          );
+          return this.activate(
+            verified,
+            "cache",
+            activation.saved ? activation.state : null,
+            update,
+            attempt,
+            activation.saved ? undefined : CACHE_WARNING,
+          );
+        } catch (error) {
+          if (this.failureCode(error) !== "bundle.cache.corrupt") throw error;
         }
-        const actual = `sha256:${Array.from(new Uint8Array(digest), (byte) =>
-          byte.toString(16).padStart(2, "0"),
-        ).join("")}`;
-        if (actual !== asset.sha256) fail("bundle.asset.digest_mismatch");
-        buffers[asset.role] = buffer;
       }
-      verifyComponents(manifest, buffers);
-      if (attempt !== this.attempt) fail("bundle.load.superseded");
-      const bytesByRole = Object.freeze(
-        Object.fromEntries(
-          manifest.assets.map((asset) => [
-            asset.role,
-            new Blob([buffers[asset.role]], { type: asset.media_type }),
-          ]),
-        ) as Record<ModelBundleAssetRole, Blob>,
+
+      let verified: VerifiedModelBundle;
+      try {
+        verified = await this.verifyBundle(
+          prepared,
+          async (asset) =>
+            await this.fetchBytes(
+              assetUrl(manifestUrl, asset.locator.path),
+              "bundle.asset.unavailable",
+            ),
+          update,
+        );
+      } catch (error) {
+        if (this.failureCode(error) === "bundle.asset.unavailable") {
+          return await this.restoreActive(error, update, attempt);
+        }
+        throw error;
+      }
+      const activation = await this.mutateCache(attempt, () =>
+        this.cache.saveAndActivate({
+          identity: verified.manifestSha256,
+          manifest: verified.manifestBytes,
+          bytesByRole: verified.bytesByRole,
+        }),
       );
-      const verified = Object.freeze({
-        id: manifest.bundle_id,
-        version: manifest.version,
-        manifest,
-        bytesByRole,
-      });
-      this.activeValue = verified;
-      update("ready");
-      return verified;
+      return this.activate(
+        verified,
+        "network",
+        activation.saved ? activation.state : null,
+        update,
+        attempt,
+        activation.saved ? undefined : CACHE_WARNING,
+      );
     } catch (error) {
-      const failure =
-        error instanceof ModelBundleLoadError
-          ? error
-          : new ModelBundleLoadError("bundle.asset.unavailable");
-      if (attempt === this.attempt) {
-        this.statusValue = statusFor("error", this.activeValue, failure.message);
-        onStatus(this.statusValue);
-      }
-      throw failure;
+      return this.finishFailure(error, "bundle.asset.unavailable", attempt, onStatus);
     }
+  }
+
+  async rollback(
+    onStatus: (status: ModelBundleStatus) => void = () => undefined,
+  ): Promise<VerifiedModelBundle> {
+    const attempt = ++this.attempt;
+    const update = this.updater(attempt, onStatus);
+    try {
+      update("loading", undefined, "rollback");
+      const cached = await this.cache.readSelected("previous");
+      if (cached === null) fail("bundle.cache.rollback_unavailable");
+      const verified = await this.verifyCached(cached, cached.identity, update);
+      const state = await this.mutateCache(attempt, () => this.cache.rollback(cached.identity));
+      if (state === null) fail("bundle.cache.rollback_unavailable");
+      return this.activate(verified, "rollback", state, update, attempt);
+    } catch (error) {
+      return this.finishFailure(error, "bundle.cache.rollback_unavailable", attempt, onStatus);
+    }
+  }
+
+  private async prepareManifest(buffer: ArrayBuffer): Promise<PreparedManifest> {
+    const manifest = validateManifest(parseJson(buffer, "bundle.manifest.invalid"));
+    return { manifest, buffer, sha256: await this.digest(buffer) };
+  }
+
+  private async verifyBundle(
+    prepared: PreparedManifest,
+    readAsset: (asset: ManifestAsset) => Promise<ArrayBuffer>,
+    update: StatusUpdate,
+  ): Promise<VerifiedModelBundle> {
+    const downloads = await Promise.all(
+      prepared.manifest.assets.map(async (asset) => ({ asset, buffer: await readAsset(asset) })),
+    );
+    update("verifying");
+    const buffers = {} as Record<ModelBundleAssetRole, ArrayBuffer>;
+    for (const { asset, buffer } of downloads) {
+      if (buffer.byteLength !== asset.size_bytes) fail("bundle.asset.size_mismatch");
+      if ((await this.digest(buffer)) !== asset.sha256) fail("bundle.asset.digest_mismatch");
+      buffers[asset.role] = buffer;
+    }
+    verifyComponents(prepared.manifest, buffers);
+    const bytesByRole = Object.freeze(
+      Object.fromEntries(
+        prepared.manifest.assets.map((asset) => [
+          asset.role,
+          new Blob([buffers[asset.role]], { type: asset.media_type }),
+        ]),
+      ) as Record<ModelBundleAssetRole, Blob>,
+    );
+    return Object.freeze({
+      id: prepared.manifest.bundle_id,
+      version: prepared.manifest.version,
+      manifest: prepared.manifest,
+      manifestBytes: new Blob([prepared.buffer], { type: "application/json" }),
+      manifestSha256: prepared.sha256,
+      bytesByRole,
+    });
+  }
+
+  private async verifyCached(
+    cached: CachedModelBundle,
+    expectedIdentity: string,
+    update: StatusUpdate,
+  ): Promise<VerifiedModelBundle> {
+    try {
+      const prepared = await this.prepareManifest(await cached.manifest.arrayBuffer());
+      if (prepared.sha256 !== expectedIdentity) fail("bundle.cache.corrupt");
+      return await this.verifyBundle(
+        prepared,
+        async (asset) => {
+          const bytes = await cached.asset(asset.role);
+          if (bytes === null) fail("bundle.cache.corrupt");
+          return await bytes.arrayBuffer();
+        },
+        update,
+      );
+    } catch (error) {
+      const code = this.failureCode(error);
+      if (code === "bundle.environment.unsupported" || code === "bundle.load.superseded") {
+        throw error;
+      }
+      return fail("bundle.cache.corrupt");
+    }
+  }
+
+  private async restoreActive(
+    error: unknown,
+    update: StatusUpdate,
+    attempt: number,
+  ): Promise<VerifiedModelBundle> {
+    const cached = await this.cache.readSelected("active");
+    if (cached === null) throw error;
+    update(
+      "loading",
+      undefined,
+      "fallback",
+      cached.state?.previous !== null && cached.state?.previous !== undefined,
+    );
+    return this.activate(
+      await this.verifyCached(cached, cached.identity, update),
+      "fallback",
+      cached.state,
+      update,
+      attempt,
+    );
+  }
+
+  private activate(
+    verified: VerifiedModelBundle,
+    source: ModelBundleSource,
+    state: ModelBundleCacheState | null,
+    update: StatusUpdate,
+    attempt: number,
+    cacheWarning?: string,
+  ): VerifiedModelBundle {
+    if (attempt !== this.attempt) fail("bundle.load.superseded");
+    this.activeValue = verified;
+    update(
+      "ready",
+      undefined,
+      source,
+      state?.previous !== null && state?.previous !== undefined,
+      cacheWarning ?? null,
+    );
+    return verified;
+  }
+
+  private updater(attempt: number, onStatus: (status: ModelBundleStatus) => void): StatusUpdate {
+    return (
+      phase,
+      reason,
+      source = this.statusValue.source,
+      rollbackAvailable = this.statusValue.rollbackAvailable,
+      cacheWarning = this.statusValue.cacheWarning,
+    ) => {
+      if (attempt !== this.attempt) fail("bundle.load.superseded");
+      this.statusValue = statusFor(
+        phase,
+        this.activeValue,
+        reason,
+        source,
+        rollbackAvailable,
+        cacheWarning ?? undefined,
+      );
+      onStatus(this.statusValue);
+    };
+  }
+
+  private mutateCache<T>(attempt: number, mutation: () => Promise<T>): Promise<T> {
+    const result = this.cacheMutation.then(() => {
+      if (attempt !== this.attempt) fail("bundle.load.superseded");
+      return mutation();
+    });
+    this.cacheMutation = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
+
+  private finishFailure(
+    error: unknown,
+    fallback: ModelBundleFailureCode,
+    attempt: number,
+    onStatus: (status: ModelBundleStatus) => void,
+  ): never {
+    const failure =
+      error instanceof ModelBundleLoadError ? error : new ModelBundleLoadError(fallback);
+    if (attempt === this.attempt) {
+      this.statusValue = statusFor(
+        "error",
+        this.activeValue,
+        failure.message,
+        this.statusValue.source,
+        this.statusValue.rollbackAvailable,
+        this.statusValue.cacheWarning,
+      );
+      onStatus(this.statusValue);
+    }
+    throw failure;
+  }
+
+  private async digest(buffer: ArrayBuffer): Promise<string> {
+    const subtle = this.environment.subtle;
+    if (subtle === undefined) fail("bundle.environment.unsupported");
+    try {
+      const digest = await subtle.digest("SHA-256", new Uint8Array(buffer));
+      return `sha256:${Array.from(new Uint8Array(digest), (byte) =>
+        byte.toString(16).padStart(2, "0"),
+      ).join("")}`;
+    } catch {
+      return fail("bundle.environment.unsupported");
+    }
+  }
+
+  private failureCode(error: unknown): ModelBundleFailureCode | undefined {
+    return error instanceof ModelBundleLoadError ? error.code : undefined;
   }
 
   private async fetchBytes(url: URL, code: ModelBundleFailureCode): Promise<ArrayBuffer> {
