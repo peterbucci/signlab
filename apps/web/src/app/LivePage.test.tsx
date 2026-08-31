@@ -1,8 +1,13 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { CameraEnvironment } from "../camera/useCameraSession";
+import {
+  CANDIDATE_INFERENCE_PROTOCOL_VERSION,
+  type CandidateInferenceResult,
+} from "../inference/candidateInferenceProtocol";
+import type { LiveRecognitionSnapshot } from "../live/liveRecognitionSession";
 import {
   type ModelBundleSession,
   type ModelBundleStatus,
@@ -351,5 +356,230 @@ describe("model bundle status", () => {
 
     expect(await screen.findByText(message)).toBeVisible();
     expect(loader.load).toHaveBeenCalledOnce();
+  });
+});
+
+const resultCases = [
+  {
+    title: "Hello",
+    decision: { kind: "target", label: "hello", confidence: 0.82 } as const,
+    reason: "accepted_target" as const,
+  },
+  {
+    title: "Other movement",
+    decision: { kind: "other", label: "other", confidence: 0.74 } as const,
+    reason: "accepted_other" as const,
+  },
+  {
+    title: "No confident match",
+    decision: { kind: "abstain" } as const,
+    reason: "below_threshold" as const,
+  },
+];
+type TestLiveRuntime = NonNullable<Parameters<typeof LivePage>[0]["liveRuntime"]>;
+type TestLiveSessionFactory = TestLiveRuntime["createSession"];
+
+function inferenceResult(
+  decision: (typeof resultCases)[number]["decision"],
+  reason: (typeof resultCases)[number]["reason"],
+): CandidateInferenceResult {
+  return {
+    type: "result",
+    protocolVersion: CANDIDATE_INFERENCE_PROTOCOL_VERSION,
+    requestId: 0,
+    bundle: { id: "browser-candidate", version: "1.0.0" },
+    backend: "wasm",
+    decision,
+    reason,
+    rankedScores: [
+      { label: "hello", confidence: 0.82 },
+      { label: "other", confidence: 0.12 },
+      { label: "yes", confidence: 0.06 },
+    ],
+    timings: { preprocessingMs: 2, inferenceMs: 5, decisionMs: 1, totalMs: 8 },
+  };
+}
+
+describe("live on-device result", () => {
+  it.each(resultCases)(
+    "keeps a $title event result stable",
+    async ({ title, decision, reason }) => {
+      const devices = new TestMediaDevices();
+      const active = cameraStream("front");
+      devices.getUserMedia.mockResolvedValue(active.stream);
+      devices.enumerateDevices.mockResolvedValue([]);
+      const bundle = { id: "browser-candidate", version: "1.0.0" } as VerifiedModelBundle;
+      const load: ModelBundleSession["load"] = (_url, onStatus) => {
+        onStatus?.({ phase: "ready", active: { id: bundle.id, version: bundle.version } });
+        return Promise.resolve(bundle);
+      };
+      const loader: Pick<ModelBundleSession, "load" | "status"> = {
+        status: { phase: "idle", active: null },
+        load: vi.fn(load),
+      };
+      let emit: (snapshot: LiveRecognitionSnapshot) => void = () => undefined;
+      const close = vi.fn(() => Promise.resolve());
+      const frameSource = {
+        request: vi.fn(() => 7),
+        cancel: vi.fn(),
+        capture: vi.fn(() => Promise.resolve({ close: vi.fn() } as unknown as ImageBitmap)),
+      };
+      const liveRuntime: TestLiveRuntime = {
+        loadAssets: () =>
+          Promise.resolve({
+            handModelBuffer: new ArrayBuffer(1),
+            poseModelBuffer: new ArrayBuffer(1),
+          }),
+        createSession: (_bundle, _buffers, onState) => {
+          emit = onState;
+          return {
+            initialize: () => {
+              onState({ phase: "ready", stableResult: null, failureCode: null });
+              return Promise.resolve();
+            },
+            submitFrame: vi.fn(),
+            close,
+          };
+        },
+        ...frameSource,
+      };
+
+      render(
+        <LivePage
+          cameraEnvironment={cameraEnvironment(devices).environment}
+          modelBundleUrl="https://example.test/bundle/"
+          modelBundleSession={loader}
+          liveRuntime={liveRuntime}
+        />,
+      );
+
+      await screen.findByText(/Verified model bundle browser-candidate/);
+      await startCamera();
+      await screen.findByText(/Models are ready/);
+      act(() => {
+        emit({
+          phase: "result",
+          stableResult: inferenceResult(decision, reason),
+          failureCode: null,
+        });
+      });
+
+      const resultCard = screen.getByRole("region", { name: "Latest recognition result" });
+      expect(within(resultCard).getByText(title, { selector: "strong" })).toBeVisible();
+      expect(within(resultCard).getByRole("list", { name: "Top calibrated scores" })).toBeVisible();
+      expect(screen.getByText("8 ms")).toBeVisible();
+      expect(within(resultCard).getByText("WASM")).toBeVisible();
+      expect(within(resultCard).getByText("browser-candidate 1.0.0")).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Stop camera" }));
+      await waitFor(() => expect(close).toHaveBeenCalledOnce());
+      expect(frameSource.cancel).toHaveBeenCalledWith(expect.any(HTMLVideoElement), 7);
+    },
+  );
+
+  it("submits one captured bitmap and closes a late bitmap after stop", async () => {
+    const devices = new TestMediaDevices();
+    devices.getUserMedia.mockResolvedValue(cameraStream("front").stream);
+    devices.enumerateDevices.mockResolvedValue([]);
+    const bundle = { id: "browser-candidate", version: "1.0.0" } as VerifiedModelBundle;
+    const loader: Pick<ModelBundleSession, "load" | "status"> = {
+      status: { phase: "ready", active: { id: bundle.id, version: bundle.version } },
+      load: vi.fn(() => Promise.resolve(bundle)),
+    };
+    const callbacks: Array<(timestampMs: number) => void> = [];
+    const firstBitmap = { close: vi.fn() } as unknown as ImageBitmap;
+    const lateClose = vi.fn();
+    const lateBitmap = { close: lateClose } as unknown as ImageBitmap;
+    let resolveLate!: (bitmap: ImageBitmap) => void;
+    const lateCapture = new Promise<ImageBitmap>((resolve) => {
+      resolveLate = resolve;
+    });
+    const submitFrame = vi.fn();
+    const close = vi.fn(() => Promise.resolve());
+    const capture = vi.fn().mockResolvedValueOnce(firstBitmap).mockReturnValueOnce(lateCapture);
+    const liveRuntime: TestLiveRuntime = {
+      loadAssets: () =>
+        Promise.resolve({
+          handModelBuffer: new ArrayBuffer(1),
+          poseModelBuffer: new ArrayBuffer(1),
+        }),
+      createSession: () => ({ initialize: () => Promise.resolve(), submitFrame, close }),
+      request: vi.fn((_video: HTMLVideoElement, callback: (timestampMs: number) => void) => {
+        callbacks.push(callback);
+        return callbacks.length;
+      }),
+      cancel: vi.fn(),
+      capture,
+    };
+
+    render(
+      <LivePage
+        cameraEnvironment={cameraEnvironment(devices).environment}
+        modelBundleUrl="https://example.test/bundle/"
+        modelBundleSession={loader}
+        liveRuntime={liveRuntime}
+      />,
+    );
+
+    await startCamera();
+    await waitFor(() => expect(callbacks).toHaveLength(1));
+    act(() => callbacks[0]!(1_250));
+    await waitFor(() => expect(submitFrame).toHaveBeenCalledWith(firstBitmap, 1_250));
+    await waitFor(() => expect(callbacks).toHaveLength(2));
+    act(() => callbacks[1]!(1_500));
+    await waitFor(() => expect(capture).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole("button", { name: "Stop camera" }));
+    await waitFor(() => expect(close).toHaveBeenCalledOnce());
+    await act(async () => {
+      resolveLate(lateBitmap);
+      await lateCapture;
+    });
+
+    expect(lateClose).toHaveBeenCalledOnce();
+    expect(submitFrame).toHaveBeenCalledOnce();
+  });
+
+  it("recreates a failed runtime when the user retries", async () => {
+    const devices = new TestMediaDevices();
+    devices.getUserMedia.mockResolvedValue(cameraStream("front").stream);
+    devices.enumerateDevices.mockResolvedValue([]);
+    const bundle = { id: "browser-candidate", version: "1.0.0" } as VerifiedModelBundle;
+    const load: ModelBundleSession["load"] = () => Promise.resolve(bundle);
+    const loader: Pick<ModelBundleSession, "load" | "status"> = {
+      status: { phase: "ready", active: { id: bundle.id, version: bundle.version } },
+      load: vi.fn(load),
+    };
+    const createFailedSession: TestLiveSessionFactory = (_bundle, _buffers, onState) => ({
+      initialize: () => {
+        onState({ phase: "failed", stableResult: null, failureCode: "test.failure" });
+        return Promise.resolve();
+      },
+      submitFrame: vi.fn(),
+      close: vi.fn(() => Promise.resolve()),
+    });
+    const factory = vi.fn(createFailedSession);
+
+    render(
+      <LivePage
+        cameraEnvironment={cameraEnvironment(devices).environment}
+        modelBundleUrl="https://example.test/bundle/"
+        modelBundleSession={loader}
+        liveRuntime={{
+          loadAssets: () =>
+            Promise.resolve({
+              handModelBuffer: new ArrayBuffer(1),
+              poseModelBuffer: new ArrayBuffer(1),
+            }),
+          createSession: factory,
+          request: () => 1,
+          cancel: vi.fn(),
+          capture: vi.fn(),
+        }}
+      />,
+    );
+
+    await startCamera();
+    const retry = await screen.findByRole("button", { name: "Retry recognition" });
+    fireEvent.click(retry);
+    await waitFor(() => expect(factory).toHaveBeenCalledTimes(2));
   });
 });

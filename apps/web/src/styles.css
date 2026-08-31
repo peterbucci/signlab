@@ -471,6 +471,55 @@ h1 {
   accent-color: #e8623c;
 }
 
+.recognition-result {
+  padding: 1rem;
+  margin-top: 1rem;
+  border: 1px solid rgb(242 241 233 / 18%);
+  border-radius: 1rem;
+  background: rgb(9 27 26 / 72%);
+}
+
+.recognition-result > strong {
+  display: block;
+  color: #f5a58b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.recognition-result > p:not(.card-label) {
+  color: #adc0bd;
+}
+
+.recognition-result ol {
+  padding: 0;
+  margin: 1rem 0;
+  list-style: none;
+}
+
+.recognition-result li,
+.recognition-result dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid rgb(242 241 233 / 12%);
+}
+
+.recognition-result dl {
+  margin: 0;
+  color: #adc0bd;
+  font-size: 0.78rem;
+}
+
+.recognition-result dd {
+  margin: 0;
+  color: #f2f1e9;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
 .content-page h1 {
   max-width: 13ch;
   font-size: clamp(3.2rem, 7vw, 6.5rem);

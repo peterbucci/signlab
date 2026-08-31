@@ -7,7 +7,19 @@ import {
   type CameraEnvironment,
   type CameraStatus,
 } from "../camera/useCameraSession";
-import { ModelBundleSession, type ModelBundleStatus } from "../modelBundle/modelBundleSession";
+import {
+  loadLandmarkModelAssets,
+  type LandmarkModelAssetBuffers,
+} from "../landmarks/landmarkModelAssets";
+import {
+  LiveRecognitionSession,
+  type LiveRecognitionSnapshot,
+} from "../live/liveRecognitionSession";
+import {
+  ModelBundleSession,
+  type ModelBundleStatus,
+  type VerifiedModelBundle,
+} from "../modelBundle/modelBundleSession";
 
 function usePageHeading(title: string) {
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -38,6 +50,37 @@ const startableStatuses = new Set<CameraStatus>([
 ]);
 
 type BundleLoader = Pick<ModelBundleSession, "load" | "status">;
+type LiveSession = Pick<LiveRecognitionSession, "initialize" | "submitFrame" | "close">;
+
+interface LiveRuntime {
+  loadAssets(): Promise<LandmarkModelAssetBuffers>;
+  createSession(
+    bundle: VerifiedModelBundle,
+    buffers: LandmarkModelAssetBuffers,
+    onState: (snapshot: LiveRecognitionSnapshot) => void,
+  ): LiveSession;
+  request(video: HTMLVideoElement, callback: (captureTimestampMs: number) => void): number;
+  cancel(video: HTMLVideoElement, requestId: number): void;
+  capture(video: HTMLVideoElement): Promise<ImageBitmap>;
+}
+
+const browserLiveRuntime: LiveRuntime = {
+  loadAssets: loadLandmarkModelAssets,
+  createSession: (bundle, taskBuffers, onState) =>
+    new LiveRecognitionSession({ bundle, taskBuffers, onState }),
+  request(video, callback) {
+    if (typeof video.requestVideoFrameCallback !== "function") {
+      throw new Error("live.recognition.video_frames.unsupported");
+    }
+    return video.requestVideoFrameCallback((_now, metadata) =>
+      callback(metadata.mediaTime * 1_000),
+    );
+  },
+  cancel(video, requestId) {
+    video.cancelVideoFrameCallback(requestId);
+  },
+  capture: (video) => globalThis.createImageBitmap(video),
+};
 
 function bundleStatusMessage(status: ModelBundleStatus): string {
   const active =
@@ -50,14 +93,41 @@ function bundleStatusMessage(status: ModelBundleStatus): string {
   return `${status.failureReason ?? fallback}${active === null ? "" : ` ${active} remains active.`}`;
 }
 
+const livePhaseMessages = {
+  loading: "Preparing the on-device models.",
+  ready: "Models are ready. Hold still, then perform one gesture.",
+  watching: "Watching for the start of a gesture.",
+  recording: "Movement detected. Finish the gesture naturally.",
+  classifying: "Classifying the completed gesture.",
+  result: "Result ready. Hold still before the next gesture.",
+  failed: "Recognition stopped safely. Retry or restart the camera.",
+} as const;
+
+const readableLabel = (label: string) =>
+  label.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
+
+function decisionTitle(result: NonNullable<LiveRecognitionSnapshot["stableResult"]>): string {
+  if (!("label" in result.decision)) return "No confident match";
+  if (result.decision.kind === "other") return "Other movement";
+  return readableLabel(result.decision.label);
+}
+
+function decisionReason(result: NonNullable<LiveRecognitionSnapshot["stableResult"]>): string {
+  if (result.reason === "below_threshold") return "The model abstained because confidence was low.";
+  if (result.reason === "accepted_other") return "The event looked unlike the five target prompts.";
+  return "The top calibrated score passed the decision threshold.";
+}
+
 export function LivePage({
   cameraEnvironment,
   modelBundleUrl,
   modelBundleSession,
+  liveRuntime = browserLiveRuntime,
 }: {
   cameraEnvironment?: CameraEnvironment;
   modelBundleUrl?: string;
   modelBundleSession?: BundleLoader;
+  liveRuntime?: LiveRuntime;
 }) {
   const headingRef = usePageHeading(livePageDefinition.label);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -67,17 +137,22 @@ export function LivePage({
     [modelBundleSession],
   );
   const [bundleStatus, setBundleStatus] = useState(bundleLoader.status);
+  const [verifiedBundle, setVerifiedBundle] = useState<VerifiedModelBundle | null>(null);
+  const [liveSnapshot, setLiveSnapshot] = useState<LiveRecognitionSnapshot | null>(null);
+  const [runtimeAttempt, setRuntimeAttempt] = useState(0);
   const { state, canRequest, start, pause, resume, stop, switchCamera } =
     useCameraSession(cameraEnvironment);
 
   useEffect(() => {
     const configuredUrl = modelBundleUrl ?? import.meta.env.VITE_SIGNLAB_MODEL_BUNDLE_URL;
-    if (configuredUrl?.trim() === "") return;
-    if (configuredUrl === undefined) return;
+    if (configuredUrl === undefined || configuredUrl.trim() === "") return;
     let mounted = true;
     void bundleLoader
       .load(configuredUrl, (status) => {
         if (mounted) setBundleStatus(status);
+      })
+      .then((bundle) => {
+        if (mounted) setVerifiedBundle(bundle);
       })
       .catch(() => undefined);
     return () => {
@@ -94,8 +169,92 @@ export function LivePage({
     };
   }, [state.stream]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (
+      state.status !== "active" ||
+      state.stream === null ||
+      verifiedBundle === null ||
+      video === null
+    ) {
+      return;
+    }
+
+    let disposed = false;
+    let halted = false;
+    let frameRequestId: number | null = null;
+    let liveSession: LiveSession | null = null;
+    setLiveSnapshot({ phase: "loading", stableResult: null, failureCode: null });
+
+    const stopPump = () => {
+      halted = true;
+      if (frameRequestId !== null) liveRuntime.cancel(video, frameRequestId);
+      frameRequestId = null;
+    };
+    const failStartup = () => {
+      if (disposed) return;
+      stopPump();
+      setLiveSnapshot((previous) => ({
+        phase: "failed",
+        stableResult: previous?.stableResult ?? null,
+        failureCode: "live.recognition.startup.failed",
+      }));
+      void liveSession?.close();
+    };
+    const scheduleFrame = () => {
+      if (disposed || halted || liveSession === null) return;
+      try {
+        frameRequestId = liveRuntime.request(video, (captureTimestampMs) => {
+          frameRequestId = null;
+          void (async () => {
+            try {
+              const bitmap = await liveRuntime.capture(video);
+              if (disposed || halted) bitmap.close();
+              else liveSession?.submitFrame(bitmap, captureTimestampMs);
+            } catch {
+              failStartup();
+            }
+            if (!disposed && !halted) scheduleFrame();
+          })();
+        });
+      } catch {
+        failStartup();
+      }
+    };
+
+    void (async () => {
+      try {
+        const taskBuffers = await liveRuntime.loadAssets();
+        if (disposed) return;
+        liveSession = liveRuntime.createSession(verifiedBundle, taskBuffers, (snapshot) => {
+          if (disposed) return;
+          setLiveSnapshot(snapshot);
+          if (snapshot.phase === "failed") stopPump();
+        });
+        await liveSession.initialize();
+        if (disposed) await liveSession.close();
+        else scheduleFrame();
+      } catch {
+        failStartup();
+      }
+    })();
+
+    return () => {
+      disposed = true;
+      stopPump();
+      void liveSession?.close();
+    };
+  }, [liveRuntime, runtimeAttempt, state.status, state.stream, verifiedBundle]);
+
   const hasStream = state.stream !== null;
   const canStart = canRequest && startableStatuses.has(state.status);
+  const recognitionMessage =
+    liveSnapshot?.failureCode === "live.recognition.candidate.invalid"
+      ? "That event could not be classified. Hold still, then try again."
+      : state.status !== "active" || liveSnapshot === null
+        ? "Recognition starts when the camera and model are ready."
+        : livePhaseMessages[liveSnapshot.phase];
+  const stableResult = liveSnapshot?.stableResult ?? null;
 
   return (
     <section className="live-page" aria-labelledby="live-heading">
@@ -119,9 +278,14 @@ export function LivePage({
             {bundleStatusMessage(bundleStatus)}
           </StatusBanner>
         </div>
+        <div className="model-bundle-status">
+          <p className="card-label">Recognition</p>
+          <StatusBanner label="Recognition status">{recognitionMessage}</StatusBanner>
+        </div>
         <p className="page-note">
-          Model execution and recognition are not connected yet. Preview mirroring changes only what
-          you see, never the camera stream or future model coordinates.
+          Perform one prompt at a time with your hands and upper body in frame. Preview mirroring
+          changes only what you see; model coordinates remain unmirrored. This five-prompt research
+          prototype is not sign-language translation.
         </p>
       </div>
 
@@ -164,6 +328,11 @@ export function LivePage({
               Stop camera
             </button>
           ) : null}
+          {state.status === "active" && liveSnapshot?.phase === "failed" ? (
+            <button type="button" onClick={() => setRuntimeAttempt((attempt) => attempt + 1)}>
+              Retry recognition
+            </button>
+          ) : null}
         </div>
 
         {hasStream ? (
@@ -194,6 +363,36 @@ export function LivePage({
             </label>
           </div>
         ) : null}
+
+        {stableResult === null ? null : (
+          <section className="recognition-result" aria-label="Latest recognition result">
+            <p className="card-label">Latest event</p>
+            <strong>{decisionTitle(stableResult)}</strong>
+            <p>{decisionReason(stableResult)}</p>
+            <ol aria-label="Top calibrated scores">
+              {stableResult.rankedScores.slice(0, 3).map(({ label, confidence }) => (
+                <li key={label}>
+                  <span>{readableLabel(label)}</span>
+                  <span>{Math.round(confidence * 100)}%</span>
+                </li>
+              ))}
+            </ol>
+            <dl>
+              <div>
+                <dt>Latency</dt>
+                <dd>{Math.round(stableResult.timings.totalMs)} ms</dd>
+              </div>
+              <div>
+                <dt>Runtime</dt>
+                <dd>{stableResult.backend.toUpperCase()}</dd>
+              </div>
+              <div>
+                <dt>Bundle</dt>
+                <dd>{`${stableResult.bundle.id} ${stableResult.bundle.version}`}</dd>
+              </div>
+            </dl>
+          </section>
+        )}
       </div>
     </section>
   );
@@ -216,14 +415,14 @@ export function OverviewPage() {
             movement or uncertainty for a result.
           </p>
           <StatusBanner>
-            Browser interface in progress: local camera preview is available; model inference is not
-            connected yet.
+            Browser interface in progress: the private camera-to-result path now runs on-device;
+            replay and release checks remain.
           </StatusBanner>
         </div>
 
         <aside className="research-card" aria-label="Current research boundary">
           <p className="card-label">Current boundary</p>
-          <strong>Data ready. Evaluation next.</strong>
+          <strong>Live path connected. Evaluation next.</strong>
           <dl>
             <div>
               <dt>Vocabulary</dt>
@@ -235,7 +434,7 @@ export function OverviewPage() {
             </div>
             <div>
               <dt>Browser model</dt>
-              <dd>Pending</dd>
+              <dd>On-device</dd>
             </div>
           </dl>
         </aside>

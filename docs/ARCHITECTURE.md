@@ -42,10 +42,11 @@ configured subpath without server-side route rewrites.
 The feature routes describe their intended behavior but deliberately do not imitate
 unfinished features. The live route requests camera permission only after an explicit
 user action and can show a local preview. It stops camera tracks on stop, navigation,
-page hiding, or device interruption; it does not upload, record, persist, or submit
-frames to the worker. The shell makes no runtime data request, loads no model, reads
-no replay input, and stores no feedback. Those capabilities retain separate evidence
-gates.
+page hiding, or device interruption. After a bundle is verified, it loads the two
+size- and digest-pinned MediaPipe task files, sends disposable frame bitmaps through
+the landmark worker, detects one bounded event, and runs ONNX inference in a second
+worker. It does not upload, record, or persist camera frames or landmarks. Replay and
+feedback remain disconnected and retain separate evidence gates.
 
 The intended bundle-loading flow is manifest-first:
 
@@ -57,13 +58,14 @@ Static model-bundle files
   -> expose readiness or a clear failure to the route UI
 ```
 
-The shell now contains a dormant `@mediapipe/tasks-vision@1.0.1` landmark worker.
-It initializes one hand/pose task pair from externally verified buffers, returns
+The shell uses one `@mediapipe/tasks-vision@1.0.1` landmark worker. It initializes one
+hand/pose task pair from externally verified buffers, returns
 typed timestamps, two-hand slots, six body anchors, validity, and confidence, keeps
 only the newest waiting frame, emits sanitized timing/drop/failure measurements, and
-releases replaced or processed images and task resources. The camera preview remains
-disconnected from that worker. Bundle verification and loading, replay input, ONNX
-inference, and event detection remain separate gates; no browser model is usable yet.
+releases replaced or processed images and task resources. A bounded live coordinator
+feeds those frames through the shared event detector and the WASM ONNX worker, then
+keeps one event-level decision stable in the React view. Replay remains a separate
+gate and will exercise this assembled post-landmark path rather than a parallel one.
 
 The [licensed external-data boundary](external-datasets.md) is intentionally
 separate from participant ingest. It registers source, license, attribution,
