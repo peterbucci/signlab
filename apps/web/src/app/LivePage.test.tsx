@@ -3,6 +3,11 @@ import { StrictMode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { CameraEnvironment } from "../camera/useCameraSession";
+import {
+  type ModelBundleSession,
+  type ModelBundleStatus,
+  type VerifiedModelBundle,
+} from "../modelBundle/modelBundleSession";
 import { LivePage } from "./routes";
 
 class TestDocument extends EventTarget {
@@ -90,6 +95,9 @@ describe("consent-first camera preview", () => {
     expect(
       screen.getByText(/asks for permission only after you select Start camera/),
     ).toBeVisible();
+    expect(screen.getByRole("status", { name: "Model bundle status" })).toHaveTextContent(
+      "No model bundle is configured.",
+    );
 
     await startCamera();
 
@@ -98,7 +106,7 @@ describe("consent-first camera preview", () => {
       video: { facingMode: { ideal: "user" } },
     });
     const video = screen.getByLabelText("Local camera preview");
-    expect(video).toHaveProperty("srcObject", stream);
+    await waitFor(() => expect(video).toHaveProperty("srcObject", stream));
     expect(video).toHaveClass("is-mirrored");
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Mirror preview" }));
@@ -305,5 +313,43 @@ describe("consent-first camera preview", () => {
 
     await waitFor(() => expect(late.track.stop).toHaveBeenCalledOnce());
     expect(screen.queryByLabelText("Local camera preview")).not.toBeInTheDocument();
+  });
+});
+
+describe("model bundle status", () => {
+  it.each([
+    [
+      {
+        phase: "ready",
+        active: { id: "candidate_bundle", version: "1.2.3" },
+      } satisfies ModelBundleStatus,
+      false,
+      "Verified model bundle candidate_bundle version 1.2.3 is ready.",
+    ],
+    [
+      {
+        phase: "error",
+        active: { id: "previous_bundle", version: "1.0.0" },
+        failureReason: "A model bundle file failed its integrity check.",
+      } satisfies ModelBundleStatus,
+      true,
+      "A model bundle file failed its integrity check. previous_bundle version 1.0.0 remains active.",
+    ],
+  ])("shows a concise %s state", async (result, rejects, message) => {
+    const load: ModelBundleSession["load"] = (_url, onStatus) => {
+      onStatus?.(result);
+      return rejects
+        ? Promise.reject(new Error("simulated load failure"))
+        : Promise.resolve({} as VerifiedModelBundle);
+    };
+    const loader: Pick<ModelBundleSession, "load" | "status"> = {
+      status: { phase: "idle", active: null },
+      load: vi.fn(load),
+    };
+
+    render(<LivePage modelBundleUrl="https://example.test/bundle/" modelBundleSession={loader} />);
+
+    expect(await screen.findByText(message)).toBeVisible();
+    expect(loader.load).toHaveBeenCalledOnce();
   });
 });
