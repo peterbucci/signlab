@@ -13,6 +13,7 @@ import {
 } from "../landmarks/landmarkModelAssets";
 import {
   LiveRecognitionSession,
+  type LiveRecognitionDiagnostics,
   type LiveRecognitionSnapshot,
 } from "../live/liveRecognitionSession";
 import {
@@ -106,6 +107,9 @@ const livePhaseMessages = {
 const readableLabel = (label: string) =>
   label.replaceAll("_", " ").replace(/^./, (letter) => letter.toUpperCase());
 
+const diagnosticStateLabel = (state: string) =>
+  state === "recording" ? "Gesture in progress" : readableLabel(state);
+
 function decisionTitle(result: NonNullable<LiveRecognitionSnapshot["stableResult"]>): string {
   if (!("label" in result.decision)) return "No confident match";
   if (result.decision.kind === "other") return "Other movement";
@@ -116,6 +120,14 @@ function decisionReason(result: NonNullable<LiveRecognitionSnapshot["stableResul
   if (result.reason === "below_threshold") return "The model abstained because confidence was low.";
   if (result.reason === "accepted_other") return "The event looked unlike the five target prompts.";
   return "The top calibrated score passed the decision threshold.";
+}
+
+function landmarkSummary(diagnostics: LiveRecognitionDiagnostics | undefined): string {
+  if (diagnostics === undefined || diagnostics.landmarkState === "waiting")
+    return "Waiting for frames";
+  if (diagnostics.landmarkState === "invalid") return "Latest frame unavailable";
+  if (diagnostics.landmarkState === "no_hands") return "No hands detected";
+  return `${diagnostics.detectedHands} ${diagnostics.detectedHands === 1 ? "hand" : "hands"} detected`;
 }
 
 export function LivePage({
@@ -139,6 +151,7 @@ export function LivePage({
   const [bundleStatus, setBundleStatus] = useState(bundleLoader.status);
   const [verifiedBundle, setVerifiedBundle] = useState<VerifiedModelBundle | null>(null);
   const [liveSnapshot, setLiveSnapshot] = useState<LiveRecognitionSnapshot | null>(null);
+  const [bundleAttempt, setBundleAttempt] = useState(0);
   const [runtimeAttempt, setRuntimeAttempt] = useState(0);
   const { state, canRequest, start, pause, resume, stop, switchCamera } =
     useCameraSession(cameraEnvironment);
@@ -158,7 +171,7 @@ export function LivePage({
     return () => {
       mounted = false;
     };
-  }, [bundleLoader, modelBundleUrl]);
+  }, [bundleAttempt, bundleLoader, modelBundleUrl]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -198,6 +211,7 @@ export function LivePage({
         phase: "failed",
         stableResult: previous?.stableResult ?? null,
         failureCode: "live.recognition.startup.failed",
+        diagnostics: previous?.diagnostics,
       }));
       void liveSession?.close();
     };
@@ -255,6 +269,18 @@ export function LivePage({
         ? "Recognition starts when the camera and model are ready."
         : livePhaseMessages[liveSnapshot.phase];
   const stableResult = liveSnapshot?.stableResult ?? null;
+  const diagnostics = liveSnapshot?.diagnostics;
+  const bundleBlocked = bundleStatus.phase === "error" && bundleStatus.active === null;
+  const runtimeFailed = state.status === "active" && liveSnapshot?.phase === "failed";
+  const retryAvailable = bundleBlocked || runtimeFailed;
+  const diagnosticBundle = diagnostics?.bundle ?? stableResult?.bundle ?? verifiedBundle;
+  const retrySetup = () => {
+    if (bundleBlocked) {
+      setVerifiedBundle(null);
+      setBundleAttempt((attempt) => attempt + 1);
+    }
+    if (runtimeFailed) setRuntimeAttempt((attempt) => attempt + 1);
+  };
 
   return (
     <section className="live-page" aria-labelledby="live-heading">
@@ -271,6 +297,20 @@ export function LivePage({
             this device; the page does not upload, save, or record raw video.
           </p>
         </div>
+        <section className="live-guide" aria-labelledby="live-guide-heading">
+          <h2 id="live-guide-heading">How to try it</h2>
+          <ol>
+            <li>Choose one prompt: Hello, No, Please, Thank you, or Yes.</li>
+            <li>
+              Keep your hands and upper body in frame with even light facing you, not behind you.
+            </li>
+            <li>Hold still, perform one prompt naturally, then hold still for the result.</li>
+          </ol>
+          <p>
+            Mirroring changes only the preview. This five-prompt research prototype is not
+            sign-language translation. <a href="#/limitations">Read its limitations.</a>
+          </p>
+        </section>
         <StatusBanner>{state.message}</StatusBanner>
         <div className="model-bundle-status">
           <p className="card-label">Model bundle</p>
@@ -282,11 +322,14 @@ export function LivePage({
           <p className="card-label">Recognition</p>
           <StatusBanner label="Recognition status">{recognitionMessage}</StatusBanner>
         </div>
-        <p className="page-note">
-          Perform one prompt at a time with your hands and upper body in frame. Preview mirroring
-          changes only what you see; model coordinates remain unmirrored. This five-prompt research
-          prototype is not sign-language translation.
-        </p>
+        {retryAvailable ? (
+          <div className="recovery-action">
+            <button type="button" onClick={retrySetup}>
+              Retry setup
+            </button>
+            <span>Retries the failed setup without reloading this page.</span>
+          </div>
+        ) : null}
       </div>
 
       <div className="camera-card">
@@ -328,11 +371,6 @@ export function LivePage({
               Stop camera
             </button>
           ) : null}
-          {state.status === "active" && liveSnapshot?.phase === "failed" ? (
-            <button type="button" onClick={() => setRuntimeAttempt((attempt) => attempt + 1)}>
-              Retry recognition
-            </button>
-          ) : null}
         </div>
 
         {hasStream ? (
@@ -369,6 +407,11 @@ export function LivePage({
             <p className="card-label">Latest event</p>
             <strong>{decisionTitle(stableResult)}</strong>
             <p>{decisionReason(stableResult)}</p>
+            <p className="score-note">
+              Higher calibrated scores are stronger model matches, not guarantees. Alternatives show
+              what the model considered; decision time covers on-device preprocessing, inference,
+              and scoring for this completed event.
+            </p>
             <ol aria-label="Top calibrated scores">
               {stableResult.rankedScores.slice(0, 3).map(({ label, confidence }) => (
                 <li key={label}>
@@ -379,7 +422,7 @@ export function LivePage({
             </ol>
             <dl>
               <div>
-                <dt>Latency</dt>
+                <dt>Decision time</dt>
                 <dd>{Math.round(stableResult.timings.totalMs)} ms</dd>
               </div>
               <div>
@@ -393,6 +436,47 @@ export function LivePage({
             </dl>
           </section>
         )}
+
+        <details className="live-diagnostics">
+          <summary>Session diagnostics</summary>
+          <p>Most recent session facts only. They are not saved or uploaded.</p>
+          <dl aria-label="Session diagnostics">
+            <div>
+              <dt>Recognition</dt>
+              <dd>
+                {liveSnapshot === null ? "Not started" : diagnosticStateLabel(liveSnapshot.phase)}
+              </dd>
+            </div>
+            <div>
+              <dt>Detector</dt>
+              <dd>
+                {diagnostics === undefined
+                  ? "Not ready"
+                  : diagnosticStateLabel(diagnostics.detectorState)}
+              </dd>
+            </div>
+            <div>
+              <dt>Landmarks</dt>
+              <dd>{landmarkSummary(diagnostics)}</dd>
+            </div>
+            <div>
+              <dt>Dropped frames</dt>
+              <dd>{diagnostics?.droppedFrames ?? 0}</dd>
+            </div>
+            <div>
+              <dt>Runtime</dt>
+              <dd>{diagnostics?.backend?.toUpperCase() ?? "Waiting"}</dd>
+            </div>
+            <div>
+              <dt>Bundle</dt>
+              <dd>
+                {diagnosticBundle === null
+                  ? "Not ready"
+                  : `${diagnosticBundle.id} ${diagnosticBundle.version}`}
+              </dd>
+            </div>
+          </dl>
+        </details>
       </div>
     </section>
   );

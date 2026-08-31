@@ -177,6 +177,37 @@ function emitActiveEvent(emit: (event: LandmarkClientEvent) => void, invalidInsi
 }
 
 describe("LiveRecognitionSession", () => {
+  it("publishes current-session diagnostics from existing worker events", async () => {
+    const runtime = harness();
+    await runtime.session.initialize();
+    expect(runtime.snapshots.at(-1)?.diagnostics).toEqual({
+      detectorState: "inactive",
+      landmarkState: "waiting",
+      detectedHands: 0,
+      droppedFrames: 0,
+      backend: "wasm",
+      bundle: { id: bundle.id, version: bundle.version },
+    });
+
+    const snapshotCount = runtime.snapshots.length;
+    runtime.emitLandmark({ type: "frame-dropped", frameId: 0, droppedFrames: 2 });
+    expect(runtime.snapshots).toHaveLength(snapshotCount);
+    runtime.emitLandmark(frame(0, 0, 0.4));
+    expect(runtime.snapshots.at(-1)?.diagnostics).toMatchObject({
+      detectorState: "inactive",
+      landmarkState: "usable",
+      detectedHands: 1,
+      droppedFrames: 2,
+    });
+
+    runtime.emitLandmark(frame(1, 50_000, null));
+    expect(runtime.snapshots.at(-1)?.diagnostics).toMatchObject({
+      landmarkState: "no_hands",
+      detectedHands: 0,
+      droppedFrames: 2,
+    });
+  });
+
   it("classifies one exact event with rebased frames and publishes its result", async () => {
     const runtime = harness();
     await runtime.session.initialize();

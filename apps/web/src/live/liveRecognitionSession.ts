@@ -8,6 +8,7 @@ import {
   createCandidateEventDetector,
   type CandidateEvent,
   type CandidateEventDetector,
+  type CandidateEventState,
 } from "../inference/candidateEvents";
 import type {
   CandidateInferenceInput,
@@ -25,10 +26,20 @@ import type { VerifiedModelBundle } from "../modelBundle/modelBundleSession";
 export type LiveRecognitionPhase =
   "loading" | "ready" | "watching" | "recording" | "classifying" | "result" | "failed";
 
+export interface LiveRecognitionDiagnostics {
+  readonly detectorState: CandidateEventState | "not_ready";
+  readonly landmarkState: "waiting" | "usable" | "no_hands" | "invalid";
+  readonly detectedHands: 0 | 1 | 2;
+  readonly droppedFrames: number;
+  readonly backend: "wasm" | null;
+  readonly bundle: { readonly id: string; readonly version: string } | null;
+}
+
 export interface LiveRecognitionSnapshot {
   readonly phase: LiveRecognitionPhase;
   readonly stableResult: CandidateInferenceResult | null;
   readonly failureCode: string | null;
+  readonly diagnostics?: LiveRecognitionDiagnostics;
 }
 
 export type LiveLandmarkClient = Pick<LandmarkWorkerClient, "initialize" | "submitFrame" | "close">;
@@ -52,7 +63,8 @@ const QUALITY_EVIDENCE = { timestampDiscontinuityCount: 0, gaps: [] } as const;
 const INITIAL_SNAPSHOT = { phase: "loading", stableResult: null, failureCode: null } as const;
 
 export class LiveRecognitionSession {
-  private snapshotValue: LiveRecognitionSnapshot = INITIAL_SNAPSHOT;
+  private snapshotValue: LiveRecognitionSnapshot;
+  private diagnosticsValue: LiveRecognitionDiagnostics;
   private readonly projector = new CandidateObservationProjector();
   private detector: CandidateEventDetector | null = null;
   private landmarkClient: LiveLandmarkClient | null = null;
@@ -67,6 +79,18 @@ export class LiveRecognitionSession {
   private retentionUs = 0;
 
   constructor(private readonly options: LiveRecognitionSessionOptions) {
+    this.diagnosticsValue = Object.freeze({
+      detectorState: "not_ready",
+      landmarkState: "waiting",
+      detectedHands: 0,
+      droppedFrames: 0,
+      backend: null,
+      bundle: null,
+    });
+    this.snapshotValue = Object.freeze({
+      ...INITIAL_SNAPSHOT,
+      diagnostics: this.diagnosticsValue,
+    });
     options.onState(this.snapshotValue);
   }
 
@@ -74,6 +98,7 @@ export class LiveRecognitionSession {
     try {
       this.detector = await createCandidateEventDetector(this.options.bundle);
       if (this.closed) return;
+      this.updateDiagnostics({ detectorState: this.detector.state });
       const config = this.detector.config;
       this.retentionUs =
         config.maximum_event_duration_us +
@@ -130,6 +155,7 @@ export class LiveRecognitionSession {
         if (++this.readyWorkers === 2) this.publish("ready");
         return;
       case "frame-dropped":
+        this.updateDiagnostics({ droppedFrames: event.droppedFrames });
         return;
       case "frame":
         if (this.snapshotValue.phase !== "classifying") this.handleLandmarkFrame(event);
@@ -151,6 +177,12 @@ export class LiveRecognitionSession {
       while ((this.bufferedFrames[0]?.[1].relativeTimestampUs ?? cutoff) < cutoff)
         this.bufferedFrames.shift();
       const event = detector.push(this.projector.project(frame));
+      const detectedHands = frame.hands.filter((hand) => hand.present).length as 0 | 1 | 2;
+      this.updateDiagnostics({
+        detectorState: detector.state,
+        landmarkState: !frame.valid ? "invalid" : detectedHands === 0 ? "no_hands" : "usable",
+        detectedHands,
+      });
       if (event !== null) this.classify(event);
       else
         this.publish(
@@ -214,6 +246,7 @@ export class LiveRecognitionSession {
     if (this.closed || this.snapshotValue.phase === "failed") return;
     switch (event.type) {
       case "ready":
+        this.updateDiagnostics({ backend: event.backend, bundle: event.bundle });
         if (++this.readyWorkers === 2) this.publish("ready");
         return;
       case "result":
@@ -234,8 +267,17 @@ export class LiveRecognitionSession {
     stableResult = this.snapshotValue.stableResult,
     failureCode: string | null = null,
   ): void {
-    this.snapshotValue = Object.freeze({ phase, stableResult, failureCode });
+    this.snapshotValue = Object.freeze({
+      phase,
+      stableResult,
+      failureCode,
+      diagnostics: this.diagnosticsValue,
+    });
     this.options.onState(this.snapshotValue);
+  }
+
+  private updateDiagnostics(update: Partial<LiveRecognitionDiagnostics>): void {
+    this.diagnosticsValue = Object.freeze({ ...this.diagnosticsValue, ...update });
   }
 
   private fail(code: string): void {
