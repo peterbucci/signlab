@@ -41,7 +41,9 @@ are conformance evidence only, not natural-use performance.
 
 `replay/` contains MIT-licensed invented truth intervals and final decisions for one
 mixed and one negative-only session. It proves scoring counts and grouping mechanics;
-its rates and timing values are not measurements of people, models, or runtimes.
+its rates and timing values are not measurements of people, models, or runtimes. It
+also contains one compact post-landmark motion plan that reuses the public synthetic
+parity template to exercise the live browser pipeline without a person or camera.
 
 `parity/` contains one MIT-licensed, no-person candidate-runtime golden and a tiny
 deterministic ONNX probe. The JSON shares raw synthetic frames, compact expected

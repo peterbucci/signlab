@@ -1,0 +1,52 @@
+{
+  "format": "signlab-live-post-landmark-replay/1",
+  "fixtureId": "live_post_landmark_v1",
+  "metadata": {
+    "license": "MIT",
+    "provenance": "Project-authored motion applied to the public synthetic gap_unmirrored template; no person, camera, public corpus, or participant-derived coordinates.",
+    "limitation": "This fixture proves deterministic runtime wiring only, not recognition quality or safety."
+  },
+  "template": {
+    "path": "tests/fixtures/public/parity/candidate-runtime-goldens-v1.json",
+    "preprocessingCaseId": "gap_unmirrored",
+    "frameIndex": 0
+  },
+  "bundle": {
+    "id": "public-post-landmark-probe",
+    "version": "1.0.0"
+  },
+  "steps": [
+    { "relativeTimestampUs": 0, "handsPresent": true, "translateImageX": 0.0 },
+    { "relativeTimestampUs": 50000, "handsPresent": true, "translateImageX": 0.05 },
+    { "relativeTimestampUs": 100000, "handsPresent": true, "translateImageX": 0.1 },
+    { "relativeTimestampUs": 150000, "handsPresent": true, "translateImageX": 0.15 },
+    { "relativeTimestampUs": 200000, "handsPresent": true, "translateImageX": 0.2 },
+    { "relativeTimestampUs": 225000, "handsPresent": false },
+    { "relativeTimestampUs": 250000, "handsPresent": false },
+    { "relativeTimestampUs": 275000, "handsPresent": false }
+  ],
+  "expected": {
+    "event": {
+      "firstFrameIndex": 0,
+      "lastFrameIndex": 4,
+      "firstTimestampUs": 0,
+      "lastTimestampUs": 200000,
+      "inferenceTimestampsUs": [0, 50000, 100000, 150000, 200000]
+    },
+    "decision": {
+      "kind": "target",
+      "label": "hello",
+      "reason": "accepted_target"
+    },
+    "backend": "wasm",
+    "scoreAbsoluteTolerance": 0.001,
+    "rankedScores": [
+      { "label": "hello", "confidence": 0.3137476350558837 },
+      { "label": "yes", "confidence": 0.2027176325202149 },
+      { "label": "please", "confidence": 0.19374706693016586 },
+      { "label": "no", "confidence": 0.10559939135559054 },
+      { "label": "thank_you", "confidence": 0.1046252917705309 },
+      { "label": "other", "confidence": 0.07956298236761415 }
+    ]
+  }
+}
