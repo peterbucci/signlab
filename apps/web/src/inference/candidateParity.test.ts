@@ -5,13 +5,13 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-import * as ort from "onnxruntime-web";
 import { describe, expect, it } from "vitest";
 
 import policy from "../../../../docs/reports/popsign-constructed-calibration-policy-v1.json";
 import plan from "../../../../src/signlab/resources/features/config/hand-local-64-1.default.json";
 import fixture from "../../../../tests/fixtures/public/parity/candidate-runtime-goldens-v1.json";
 import { CANDIDATE_LABELS, decideCandidate } from "./candidateDecision";
+import { createCandidateInferenceEngine } from "./candidateInferenceSession";
 import { preprocessCandidate } from "./candidatePreprocessing";
 
 type ExpectedRows = {
@@ -142,31 +142,18 @@ describe("candidate runtime golden parity", () => {
   });
 
   it("proves the single-threaded WASM engine contract, not worker/browser integration", async () => {
-    ort.env.wasm.numThreads = 1;
     const model = await readFile(resolve(repositoryRoot, fixture.resources.testModel.path));
-    const session = await ort.InferenceSession.create(new Uint8Array(model), {
-      executionProviders: ["wasm"],
-      intraOpNumThreads: 1,
-      interOpNumThreads: 1,
-    });
+    const engine = await createCandidateInferenceEngine(Uint8Array.from(model).buffer);
     try {
-      expect(session.inputNames).toEqual([fixture.onnx.input.name]);
-      expect(session.outputNames).toEqual([fixture.onnx.output.name]);
       for (const runtimeCase of fixture.onnx.cases) {
         const source = fixture.preprocessingCases.find(
           (candidateCase) => candidateCase.id === runtimeCase.preprocessingCaseId,
         );
         if (source === undefined) throw new Error("missing preprocessing golden");
         const values = expectedTensor(source.expected);
-        const input = new ort.Tensor("float32", values, fixture.onnx.input.shape);
-        const output = (await session.run({ [fixture.onnx.input.name]: input }))[
-          fixture.onnx.output.name
-        ];
-        if (output === undefined || !(output.data instanceof Float32Array)) {
-          throw new Error("invalid ONNX output");
-        }
-        expect(output.dims).toEqual(fixture.onnx.output.shape);
-        output.data.forEach((value, index) => {
+        const probabilities = await engine.run(values);
+        if (!(probabilities instanceof Float32Array)) throw new Error("invalid ONNX output");
+        probabilities.forEach((value, index) => {
           const expected = runtimeCase.probabilities[index]!;
           const tolerance =
             fixture.onnx.tolerances.absolute +
@@ -175,7 +162,7 @@ describe("candidate runtime golden parity", () => {
         });
       }
     } finally {
-      await session.release();
+      await engine.close();
     }
   });
 });

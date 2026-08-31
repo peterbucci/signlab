@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { decideCandidate } from "./candidateDecision";
+import { decideCandidate, scoreCandidate } from "./candidateDecision";
 import policy from "../../../../docs/reports/popsign-constructed-calibration-policy-v1.json";
 
 describe("candidate decision contract", () => {
@@ -10,21 +10,41 @@ describe("candidate decision contract", () => {
 
   it("temperature-scales valid probabilities and chooses the first equal maximum", () => {
     const probabilities = [0.4, 0.4, 0.05, 0.05, 0.05, 0.05];
-    const decision = decideCandidate(true, probabilities, policy);
-    const expected = 0.4 ** 20 / (2 * 0.4 ** 20 + 4 * 0.05 ** 20);
+    const scored = scoreCandidate(probabilities, policy);
+    const denominator = 2 * 0.4 ** 20 + 4 * 0.05 ** 20;
+    const expected = [0.4 ** 20 / denominator, 0.05 ** 20 / denominator];
 
-    expect(decision).toMatchObject({ kind: "target", label: "hello" });
+    expect(scored).toMatchObject({
+      decision: { kind: "target", label: "hello" },
+      reason: "accepted_target",
+    });
+    if (scored === null) throw new Error("expected scored decision");
+    expect(scored.rankedScores.map(({ label }) => label)).toEqual([
+      "hello",
+      "no",
+      "please",
+      "thank_you",
+      "yes",
+      "other",
+    ]);
+    scored.rankedScores.forEach(({ confidence }, index) => {
+      expect(confidence / expected[index < 2 ? 0 : 1]!).toBeCloseTo(1, 12);
+    });
+    expect(decideCandidate(true, probabilities, policy)).toEqual(scored.decision);
     expect(decideCandidate(true, [1.000019, 0, 0, 0, 0, 0], policy)).toMatchObject({
       kind: "target",
     });
-    if (decision.kind !== "target") throw new Error("expected target decision");
-    expect(decision.confidence).toBeCloseTo(expected, 14);
   });
 
   it("keeps the selected other class distinct from target and abstain", () => {
-    expect(
-      decideCandidate(true, new Float32Array([0.01, 0.01, 0.01, 0.01, 0.01, 0.95]), policy),
-    ).toMatchObject({ kind: "other", label: "other" });
+    const probabilities = new Float32Array([0.01, 0.01, 0.01, 0.01, 0.01, 0.95]);
+    const scored = scoreCandidate(probabilities, policy);
+
+    expect(scored).toMatchObject({
+      decision: { kind: "other", label: "other" },
+      reason: "accepted_other",
+    });
+    expect(decideCandidate(true, probabilities, policy)).toEqual(scored?.decision);
   });
 
   it("abstains on malformed active probability vectors", () => {
@@ -35,6 +55,9 @@ describe("candidate decision contract", () => {
       [0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
     ];
 
+    expect(malformed.map((value) => scoreCandidate(value, policy))).toEqual(
+      malformed.map(() => null),
+    );
     expect(malformed.map((value) => decideCandidate(true, value, policy))).toEqual(
       malformed.map(() => ({ kind: "abstain" })),
     );
