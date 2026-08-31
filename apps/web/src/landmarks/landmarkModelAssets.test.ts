@@ -9,6 +9,8 @@ const HAND_URL =
   "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task?generation=1682480004222387";
 const POSE_URL =
   "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task?generation=1682624736756847";
+const RELEASE_HAND_URL = "https://example.test/signlab/models/mediapipe/hand_landmarker.task";
+const RELEASE_POSE_URL = "https://example.test/signlab/models/mediapipe/pose_landmarker_lite.task";
 
 function bytesForSha256(value: string): ArrayBuffer {
   const hex = value.replace("sha256:", "");
@@ -32,7 +34,7 @@ function environment(
 ): LandmarkModelAssetEnvironment {
   return {
     fetch: vi.fn((url: URL) => {
-      const size = url.href === HAND_URL ? HAND_SIZE : POSE_SIZE;
+      const size = [HAND_URL, RELEASE_HAND_URL].includes(url.href) ? HAND_SIZE : POSE_SIZE;
       return Promise.resolve(new Response(new Uint8Array(size)));
     }),
     subtle: mockSubtle(
@@ -61,9 +63,28 @@ describe("loadLandmarkModelAssets", () => {
     expect(injected.fetch).toHaveBeenNthCalledWith(2, new URL(POSE_URL));
   });
 
-  it("rejects an exact-size mismatch without revealing its URL", async () => {
+  it("uses fixed same-origin, subpath-safe model URLs in production", async () => {
     const injected = environment({
-      fetch: vi.fn(() => Promise.resolve(new Response(new Uint8Array(HAND_SIZE - 1)))),
+      production: true,
+      documentBaseUrl: "https://example.test/signlab/",
+    });
+
+    await loadLandmarkModelAssets(injected);
+
+    expect(injected.fetch).toHaveBeenNthCalledWith(1, new URL(RELEASE_HAND_URL), {
+      redirect: "error",
+    });
+    expect(injected.fetch).toHaveBeenNthCalledWith(2, new URL(RELEASE_POSE_URL), {
+      redirect: "error",
+    });
+  });
+
+  it.each([
+    ["short", HAND_SIZE - 1],
+    ["oversized streamed", HAND_SIZE + 1],
+  ])("rejects a %s task without revealing its URL", async (_case, size) => {
+    const injected = environment({
+      fetch: vi.fn(() => Promise.resolve(new Response(new Uint8Array(size)))),
     });
     const promise = loadLandmarkModelAssets(injected);
 

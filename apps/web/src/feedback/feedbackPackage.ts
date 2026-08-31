@@ -1,5 +1,7 @@
 import type { FeedbackRecord } from "./feedbackStore";
 
+const MAX_FEEDBACK_PACKAGE_BYTES = 16 * 1024 * 1024;
+
 const compareText = (left: string, right: string) => (left < right ? -1 : left > right ? 1 : 0);
 
 function exportRecords(records: readonly FeedbackRecord[], includeLandmarks: boolean) {
@@ -93,7 +95,11 @@ export async function downloadFeedbackPackage(
   target = browserDownloadTarget,
 ) {
   const feedbackPackage = await createFeedbackPackage(records, includeLandmarks, grantedAt);
-  const blob = new Blob([`${JSON.stringify(feedbackPackage, null, 2)}\n`], {
+  const serialized = `${JSON.stringify(feedbackPackage, null, 2)}\n`;
+  if (new TextEncoder().encode(serialized).byteLength > MAX_FEEDBACK_PACKAGE_BYTES) {
+    throw new Error("Feedback package exceeds the 16 MiB export limit.");
+  }
+  const blob = new Blob([serialized], {
     type: "application/json",
   });
   const url = target.createObjectURL(blob);

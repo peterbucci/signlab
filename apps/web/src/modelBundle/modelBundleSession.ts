@@ -11,6 +11,7 @@ import {
   type CachedModelBundle,
   type ModelBundleCacheState,
 } from "./modelBundleCache";
+import { readBoundedResponse } from "../network/readBoundedResponse";
 
 const LABELS = ["hello", "no", "please", "thank_you", "yes", "other"] as const;
 const ASSETS = [
@@ -31,6 +32,9 @@ const COMPONENTS = {
   decision_policy_sha256: "sha256:6eb700443dbb50de5094868d564e8a72aff6af0182c8394ab8c6a28844572e41",
 } as const;
 const TAXONOMY_SHA256 = "sha256:c0f6cbddfe43e3a6eb3de01dbbbbc1ceebcb83d50cc197999776f58e3d9ce20d";
+const SHA256 = /^sha256:[0-9a-f]{64}$/;
+const MAX_MANIFEST_BYTES = 64 * 1024;
+const MAX_BUNDLE_BYTES = 8 * 1024 * 1024;
 const ONNX = {
   format: "onnx",
   opset: 18,
@@ -69,6 +73,7 @@ export type ModelBundleFailureCode =
   | "bundle.load.superseded"
   | "bundle.manifest.unavailable"
   | "bundle.manifest.invalid"
+  | "bundle.manifest.untrusted"
   | "bundle.manifest.unsupported"
   | "bundle.asset.unavailable"
   | "bundle.asset.size_mismatch"
@@ -117,10 +122,12 @@ export interface ModelBundleStatus {
 }
 
 export interface ModelBundleEnvironment {
-  readonly fetch: (input: URL) => Promise<Response>;
+  readonly fetch: (input: URL, init?: RequestInit) => Promise<Response>;
   readonly subtle?: SubtleCrypto;
   readonly documentBaseUrl?: string;
   readonly cacheStorage?: Pick<CacheStorage, "open">;
+  readonly production?: boolean;
+  readonly trustedManifestSha256?: string;
 }
 
 const FAILURE_MESSAGES: Record<ModelBundleFailureCode, string> = {
@@ -128,6 +135,7 @@ const FAILURE_MESSAGES: Record<ModelBundleFailureCode, string> = {
   "bundle.load.superseded": "A newer model bundle load replaced this request.",
   "bundle.manifest.unavailable": "The model bundle manifest could not be loaded.",
   "bundle.manifest.invalid": "The model bundle manifest is incomplete or invalid.",
+  "bundle.manifest.untrusted": "This release does not trust that model bundle.",
   "bundle.manifest.unsupported": "This model bundle version is not supported.",
   "bundle.asset.unavailable": "A required model bundle file could not be loaded.",
   "bundle.asset.size_mismatch": "A model bundle file has the wrong size.",
@@ -202,6 +210,7 @@ function validateManifest(value: unknown): ModelBundleManifest {
   ) {
     fail("bundle.component.incompatible");
   }
+  let declaredBytes = 0;
   manifest.assets.forEach((asset, index) => {
     const expected = ASSETS[index];
     if (
@@ -211,10 +220,12 @@ function validateManifest(value: unknown): ModelBundleManifest {
       asset.locator.kind !== "workspace_relative" ||
       asset.locator.path !== expected[1] ||
       asset.media_type !== expected[2] ||
-      asset.size_bytes <= 0
+      asset.size_bytes <= 0 ||
+      asset.size_bytes > MAX_BUNDLE_BYTES - declaredBytes
     ) {
       fail("bundle.manifest.invalid");
     }
+    declaredBytes += asset.size_bytes;
   });
   return deepFreeze(manifest);
 }
@@ -324,10 +335,12 @@ export class ModelBundleSession {
 
   constructor(
     private readonly environment: ModelBundleEnvironment = {
-      fetch: (input) => globalThis.fetch(input),
+      fetch: (input, init) => globalThis.fetch(input, init),
       subtle: globalThis.crypto?.subtle,
       documentBaseUrl: globalThis.document?.baseURI,
       cacheStorage: globalThis.caches,
+      production: import.meta.env.PROD,
+      trustedManifestSha256: import.meta.env.VITE_SIGNLAB_TRUSTED_MODEL_MANIFEST_SHA256,
     },
   ) {
     this.cache = new ModelBundleCache(environment.cacheStorage);
@@ -351,9 +364,15 @@ export class ModelBundleSession {
     try {
       update("loading");
       const manifestUrl = bundleManifestUrl(baseUrl, this.environment.documentBaseUrl);
+      this.assertProductionBoundary(manifestUrl);
       let manifestBuffer: ArrayBuffer;
       try {
-        manifestBuffer = await this.fetchBytes(manifestUrl, "bundle.manifest.unavailable");
+        manifestBuffer = await this.fetchBytes(
+          manifestUrl,
+          "bundle.manifest.unavailable",
+          MAX_MANIFEST_BYTES,
+          "bundle.manifest.invalid",
+        );
       } catch (error) {
         return await this.restoreActive(error, update, attempt);
       }
@@ -387,6 +406,8 @@ export class ModelBundleSession {
             await this.fetchBytes(
               assetUrl(manifestUrl, asset.locator.path),
               "bundle.asset.unavailable",
+              asset.size_bytes,
+              "bundle.asset.size_mismatch",
             ),
           update,
         );
@@ -435,8 +456,11 @@ export class ModelBundleSession {
   }
 
   private async prepareManifest(buffer: ArrayBuffer): Promise<PreparedManifest> {
+    if (buffer.byteLength > MAX_MANIFEST_BYTES) fail("bundle.manifest.invalid");
+    const sha256 = await this.digest(buffer);
+    this.assertTrustedManifest(sha256);
     const manifest = validateManifest(parseJson(buffer, "bundle.manifest.invalid"));
-    return { manifest, buffer, sha256: await this.digest(buffer) };
+    return { manifest, buffer, sha256 };
   }
 
   private async verifyBundle(
@@ -479,6 +503,7 @@ export class ModelBundleSession {
     update: StatusUpdate,
   ): Promise<VerifiedModelBundle> {
     try {
+      if (cached.manifest.size > MAX_MANIFEST_BYTES) fail("bundle.cache.corrupt");
       const prepared = await this.prepareManifest(await cached.manifest.arrayBuffer());
       if (prepared.sha256 !== expectedIdentity) fail("bundle.cache.corrupt");
       return await this.verifyBundle(
@@ -486,6 +511,7 @@ export class ModelBundleSession {
         async (asset) => {
           const bytes = await cached.asset(asset.role);
           if (bytes === null) fail("bundle.cache.corrupt");
+          if (bytes.size > asset.size_bytes) fail("bundle.cache.corrupt");
           return await bytes.arrayBuffer();
         },
         update,
@@ -613,11 +639,45 @@ export class ModelBundleSession {
     return error instanceof ModelBundleLoadError ? error.code : undefined;
   }
 
-  private async fetchBytes(url: URL, code: ModelBundleFailureCode): Promise<ArrayBuffer> {
+  private assertProductionBoundary(manifestUrl: URL): void {
+    if (this.environment.production !== true) return;
     try {
-      const response = await this.environment.fetch(url);
+      const page = new URL(this.environment.documentBaseUrl ?? "");
+      if (manifestUrl.origin !== page.origin) fail("bundle.manifest.untrusted");
+    } catch (error) {
+      if (error instanceof ModelBundleLoadError) throw error;
+      fail("bundle.manifest.untrusted");
+    }
+  }
+
+  private assertTrustedManifest(sha256: string): void {
+    if (this.environment.production !== true) return;
+    const trusted = (this.environment.trustedManifestSha256 ?? "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
+    if (
+      trusted.length === 0 ||
+      trusted.some((value) => !SHA256.test(value)) ||
+      !trusted.includes(sha256)
+    ) {
+      fail("bundle.manifest.untrusted");
+    }
+  }
+
+  private async fetchBytes(
+    url: URL,
+    code: ModelBundleFailureCode,
+    limit: number,
+    oversized: ModelBundleFailureCode,
+  ): Promise<ArrayBuffer> {
+    try {
+      const response =
+        this.environment.production === true
+          ? await this.environment.fetch(url, { redirect: "error" })
+          : await this.environment.fetch(url);
       if (!response.ok) fail(code);
-      return await response.arrayBuffer();
+      return await readBoundedResponse(response, limit, () => fail(oversized));
     } catch (error) {
       if (error instanceof ModelBundleLoadError) throw error;
       return fail(code);
