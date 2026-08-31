@@ -225,9 +225,9 @@ and continuous-replay scorer evidence. Its
 [nomination report](docs/reports/popsign-tcn-portable-export-nomination-v1.json)
 freeze the exact evidence and nominate it for portable export only. No champion or
 natural-use, test, release, or production claim is made.
-The registered DVC graph remains the Story #14 fixture receipt scaffold rather
-than a production extraction runner. No headline model result is considered valid
-until the remaining licensed-corpus and grouped-evaluation foundations are complete.
+The public DVC graph remains fixture-only by design. The remaining release limits
+are the candidate's unresolved redistribution status, sealed locked test, missing
+natural continuous-use evidence, and not-yet-deployed public site.
 
 ## Data and privacy
 
