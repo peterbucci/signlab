@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { App } from "./App";
 
-const routes = ["/", "/live", "/privacy", "/missing"] as const;
+const routes = ["/", "/live", "/feedback", "/privacy", "/missing"] as const;
 
 describe("automated accessibility smoke", () => {
   it.each(routes)("has no detectable A/AA violations on %s", async (path) => {

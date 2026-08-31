@@ -78,10 +78,10 @@ export const staticPages = [
     eyebrow: "Local by default",
     heading: "Feedback stays local by default",
     summary:
-      "The completed demo will let users review a prediction and choose whether to save a correction locally.",
+      "Review corrections saved in this browser. They are never uploaded and do not become training data.",
     status:
-      "Feedback collection is not active. This scaffold stores no feedback and sends nothing anywhere.",
-    detailsTitle: "Planned safeguards",
+      "Nothing is saved automatically. Browser storage may be unavailable or cleared by the browser.",
+    detailsTitle: "Local safeguards",
     details: [
       "Nothing is saved without a clear user action.",
       "Local corrections remain separate from research training data.",
@@ -96,7 +96,7 @@ export const staticPages = [
     summary:
       "The completed browser demo is intended to process camera frames on the user’s device. Raw video will not be uploaded or stored by default.",
     status:
-      "Camera access is explicit. Inference stays on-device, with no stored feedback or analytics.",
+      "Camera access and local feedback storage are explicit. There are no uploads or analytics.",
     detailsTitle: "Current privacy facts",
     details: [
       "The live path downloads only its configured model bundle and two integrity-checked MediaPipe model files.",

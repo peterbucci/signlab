@@ -513,6 +513,21 @@ describe("live on-device result", () => {
         emit({
           phase: "result",
           stableResult: inferenceResult(decision, reason),
+          feedbackContext: {
+            event: {
+              firstFrameIndex: 0,
+              lastFrameIndex: 0,
+              firstTimestampUs: 0,
+              lastTimestampUs: 0,
+              terminationReason: "settled",
+              configSha256: "sha256:detector",
+            },
+            input: {
+              frames: [],
+              sourceMirrorState: "not_mirrored",
+              quality: { timestampDiscontinuityCount: 0, gaps: [] },
+            },
+          },
           failureCode: null,
           diagnostics: {
             detectorState: "recording",
@@ -541,6 +556,9 @@ describe("live on-device result", () => {
       expect(within(resultCard).getByText("WASM")).toBeVisible();
       expect(within(resultCard).getByText("browser-candidate 1.0.0")).toBeVisible();
       expect(within(resultCard).getByText(/stronger model matches, not guarantees/)).toBeVisible();
+      expect(
+        within(resultCard).getByRole("heading", { name: "Save feedback locally" }),
+      ).toBeVisible();
       fireEvent.click(screen.getByText("Session diagnostics"));
       const diagnostics = screen.getByLabelText("Session diagnostics");
       expect(within(diagnostics).getByText("Result")).toBeVisible();
