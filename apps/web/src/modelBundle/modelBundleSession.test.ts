@@ -120,6 +120,7 @@ function harness(
   bytes: Record<ModelBundleAssetRole, Uint8Array>,
   manifestBody: unknown = manifest,
   cache?: MemoryCacheStorage,
+  environmentOverrides: Partial<ModelBundleEnvironment> = {},
 ) {
   const requests: string[] = [];
   const responses = { ...bytes };
@@ -146,6 +147,7 @@ function harness(
     fetch,
     subtle: webcrypto.subtle as SubtleCrypto,
     cacheStorage: cache?.storage,
+    ...environmentOverrides,
   };
   return {
     session: new ModelBundleSession(environment),
@@ -175,6 +177,70 @@ describe("ModelBundleSession", () => {
     expect(Object.isFrozen(loaded.manifest)).toBe(true);
     expect(Object.isFrozen(loaded.bytesByRole)).toBe(true);
     expect(await loaded.bytesByRole.model.text()).toBe("tiny structural ONNX fixture");
+  });
+
+  it("pins a same-origin production manifest before requesting its assets", async () => {
+    const data = await fixture();
+    const digest = await sha256(jsonBytes(data.manifest));
+    const release = harness(data.manifest, data.bytes, data.manifest, undefined, {
+      production: true,
+      documentBaseUrl: "https://example.test/signlab/",
+      trustedManifestSha256: `sha256:${"0".repeat(64)}, ${digest}`,
+    });
+
+    await expect(release.session.load(BASE_URL)).resolves.toMatchObject({
+      manifestSha256: digest,
+    });
+    expect(release.requests).toHaveLength(9);
+    expect(release.fetch).toHaveBeenNthCalledWith(1, new URL(MANIFEST_URL), {
+      redirect: "error",
+    });
+  });
+
+  it("rejects a missing or mismatched production manifest pin before asset requests", async () => {
+    const data = await fixture();
+    for (const trustedManifestSha256 of [undefined, `sha256:${"0".repeat(64)}`]) {
+      const release = harness(data.manifest, data.bytes, data.manifest, undefined, {
+        production: true,
+        documentBaseUrl: "https://example.test/signlab/",
+        trustedManifestSha256,
+      });
+
+      await expect(release.session.load(BASE_URL)).rejects.toMatchObject({
+        code: "bundle.manifest.untrusted",
+      });
+      expect(release.requests).toEqual([MANIFEST_URL]);
+    }
+  });
+
+  it("rejects a cross-origin production bundle before any network request", async () => {
+    const data = await fixture();
+    const release = harness(data.manifest, data.bytes, data.manifest, undefined, {
+      production: true,
+      documentBaseUrl: "https://release.example/signlab/",
+      trustedManifestSha256: await sha256(jsonBytes(data.manifest)),
+    });
+
+    await expect(release.session.load(BASE_URL)).rejects.toMatchObject({
+      code: "bundle.manifest.untrusted",
+    });
+    expect(release.requests).toEqual([]);
+  });
+
+  it("caps actual manifest bytes and declared bundle bytes before asset requests", async () => {
+    const data = await fixture();
+    const oversizedManifest = harness(data.manifest, data.bytes, " ".repeat(64 * 1024 + 1));
+    await expect(oversizedManifest.session.load(BASE_URL)).rejects.toMatchObject({
+      code: "bundle.manifest.invalid",
+    });
+    expect(oversizedManifest.requests).toEqual([MANIFEST_URL]);
+
+    data.manifest.assets[4]!.size_bytes = 8 * 1024 * 1024;
+    const oversizedBundle = harness(data.manifest, data.bytes);
+    await expect(oversizedBundle.session.load(BASE_URL)).rejects.toMatchObject({
+      code: "bundle.manifest.invalid",
+    });
+    expect(oversizedBundle.requests).toEqual([MANIFEST_URL]);
   });
 
   it.each([
@@ -252,12 +318,16 @@ describe("ModelBundleSession", () => {
 
   it.each([
     ["size", "bundle.asset.size_mismatch"],
+    ["oversized stream", "bundle.asset.size_mismatch"],
     ["digest", "bundle.asset.digest_mismatch"],
     ["network", "bundle.asset.unavailable"],
   ])("rejects an asset %s failure", async (failure, code) => {
     const data = await fixture();
     const test = harness(data.manifest, data.bytes);
     if (failure === "size") test.responses.model = encoder.encode("short");
+    if (failure === "oversized stream") {
+      test.responses.model = new Uint8Array(data.bytes.model.byteLength + 1);
+    }
     if (failure === "digest") {
       const altered = data.bytes.model.slice();
       altered[0] = altered[0]! ^ 1;
@@ -360,6 +430,32 @@ describe("ModelBundleSession", () => {
       source: "fallback",
       rollbackAvailable: false,
     });
+  });
+
+  it("applies production manifest pins to fallback and rollback cache reads", async () => {
+    const cache = new MemoryCacheStorage();
+    const version1 = await fixture("1.0.0");
+    const saved1 = await harness(
+      version1.manifest,
+      version1.bytes,
+      version1.manifest,
+      cache,
+    ).session.load(BASE_URL);
+    const version2 = await fixture("1.1.0");
+    await harness(version2.manifest, version2.bytes, version2.manifest, cache).session.load(
+      BASE_URL,
+    );
+    const release = harness(version2.manifest, version2.bytes, version2.manifest, cache, {
+      production: true,
+      documentBaseUrl: "https://example.test/signlab/",
+      trustedManifestSha256: saved1.manifestSha256,
+    });
+    release.network.manifestUnavailable = true;
+
+    await expect(release.session.load(BASE_URL)).rejects.toMatchObject({
+      code: "bundle.cache.corrupt",
+    });
+    await expect(release.session.rollback()).resolves.toMatchObject({ version: "1.0.0" });
   });
 
   it("repairs a corrupt warm entry from verified network bytes", async () => {

@@ -183,6 +183,16 @@ def test_duplicate_package_is_never_replaced(tmp_path: Path) -> None:
     assert (first.destination / "package.signlab-feedback.json").read_bytes() == source.read_bytes()
 
 
+def test_oversized_package_is_rejected_before_parsing_or_quarantine(tmp_path: Path) -> None:
+    source = tmp_path / "oversized.json"
+    source.write_bytes(b"x" * ((16 * 1024 * 1024) + 1))
+
+    with pytest.raises(FeedbackPackageError, match="feedback package invalid"):
+        import_feedback_package(source, quarantine_root=tmp_path / "quarantine")
+
+    assert not (tmp_path / "quarantine").exists()
+
+
 def test_cli_reports_only_sanitized_aggregate_success_and_failure(tmp_path: Path) -> None:
     source, root = tmp_path / "participant-private.json", tmp_path / "quarantine"
     source.write_bytes((Path(__file__).parent / "fixtures/public/feedback/browser-feedback-package-v1.json").read_bytes())

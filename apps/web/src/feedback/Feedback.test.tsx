@@ -312,4 +312,31 @@ describe("feedback package", () => {
     expect(target.revokeObjectURL).toHaveBeenCalledWith("blob:feedback");
     expect(network).not.toHaveBeenCalled();
   });
+
+  it("rejects an oversized export before creating a download Blob", async () => {
+    const feedback = store("feedback-oversized");
+    const record = await feedback.save({
+      result,
+      context,
+      correction: "yes",
+      includeLandmarks: false,
+      previewMirrored: false,
+    });
+    const target = {
+      createObjectURL: vi.fn(() => "blob:feedback"),
+      revokeObjectURL: vi.fn(),
+      click: vi.fn(),
+    };
+
+    await expect(
+      downloadFeedbackPackage(
+        [{ ...record, id: "x".repeat(16 * 1024 * 1024 + 1) }],
+        false,
+        "2026-08-31T13:00:00.000Z",
+        target,
+      ),
+    ).rejects.toThrow("Feedback package exceeds the 16 MiB export limit.");
+    expect(target.createObjectURL).not.toHaveBeenCalled();
+    expect(target.click).not.toHaveBeenCalled();
+  });
 });

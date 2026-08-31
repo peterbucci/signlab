@@ -25,6 +25,7 @@ _HANDS = ("hand_0", "hand_1")
 _ANCHORS = ("left_shoulder", "right_shoulder", "left_elbow", "right_elbow", "left_wrist", "right_wrist")
 # fmt: on
 _MAX_SAFE_INTEGER = (2**53) - 1
+_MAX_PACKAGE_BYTES = 16 * 1024 * 1024
 
 
 class FeedbackPackageError(ValueError):
@@ -244,9 +245,12 @@ def import_feedback_package(
     """Validate exact bytes, then publish one immutable quarantine directory."""
 
     try:
-        package_bytes = Path(package).read_bytes()
+        with Path(package).open("rb") as source:
+            package_bytes = source.read(_MAX_PACKAGE_BYTES + 1)
     except OSError as error:
         raise FeedbackPackageError() from error
+    if len(package_bytes) > _MAX_PACKAGE_BYTES:
+        raise FeedbackPackageError()
     receipt = _receipt(package_bytes)
     root = Path(quarantine_root)
     digest = cast(str, receipt["packageSha256"])
